@@ -1,0 +1,52 @@
+name: Startup on macOS and Windows
+on: [push, pull_request, workflow_dispatch]
+jobs:
+  startup:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Prepare project dependencies through macOS launcher
+        if: runner.os == 'macOS'
+        shell: bash
+        env:
+          MYTV_SETUP_ONLY: '1'
+        run: /bin/zsh "启动 My TV.command"
+      - name: Prepare project dependencies through Windows launcher
+        if: runner.os == 'Windows'
+        shell: cmd
+        env:
+          MYTV_SETUP_ONLY: '1'
+        run: call "启动 My TV.cmd"
+      - name: Check environment and run tests (macOS)
+        if: runner.os == 'macOS'
+        shell: bash
+        run: |
+          npm run doctor
+          npm run check
+          npm test
+      - name: Windows launcher syntax and legacy PowerShell argument checks
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $env:MYTV_LAUNCH_ROOT = $PWD.Path
+          $env:MYTV_TEST_NODE = (Get-Command node).Source
+          & ([ScriptBlock]::Create([IO.File]::ReadAllText((Join-Path $PWD 'test/windows-launcher.ps1'))))
+      - name: Check environment and run tests (Windows)
+        if: runner.os == 'Windows'
+        shell: cmd
+        run: |
+          call npm run doctor
+          if errorlevel 1 exit /b 1
+          call npm run check
+          if errorlevel 1 exit /b 1
+          call npm test

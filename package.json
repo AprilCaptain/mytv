@@ -1,0 +1,26 @@
+{
+  "name": "my-tv",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "description": "本机运行的轻量点播网页",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "start": "node server.mjs",
+    "stop": "node scripts/control.mjs",
+    "launch": "node scripts/bootstrap.mjs",
+    "setup": "node scripts/bootstrap.mjs --setup-only",
+    "doctor": "node scripts/bootstrap.mjs --check-only",
+    "setup:python": "node scripts/setup-python.mjs",
+    "test": "node --test test/*.test.mjs",
+    "check": "node --check server.mjs && node --check public/app.js && node --check scripts/bootstrap.mjs && node --check scripts/environment.mjs && node --check scripts/setup-python.mjs && node --check scripts/control.mjs && node --check lib/lifecycle.mjs"
+  },
+  "dependencies": {
+    "fast-xml-parser": "5.11.2",
+    "quickjs-emscripten": "0.32.0",
+    "cheerio": "1.2.0",
+    "json5": "2.2.3",
+    "hls.js": "1.7.3",
+    "undici": "7.30.0"
+  }
+}

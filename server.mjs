@@ -71,6 +71,7 @@ const server = http.createServer(async (incoming, outgoing) => {
     const files = new Map([
       ['/', new URL('index.html', publicRoot)], ['/index.html', new URL('index.html', publicRoot)],
       ['/app.js', new URL('app.js', publicRoot)], ['/style.css', new URL('style.css', publicRoot)],
+      ['/player.js', new URL('player.js', publicRoot)], ['/player-utils.js', new URL('player-utils.js', publicRoot)],
       ['/favicon.svg', new URL('favicon.svg', publicRoot)],
       ['/placeholder.svg', new URL('placeholder.svg', publicRoot)],
       ['/vendor/hls.min.js', new URL('node_modules/hls.js/dist/hls.min.js', root)]

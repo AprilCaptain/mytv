@@ -13,7 +13,7 @@
     "doctor": "node scripts/bootstrap.mjs --check-only",
     "setup:python": "node scripts/setup-python.mjs",
     "test": "node --test test/*.test.mjs",
-    "check": "node --check server.mjs && node --check public/app.js && node --check scripts/bootstrap.mjs && node --check scripts/environment.mjs && node --check scripts/setup-python.mjs && node --check scripts/control.mjs && node --check lib/lifecycle.mjs"
+    "check": "node --check server.mjs && node --check public/app.js && node --check public/player.js && node --check public/player-utils.js && node --check scripts/bootstrap.mjs && node --check scripts/environment.mjs && node --check scripts/setup-python.mjs && node --check scripts/control.mjs && node --check lib/lifecycle.mjs"
   },
   "dependencies": {
     "fast-xml-parser": "5.11.2",

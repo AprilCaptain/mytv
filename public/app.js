@@ -98,6 +98,7 @@ async function selectConfig(config) {
   goHome(); state.generation++;
   const generation=state.generation, ctrl=controller('config');
   state.config=null; state.configUrl=config.url; state.configName=config.name;
+  $('config-alternative').hidden=true;$('config-alternative').onclick=null;
   state.catalogSource=''; state.categories=[]; state.category=''; state.genre='all'; state.q=''; state.page=1;
   state.groups=[];state.searchSources=new Map();$('search-input').value=''; $('config-url').value=config.url;
   $('catalog-title').textContent='看一部好故事.';$('catalog-caption').textContent='正在读取「'+config.name+'」的片库…';$('filter-row').hidden=false;
@@ -109,13 +110,15 @@ async function selectConfig(config) {
     const result=await api('/api/config',{method:'POST',body:{url:config.url},signal:ctrl.signal});
     if(ctrl.signal.aborted||generation!==state.generation)return;
     state.config=result; renderConfigs();
-    textForm('config-message','已读取 '+result.sources.length+' 个片源，其中 '+result.supported+' 个可接入本机运行环境。');
+    textForm('config-message','已读取 '+result.sources.length+' 个片源，其中 '+result.supported+' 个可接入本机运行环境。'+(result.encodings?.length?' 已识别编码配置。':''));
     await loadCatalog();
   } catch(error) {
     if(ctrl.signal.aborted)return;
     textForm('config-message',error.message,true); $('source-count').textContent='配置读取失败';
     $('config-summary').textContent='暂时无法读取'; $('result-count').textContent=config.name+' · 读取失败';
     catalogStatus('这个配置暂时无法读取',error.message+' 可以在侧边选择其他配置。');
+    const alternative=state.configs.find(item=>item.url===config.fallbackUrl);
+    if(alternative){$('config-alternative').textContent='读取 '+alternative.name+' 备用配置';$('config-alternative').hidden=false;$('config-alternative').onclick=()=>selectConfig(alternative);}
   }
 }
 function renderCategories() {

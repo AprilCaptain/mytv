@@ -98,6 +98,8 @@ async function selectConfig(config) {
   goHome(); state.generation++;
   const generation=state.generation, ctrl=controller('config');
   state.config=null; state.configUrl=config.url; state.configName=config.name;
+  $('config-reference').href=config.reference||'https://github.com/qist/tvbox#readme';
+  $('config-reference').textContent=config.reference?'查看片源验证记录 ↗':'查看配置来源 ↗';
   $('config-alternative').hidden=true;$('config-alternative').onclick=null;
   state.catalogSource=''; state.categories=[]; state.category=''; state.genre='all'; state.q=''; state.page=1;
   state.groups=[];state.searchSources=new Map();$('search-input').value=''; $('config-url').value=config.url;
@@ -110,7 +112,7 @@ async function selectConfig(config) {
     const result=await api('/api/config',{method:'POST',body:{url:config.url},signal:ctrl.signal});
     if(ctrl.signal.aborted||generation!==state.generation)return;
     state.config=result; renderConfigs();
-    textForm('config-message','已读取 '+result.sources.length+' 个片源，其中 '+result.supported+' 个可接入本机运行环境。'+(result.encodings?.length?' 已识别编码配置。':''));
+    textForm('config-message','已读取 '+result.sources.length+' 个片源，其中 '+result.supported+' 个可接入本机运行环境。'+(result.encodings?.length?' 已识别编码配置。':'')+(result.checkedAt?' 抽样检查日期：'+result.checkedAt+'，各影片清晰度可能不同。':''));
     await loadCatalog();
   } catch(error) {
     if(ctrl.signal.aborted)return;

@@ -1,0 +1,11 @@
+{
+  "name": "精选点播",
+  "checkedAt": "2026-10-12",
+  "description": "仅包含经过列表、搜索、详情及播放抽样验证的 HTTP 点播源；清晰度按具体影片和线路变化。",
+  "sites": [
+    { "key": "ikun", "name": "ikun资源", "type": 1, "api": "https://ikunzyapi.com/api.php/provide/vod", "searchable": 1 },
+    { "key": "guangsu", "name": "光速资源", "type": 1, "api": "https://api.guangsuapi.com/api.php/provide/vod", "searchable": 1 },
+    { "key": "baofeng", "name": "暴风资源", "type": 1, "api": "https://bfzyapi.com/api.php/provide/vod", "searchable": 1 },
+    { "key": "modu", "name": "魔都资源", "type": 1, "api": "https://caiji.moduapi.cc/api.php/provide/vod", "searchable": 1 }
+  ]
+}

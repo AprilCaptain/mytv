@@ -112,10 +112,10 @@
   <dialog id="configs-dialog" class="dialog sources-dialog">
     <div class="dialog-header"><div><p class="eyebrow">YOUR CONFIGURATIONS</p><h2>TVBox 配置</h2></div><button class="icon-button dialog-close" aria-label="关闭配置管理"><svg><use href="#i-close"/></svg></button></div>
     <p class="dialog-caption">内置配置来自 qist/tvbox。也可以导入自己的配置或影视接口。</p>
-    <form id="config-form"><label for="config-url">配置或接口地址</label><div class="url-input-row"><input id="config-url" type="url" required placeholder="https://…/config.json" autocomplete="off"><button id="config-submit" class="button primary" type="submit">导入</button></div></form>
+    <form id="config-form"><label for="config-url">TVBox / MoonTV / LibreTV 配置或接口地址</label><div class="url-input-row"><input id="config-url" type="url" required placeholder="https://…/config.json" autocomplete="off"><button id="config-submit" class="button primary" type="submit">导入</button></div></form>
     <p id="config-message" class="form-message" role="status" aria-live="polite"></p>
     <div id="config-dialog-list" class="source-list"></div>
-    <p class="config-reference"><a href="https://github.com/qist/tvbox#readme" target="_blank" rel="noopener noreferrer">查看配置来源 ↗</a></p>
+    <p class="config-reference"><a id="config-reference" href="https://github.com/qist/tvbox#readme" target="_blank" rel="noopener noreferrer">查看配置来源 ↗</a></p>
   </dialog>
   <dialog id="direct-dialog" class="dialog direct-dialog">
     <div class="dialog-header"><div><p class="eyebrow">PRESS PLAY</p><h2>打开播放链接</h2></div><button class="icon-button dialog-close" aria-label="关闭链接播放"><svg><use href="#i-close"/></svg></button></div>

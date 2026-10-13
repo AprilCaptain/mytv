@@ -44,12 +44,12 @@ test('名称搜索从第一页开始，分页传参；首页卡片不受搜索�
 test('清空确认后请求全部删除，取消不删除，成功更新列表和主页卡片',async t=>{
   const e=fixture(t);await e.history.refresh();e.click(e.$('history-clear'));e.click(e.$('history-choice-actions').children[0]);await tick();
   assert.equal(e.calls.filter(c=>c.options?.method==='DELETE').length,0);
-  e.click(e.$('history-clear'));assert.match(e.$('history-choice-message').textContent,/搜索条件不会限制/);
+  e.click(e.$('history-clear'));assert.match(e.$('history-choice-message').textContent,/包括未显示的记录/);
   e.click(e.$('history-choice-actions').children[1]);await tick();
   assert.equal(e.calls.find(c=>c.options?.method==='DELETE').path,'/api/history');
   assert.equal(e.$('history-list').children.length,0);assert.equal(e.$('continue-section').hidden,true);assert.equal(e.$('history-clear').disabled,true);
 });
 test('删除失败保留列表，并展示明确错误',async t=>{
   const e=fixture(t);await e.history.refresh();e.setFailure();e.click(e.$('history-clear'));e.click(e.$('history-choice-actions').children[1]);await tick();
-  assert.equal(e.$('history-list').children.length,1);assert.equal(e.$('history-message').textContent,'数据库不可写');
+  assert.equal(e.$('history-list').children.length,1);assert.equal(e.$('history-message').textContent,'暂时无法删除，请稍后重试。');assert.equal(e.$('history-error-detail').textContent,'数据库不可写');
 });

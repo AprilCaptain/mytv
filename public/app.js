@@ -78,10 +78,15 @@ function loadingCards() {
     item.append(element('div','poster-wrap'),element('div','skeleton-title')); $('poster-grid').append(item);
   }
 }
-function catalogStatus(title,message,retry=true) {
+function errorDetails(prefix,message='') {
+  $(prefix+'-details').hidden=!message;$(prefix+'-details').open=false;
+  $(prefix+'-detail').textContent=message;
+}
+function catalogStatus(title,message,retry=true,detail='') {
   $('poster-grid').replaceChildren(); $('catalog-status').hidden=false;
   $('status-title').textContent=title; $('status-message').textContent=message;
   $('catalog-retry').hidden=!retry; $('pagination').hidden=true;
+  errorDetails('catalog-error',detail);
 }
 function renderConfigs() {
   $('config-select').replaceChildren(); $('config-dialog-list').replaceChildren();
@@ -90,14 +95,14 @@ function renderConfigs() {
     const option=element('option','',config.name);option.value=config.url;option.selected=selected;
     $('config-select').append(option);
     const row=element('button','source-row'+(selected?' selected':''));
-    row.append(element('span','',config.name),element('small','',selected?'当前配置':'选择'),icon('chevron'));
+    row.append(element('span','',config.name),element('small','',selected?'使用中':'选择'),icon('chevron'));
     row.addEventListener('click',()=>{ $('configs-dialog').close(); selectConfig(config).then(afterHistoryConfig); });
     $('config-dialog-list').append(row);
   }
   $('config-name').textContent=state.configName;
   const total=state.config?.sources.filter(s=>s.supported&&s.playable).length || 0;
-  $('config-summary').textContent=state.config ? total+' 个可尝试观影片源' : '正在读取配置…';
-  $('source-count').textContent=state.config ? state.configName+' · '+total+' 个观影片源' : '正在读取配置…';
+  $('config-summary').textContent=state.config ? total+' 个片源' : '正在加载…';
+  $('source-count').textContent=state.config ? state.configName+' · '+total+' 个观影片源' : '正在加载…';
 }
 async function selectConfig(config,initial=false) {
   if(!initial){for(const key of Object.keys(state.controllers)) abort(key);goHome();}
@@ -105,28 +110,28 @@ async function selectConfig(config,initial=false) {
   const generation=state.generation, ctrl=controller('config');
   state.config=null; state.configUrl=config.url; state.configName=config.name;
   $('config-reference').href=config.reference||'https://github.com/qist/tvbox#readme';
-  $('config-reference').textContent=config.reference?'查看片源验证记录 ↗':'查看配置来源 ↗';
+  $('config-reference').textContent='配置说明 ↗';
   $('config-alternative').hidden=true;$('config-alternative').onclick=null;
   state.catalogSource=''; state.categories=[]; state.category=''; state.genre='all'; state.q=''; state.page=1;
   state.groups=[];state.searchSources=new Map();$('search-input').value=''; $('config-url').value=config.url;
-  $('catalog-title').textContent='看一部好故事.';$('catalog-caption').textContent='正在读取「'+config.name+'」的片库…';$('filter-row').hidden=false;
-  $('config-summary').textContent='正在读取配置…'; renderConfigs(); renderCategories(); loadingCards();
+  $('catalog-title').textContent='看一部好故事';$('catalog-caption').hidden=false;$('catalog-caption').textContent='电影、剧集、动漫，选一部开始。';$('filter-row').hidden=false;
+  $('config-summary').textContent='正在加载…'; renderConfigs(); renderCategories(); loadingCards();
   $('catalog-status').hidden=true; $('pagination').hidden=true; $('search-progress').hidden=true;
-  $('clear-search').hidden=true; $('result-count').textContent='正在读取 '+config.name+' 的片源…';
+  $('clear-search').hidden=true; $('result-count').textContent='正在加载影片…';
   textForm('config-message','正在导入…');
   try {
     const result=await api('/api/config',{method:'POST',body:{url:config.url},signal:ctrl.signal});
     if(ctrl.signal.aborted||generation!==state.generation)return;
     state.config=result; renderConfigs();
-    textForm('config-message','已读取 '+result.sources.length+' 个片源，其中 '+result.supported+' 个可接入本机运行环境。'+(result.encodings?.length?' 已识别编码配置。':'')+(result.checkedAt?' 抽样检查日期：'+result.checkedAt+'，各影片清晰度可能不同。':''));
+    textForm('config-message','正在使用「'+config.name+'」');
     await loadCatalog();
   } catch(error) {
     if(ctrl.signal.aborted)return;
-    textForm('config-message',error.message,true); $('source-count').textContent='配置读取失败';
+    textForm('config-message','配置暂不可用，请更换配置或稍后重试。',true); $('source-count').textContent='配置读取失败';
     $('config-summary').textContent='暂时无法读取'; $('result-count').textContent=config.name+' · 读取失败';
-    catalogStatus('这个配置暂时无法读取',error.message+' 可以在侧边选择其他配置。');
+    catalogStatus('配置暂不可用','请更换配置，或稍后重试。',true,error.message);
     const alternative=state.configs.find(item=>item.url===config.fallbackUrl);
-    if(alternative){$('config-alternative').textContent='读取 '+alternative.name+' 备用配置';$('config-alternative').hidden=false;$('config-alternative').onclick=()=>selectConfig(alternative);}
+    if(alternative){$('config-alternative').textContent='试试 '+alternative.name;$('config-alternative').hidden=false;$('config-alternative').onclick=()=>selectConfig(alternative);}
   }
 }
 function renderCategories() {
@@ -151,7 +156,7 @@ function posterCard(item) {
   const play=element('span','poster-play');play.append(icon('play'));
   wrap.append(image,element('span','poster-gradient'),element('span','poster-badge',item.remarks),play);
   wrap.append(element('span','poster-origin',item.sourceName));
-  if(rank(item.sourceName)>=40){wrap.classList.add('source-4k');wrap.append(element('span','quality-badge','4K 标识'));}
+    if(rank(item.sourceName)>=40){wrap.classList.add('source-4k');const badge=element('span','quality-badge','4K');badge.title='片源标注的清晰度';wrap.append(badge);}
   button.append(wrap,element('span','poster-title',item.title),element('span','poster-meta',[item.year,item.type].filter(Boolean).join(' · ')));
   button.setAttribute('aria-label',item.title+' · '+item.sourceName);
   button.addEventListener('click',()=>openMovie(item));return button;
@@ -217,7 +222,7 @@ async function loadMoreSource(result) {
       if(message.type==='source-error')throw new Error(message.message);
     });
     if(!ctrl.signal.aborted&&result.message.textContent==='正在加载…')result.message.textContent='';
-  } catch(error){if(!ctrl.signal.aborted)result.message.textContent=error.message;}
+  } catch(error){if(!ctrl.signal.aborted){result.message.textContent='暂时无法加载更多，请重试。';result.message.title=error.message;}}
   finally {result.more.disabled=false;}
 }
 async function loadCatalog(skipSource='') {
@@ -227,7 +232,7 @@ async function loadCatalog(skipSource='') {
   $('filter-row').hidden=false;
   $('catalog-status').hidden=true;$('pagination').hidden=true;$('clear-search').hidden=true;
   $('search-progress').hidden=true;$('stop-search').hidden=true;$('refresh-library').hidden=false;
-  $('catalog-title').textContent='看一部好故事.';$('catalog-caption').textContent='正在选择当前配置的片库…';
+  $('catalog-title').textContent='看一部好故事';$('catalog-caption').hidden=false;$('catalog-caption').textContent='电影、剧集、动漫，选一部开始。';
   $('result-count').textContent='正在获取影片…';loadingCards();
   try {
     const result=await api('/api/feed?'+params({config:state.config.id,source:skipSource?'':state.catalogSource,
@@ -235,16 +240,15 @@ async function loadCatalog(skipSource='') {
     if(ctrl.signal.aborted||generation!==state.generation)return;
     state.catalogSource=result.source;state.categories=result.categories;state.category=result.category;
     state.pageCount=result.pageCount;state.groups=result.list;renderCategories();renderGroups();
-    const genreName=state.categories.find(c=>c.id===state.category)?.name;
-    $('catalog-caption').textContent='片库来自 '+result.sourceName+(genreName?' · '+genreName:'')+'。点击影片查看本片源的线路与选集。';
-    $('result-count').textContent='共 '+result.total.toLocaleString()+' 部 · 第 '+result.page+' 页';
-    if(!result.list.length)catalogStatus('这个分类暂无影片','可以选择其他分类或换一个片库。',false);
+    $('catalog-caption').textContent='电影、剧集、动漫，选一部开始。';
+    $('result-count').textContent=result.sourceName+' · '+result.total.toLocaleString()+' 部';
+    if(!result.list.length)catalogStatus('暂无影片','试试其他分类，或换个片库。',false);
     else {
       $('pagination').hidden=result.pageCount<=1;$('page-indicator').textContent=result.page+' / '+result.pageCount;
       $('previous-page').disabled=result.page<=1;$('next-page').disabled=result.page>=result.pageCount;
     }
   } catch(error) {
-    if(!ctrl.signal.aborted){$('result-count').textContent=state.configName+' · 暂时无法展示';catalogStatus('片库暂时无法访问',error.message);}
+    if(!ctrl.signal.aborted){$('result-count').textContent=state.configName+' · 暂时无法展示';catalogStatus('片库暂时不可用','请重试，或换个片库。',true,error.message);}
   }
 }
 async function searchConfig() {
@@ -258,21 +262,19 @@ async function searchConfig() {
   $('search-source-filters').hidden=true;$('catalog-status').hidden=true;
   $('pagination').hidden=true;$('clear-search').hidden=false;$('refresh-library').hidden=true;
   $('search-progress').hidden=false;$('stop-search').hidden=false;
-  $('catalog-title').textContent='搜索「'+state.q+'」';
-  $('catalog-caption').textContent='并行检索「'+state.configName+'」中的片源。选择片源可查看该源的结果和更多页。';
-  $('search-progress').textContent='正在查找，有结果会立即展示…';$('result-count').textContent='正在搜索…';
-  let errors=0;
+  $('catalog-title').textContent='「'+state.q+'」的搜索结果';
+  $('catalog-caption').hidden=true;
+  $('search-progress').textContent='正在搜索…';$('result-count').textContent='';
   try {
     await stream('/api/search?'+params({config:state.config.id,q:state.q}),ctrl.signal,message=>{
       if(generation!==state.generation)return;
       if(message.type==='results')addSearchResults(message);
-      if(message.type==='progress')$('search-progress').textContent='已查找 '+message.complete+' / '+message.total+' 个片源 · 找到 '+searchCount()+' 条结果';
-      if(message.type==='source-error')errors++;
-      if(message.type==='done'){$('search-progress').textContent='查找完成 · '+message.complete+' 个片源 · '+searchCount()+' 条结果'+(errors?' · '+errors+' 个源暂无法访问':'');renderSearchFilters();}
+      if(message.type==='progress')$('search-progress').textContent='正在搜索 · '+message.complete+' / '+message.total;
+      if(message.type==='done'){$('search-progress').hidden=true;renderSearchFilters();}
       if(message.type==='error')throw new Error(message.message);
     });
     if(!ctrl.signal.aborted&&!searchCount())catalogStatus('没有找到这部影片','可以试试更短的片名，或切换另一个配置。',false);
-  } catch(error){if(!ctrl.signal.aborted)catalogStatus('搜索暂时失败',error.message);}
+  } catch(error){if(!ctrl.signal.aborted)catalogStatus('暂时无法搜索','请稍后重试，或更换配置。',true,error.message);}
   finally{if(generation===state.generation&&state.controllers.search===ctrl){state.searching=false;$('stop-search').hidden=true;}}
 }
 function stopPlayer() {
@@ -281,6 +283,7 @@ function stopPlayer() {
   video.pause();video.removeAttribute('src');video.load();
   player.reset();
   $('video-placeholder').hidden=false;$('play-error').hidden=true;$('video-quality').textContent='';
+  errorDetails('play-error');
   return saved;
 }
 function goHome() {
@@ -294,18 +297,21 @@ function playerStatus(text,kind=''){$('player-status').textContent=text;$('playe
 function currentEpisode(){return state.current?.lines[state.line]?.episodes[state.episode];}
 function errorPlayback(message) {
   history.markFailed();
-  playerStatus('播放未成功','error');$('play-error-text').textContent=message;$('play-error').hidden=false;
+  message=String(message||'暂时无法播放，请重试或切换线路。');
+  const technical=/JSON|HTTP|Python|Node|SQLite|插件|运行环境|Module|Traceback|fetch failed|timeout|ECONN|ENOT|代理|接口|缓存|https?:\/\//i.test(message)||message.length>160;
+  playerStatus('暂时无法播放','error');$('play-error-text').textContent=technical?'这条线路暂时不可用，请切换线路或选择其他片源。':message;$('play-error').hidden=false;
+  errorDetails('play-error',technical?message:'');
 }
 async function openMovie(item,restore=null) {
   state.historyRecord=restore?.record||null;state.recovering=false;
   state.historyDistinct=false;
   if(!restore?.fallback)state.resumeFailedSources.clear();
   stopSearchRequests();state.current=null;state.autoAttempt=0;state.failed.clear();state.reverse=false;state.shown=180;
-  if(state.searching)$('search-progress').textContent='搜索已暂停 · 已找到 '+searchCount()+' 条结果';
+  if(state.searching)$('search-progress').textContent='搜索已暂停';
   $('browse-view').hidden=true;$('watch-view').hidden=false;
   $('history-view').hidden=true;
   $('watch-title').textContent=item.title;$('watch-meta').textContent='';$('watch-actors').textContent='';
-  $('watch-description').textContent='';$('line-list').replaceChildren();$('episode-list').replaceChildren();
+  $('watch-description').textContent='';$('watch-description').closest('.description-panel').hidden=true;$('line-list').replaceChildren();$('episode-list').replaceChildren();
   $('episode-count').textContent='';$('watch-source').textContent=state.configName+' / '+item.sourceName;
   document.title=item.title+' · My TV';window.scrollTo({top:0});
   await loadCandidate(item,restore?.record?.episode?.name,true,restore);
@@ -315,18 +321,18 @@ async function loadCandidate(candidate,preserveName,automatic=false,restore=null
   if(!candidate)return;
   state.pendingCandidate=candidate;
   const ctrl=controller('detail'),serial=++state.detailSerial;stopPlayer();
-  playerStatus('正在加载 '+candidate.sourceName+'…');
+  playerStatus('正在加载影片…');
   $('watch-source').textContent=state.configName+' / '+candidate.sourceName;
   try {
     const detail=await api('/api/detail?'+params({source:candidate.source,id:candidate.id}),{signal:ctrl.signal});
     if(ctrl.signal.aborted||serial!==state.detailSerial)return;
     state.current={...detail,source:candidate.source,sourceName:candidate.sourceName,kind:candidate.kind,card:candidate};
-    if(!detail.lines.length)throw new Error('这个片源没有提供线路。');
+    if(!detail.lines.length)throw new Error('暂无播放线路，请选择其他片源。');
     state.line=detail.lines.map((line,index)=>({index,score:lineRank(line)})).sort((a,b)=>b.score-a.score)[0].index;
     if(!preserveName){
       const lookedUp=await history.prepare({source:candidate.source,id:detail.id,line:state.line,episode:0,configName:state.configName});
       if(ctrl.signal.aborted||serial!==state.detailSerial)return;
-      if(!lookedUp){errorPlayback('已取消播放，原进度已保留。');return;}
+      if(!lookedUp){errorPlayback('已取消播放，观看进度已保留。');return;}
       state.historyDistinct=!!history.distinct;
       if(history.record){state.historyRecord=history.record;restore={record:history.record};preserveName=history.record.episode.name;}
     }
@@ -343,10 +349,10 @@ async function loadCandidate(candidate,preserveName,automatic=false,restore=null
     $('watch-title').textContent=detail.title;
     $('watch-meta').textContent=[detail.year,detail.area,detail.type,detail.remarks].filter(Boolean).join(' · ');
     $('watch-actors').textContent=[detail.director?'导演：'+detail.director:'',detail.actors?'演员：'+detail.actors:''].filter(Boolean).join('　');
-    $('watch-description').textContent=detail.description||'这个片源暂未提供简介。';
+    $('watch-description').textContent=detail.description||'';$('watch-description').closest('.description-panel').hidden=!detail.description;
     renderLines();renderEpisodes();
-    if(missingEpisode){errorPlayback('当前片源没有能对应历史的集数，请手动选择集数。');return;}
-    if(nextMissing){errorPlayback('原集已看完，当前片源没有下一集。可手动选择重播或更换片源。');return;}
+    if(missingEpisode){errorPlayback('未找到上次观看的集数，请重新选集。');return;}
+    if(nextMissing){errorPlayback('这一集已看完，暂无下一集。可以重新选集或更换片源。');return;}
     await playEpisode(state.episode,automatic);
   } catch(error){if(!ctrl.signal.aborted&&serial===state.detailSerial){errorPlayback(error.message);if(automatic)autoFallback();}}
 }
@@ -360,13 +366,12 @@ function renderLines() {
     button.addEventListener('click',()=>{
       const old=currentEpisode()?.name;history.save();
       const matched=line.episodes.findIndex(ep=>historyEpisode(ep.name,state.current.type)===historyEpisode(old||'',state.current.type));
-      if(matched<0){stopPlayer();errorPlayback('这条线路没有可对应的同一集，请手动选择集数。');state.line=index;renderLines();renderEpisodes();return;}
+      if(matched<0){stopPlayer();errorPlayback('这条线路没有当前集数，请重新选集。');state.line=index;renderLines();renderEpisodes();return;}
       state.line=index;state.episode=matched;
       state.autoAttempt=0;state.failed.clear();renderLines();playEpisode(Math.max(0,state.episode),false);
     });
     $('line-list').append(button);
   });
-  $('line-hint').textContent='优先选择有 4K 标识的线路；播放失败可以切换线路，或返回搜索选择其他片源。';
 }
 function renderEpisodes() {
   const episodes=state.current?.lines[state.line]?.episodes||[];
@@ -395,7 +400,7 @@ async function playEpisode(index,automatic=false) {
     const body=current.direct?{url:currentEpisode().url}:{config:state.config.id,source:current.source,id:current.id,line:state.line,episode:index};
     const prepared=await history.prepare({...body,configName:state.configName},state.historyRecord?.id,state.historyDistinct);
     if(ctrl.signal.aborted||serial!==state.playSerial)return;
-    if(!prepared){errorPlayback('已取消播放，原进度已保留。可重试或返回历史。');return;}
+    if(!prepared){errorPlayback('已取消播放，观看进度已保留。');return;}
     const result=await api('/api/play',{method:'POST',body,signal:ctrl.signal});
     if(ctrl.signal.aborted||serial!==state.playSerial)return;
     attachMedia(result,serial);
@@ -422,14 +427,14 @@ async function adoptHistoryConfig(config,record){
   state.config=config;state.configUrl=config.url;state.configName=record.episode.locator.configName||'历史配置';
   if(!state.configs.some(c=>c.url===config.url))state.configs.push({name:state.configName,url:config.url});
   renderConfigs();$('config-name').textContent=state.configName;
-  const count=config.sources.filter(s=>s.supported&&s.playable).length;$('config-summary').textContent=count+' 个可尝试观影片源';$('source-count').textContent=state.configName+' · '+count+' 个观影片源';
+  const count=config.sources.filter(s=>s.supported&&s.playable).length;$('config-summary').textContent=count+' 个片源';$('source-count').textContent=state.configName+' · '+count+' 个观影片源';
 }
 async function historyCandidates(result){
   const token=state.detailSerial;
   if(result.candidate)return result.candidate;
-  if(result.candidates?.length){const value=await history.choose('选择续播片源',result.error||'请核对影片版本和集数。',result.candidates.map((c,i)=>({label:c.title+' · '+c.sourceName+' · '+(c.year||''),value:i})));
+  if(result.candidates?.length){const value=await history.choose('选择续播片源','请选择想继续观看的版本。',result.candidates.map((c,i)=>({label:c.title+' · '+c.sourceName+' · '+(c.year||''),value:i})));
     if(token!==state.detailSerial)return null;if(value!==null)return result.candidates[value];}
-  const change=await history.choose('原播放入口不可用',result.error||'可以更换配置寻找同片，原进度会保留。',[{label:'更换配置寻找',value:true},{label:'返回历史',value:false}]);
+  const change=await history.choose('上次的片源暂时不可用','更换配置后重新查找，观看进度会保留。',[{label:'更换配置',value:true},{label:'返回历史',value:false}]);
   if(token!==state.detailSerial)return null;
   if(change){showHistory();state.pendingHistory=result.record;$('configs-dialog').showModal();}else showHistory();return null;
 }
@@ -444,13 +449,13 @@ async function recoverSource(){
   }catch(e){errorPlayback(e.message);}
 }
 async function resumeHistory(id){
-  goHome();playerStatus('正在恢复历史…');
+  goHome();playerStatus('正在继续上次的播放…');
   const ctrl=controller('history-resume');
   try{const result=await api('/api/history/resume',{method:'POST',body:{id},signal:ctrl.signal});if(ctrl.signal.aborted)return;
     if(result.directUrl){openDirect(result.directUrl,result.record);return;}
     if(result.config)await adoptHistoryConfig(result.config,result.record);
     const candidate=await historyCandidates(result);if(candidate)await openMovie(candidate,{...result,record:result.record});
-  }catch(e){if(!ctrl.signal.aborted){showHistory();$('history-message').textContent=e.message;}}
+  }catch(e){if(!ctrl.signal.aborted){showHistory();$('history-message').textContent='暂时无法继续播放，请稍后重试。';errorDetails('history-error',e.message);}}
 }
 function showHistory(){goHome();$('browse-view').hidden=true;$('history-view').hidden=false;$('home-nav').classList.remove('active');$('history-nav').classList.add('active');document.title='观看历史 · My TV';void history.refresh();}
 function attachMedia(result,serial) {
@@ -466,14 +471,14 @@ function attachMedia(result,serial) {
       if(choices.length)hls.currentLevel=choices[0].index;
       video.play().catch(error=>{
         if(serial!==state.playSerial||error.name==='AbortError')return;
-        if(error.name==='NotAllowedError')playerStatus('已就绪，点击播放器开始播放。');
-        else errorPlayback('浏览器暂时无法播放，请切换线路，或返回搜索选择其他片源。');
+        if(error.name==='NotAllowedError')playerStatus('点击播放，开始观看');
+        else errorPlayback('暂时无法播放，请切换线路或选择其他片源。');
       });
     });
     hls.on(Hls.Events.ERROR,(_event,data)=>{
       if(serial!==state.playSerial||!data.fatal)return;
       if(data.type===Hls.ErrorTypes.MEDIA_ERROR&&recovery++===0){hls.recoverMediaError();return;}
-      let message='这条线路暂时无法播放，请切换线路，或返回搜索选择其他片源。';
+      let message='这条线路暂时不可用，请切换线路或选择其他片源。';
       try{message=JSON.parse(data.response?.data||data.response?.text).error||message;}catch{}
       errorPlayback(message);hls.destroy();if(state.hls===hls)state.hls=null;
       if(state.autoMode)autoFallback();
@@ -482,10 +487,10 @@ function attachMedia(result,serial) {
   } else if(result.format!=='hls'||video.canPlayType('application/vnd.apple.mpegurl')) {
     video.src=result.url;video.play().catch(error=>{
       if(serial!==state.playSerial)return;
-      if(error.name==='NotAllowedError')playerStatus('已就绪，点击播放器开始播放。');
-      else if(error.name!=='AbortError')errorPlayback('浏览器无法解码这个视频，请切换线路，或返回搜索选择其他片源。');
+      if(error.name==='NotAllowedError')playerStatus('点击播放，开始观看');
+      else if(error.name!=='AbortError')errorPlayback('当前浏览器无法播放这个视频，请切换线路。');
     });
-  } else errorPlayback('这个浏览器不支持 HLS，请使用 Chrome、Edge 或 Safari。');
+  } else errorPlayback('当前浏览器不支持此视频格式，请使用 Chrome、Edge 或 Safari。');
 }
 function actualQuality() {
   const width=video.videoWidth,height=video.videoHeight;
@@ -493,11 +498,12 @@ function actualQuality() {
 }
 video.addEventListener('loadedmetadata',actualQuality);video.addEventListener('resize',actualQuality);
 video.addEventListener('playing',()=>{if(!state.mediaUrl)return;$('play-error').hidden=true;
+  errorDetails('play-error');
   playerStatus('正在播放 · '+(currentEpisode()?.name||''),'playing');actualQuality();});
 video.addEventListener('waiting',()=>{if(state.mediaUrl)playerStatus('正在缓冲…');});
 video.addEventListener('pause',()=>{if(state.mediaUrl&&!video.ended&&$('play-error').hidden)playerStatus('已暂停');});
-video.addEventListener('error',()=>{if(state.mediaUrl&&!state.hls){errorPlayback('浏览器无法播放这个视频，请切换线路，或返回搜索选择其他片源。');if(state.autoMode)autoFallback();}});
-video.addEventListener('ended',()=>{if($('auto-next').checked&&!$('next-episode').disabled)playEpisode(nextHistoryEpisode(state.current.lines[state.line].episodes,state.episode,state.current.type),false);else playerStatus('本集已播放完毕');});
+video.addEventListener('error',()=>{if(state.mediaUrl&&!state.hls){errorPlayback('暂时无法播放，请切换线路或选择其他片源。');if(state.autoMode)autoFallback();}});
+video.addEventListener('ended',()=>{if($('auto-next').checked&&!$('next-episode').disabled)playEpisode(nextHistoryEpisode(state.current.lines[state.line].episodes,state.episode,state.current.type),false);else playerStatus('播放完毕');});
 
 for(const button of document.querySelectorAll('.dialog-close'))button.addEventListener('click',()=>button.closest('dialog').close());
 for(const dialog of document.querySelectorAll('dialog'))dialog.addEventListener('click',event=>{
@@ -521,7 +527,7 @@ $('category-select').addEventListener('change',event=>{state.category=event.targ
   $('search-input').value='';renderCategories();loadCatalog();});
 $('search-form').addEventListener('submit',event=>{event.preventDefault();state.q=$('search-input').value.trim();state.page=1;
   state.category='';state.genre='all';renderCategories();state.q?searchConfig():loadCatalog();});
-$('stop-search').addEventListener('click',()=>{stopSearchRequests();$('search-progress').textContent='搜索已暂停 · 已找到 '+searchCount()+' 条结果';$('stop-search').hidden=true;});
+$('stop-search').addEventListener('click',()=>{stopSearchRequests();$('search-progress').textContent='搜索已暂停';$('stop-search').hidden=true;});
 $('clear-search').addEventListener('click',()=>{abort('search');state.q='';state.page=1;$('search-input').value='';loadCatalog();});
 $('refresh-library').addEventListener('click',()=>{const previous=state.catalogSource;state.catalogSource='';state.page=1;state.category='';loadCatalog(previous);});
 $('previous-page').addEventListener('click',()=>{state.page--;loadCatalog();window.scrollTo({top:0});});
@@ -536,13 +542,13 @@ function openDirect(url,record=null){
   state.historyDistinct=false;
   state.current={direct:true,title:'链接播放 · '+new URL(url).hostname,sourceName:'直接播放',lines:[{name:'视频链接',episodes:[{name:'播放',url,direct:true}]}]};
   state.line=0;state.episode=0;$('watch-title').textContent=state.current.title;$('watch-meta').textContent=new URL(url).hostname;
-  $('watch-actors').textContent='';$('watch-description').textContent='直接打开的视频链接。';$('watch-source').textContent='直接播放';
+  $('watch-actors').textContent='';$('watch-description').textContent='';$('watch-description').closest('.description-panel').hidden=true;$('watch-source').textContent='直接播放';
   renderLines();renderEpisodes();void playEpisode(0,false);
 }
 $('direct-form').addEventListener('submit',event=>{
   event.preventDefault();const url=$('direct-url').value.trim();let parsed;
   try{parsed=new URL(url);if(!['http:','https:'].includes(parsed.protocol)||parsed.username||parsed.password)throw new Error();}
-  catch{textForm('direct-message','请输入有效的 HTTP / HTTPS 视频地址。',true);return;}
+  catch{textForm('direct-message','请输入以 http:// 或 https:// 开头的视频链接。',true);return;}
   openDirect(url);
 });
 window.addEventListener('pagehide',()=>{for(const key of Object.keys(state.controllers))abort(key);stopPlayer();});
@@ -551,6 +557,6 @@ async function initialize() {
   try {
     const data=await api('/api/configs');state.configs=data.configs;
     if(!state.config)await selectConfig(state.configs.find(c=>c.default)||state.configs[0],true);else renderConfigs();
-  } catch(error) {catalogStatus('服务尚未就绪',error.message+' 如果刚更新过版本，请先重启本机服务。');}
+  } catch(error) {catalogStatus('暂时无法连接','请确认 My TV 已启动，再刷新页面。',true,error.message);}
 }
 initialize();

@@ -61,3 +61,19 @@ select option:checked{color:#e2f6c8;background:#34452a}
 .continue-section{margin-top:28px}.continue-heading{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}.continue-heading h2{font-size:13px;font-weight:500;margin:0;color:#aab99b}
 .history-list{display:flex;flex-direction:column;gap:14px;margin:28px 0 40px}.history-card{display:flex;gap:20px;align-items:center;border:1px solid #35412c;background:#192016;border-radius:12px;padding:16px 20px;min-width:0}.history-cover{width:62px;height:88px;border-radius:7px;object-fit:cover;background:#242d1e;flex-shrink:0}.history-info{display:flex;flex-direction:column;gap:9px;min-width:0;flex:1}.history-info strong{font-size:15px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.history-meta{font-size:11px;color:#a1b18e}.history-info small{font-size:10px;color:#7e906c;line-height:1.7;overflow-wrap:anywhere}.history-progress{width:100%;max-width:420px;height:4px;appearance:none;border:0;border-radius:5px;overflow:hidden;background:#35402d}.history-progress::-webkit-progress-bar{background:#35402d}.history-progress::-webkit-progress-value{background:var(--accent)}.history-progress::-moz-progress-bar{background:var(--accent)}.history-actions{display:flex;flex-direction:column;align-items:center;gap:8px}.history-card.compact .history-cover{width:48px;height:67px}.history-card.compact{padding:14px 18px}.history-choice-actions{display:flex;gap:10px;flex-wrap:wrap}.history-save-status{font-size:10px;color:#819271;margin:0 0 10px;min-height:15px}.resume-notice{font-size:11px;color:var(--accent);border-left:2px solid #789b4d;padding-left:10px;margin:8px 0 14px}
 @media(max-width:700px){.history-card{padding:12px;gap:12px;flex-wrap:wrap}.history-cover{width:47px;height:66px}.history-info strong{font-size:13px}.history-actions{flex-direction:row;margin-left:auto}.history-info{min-width:160px}.history-card.compact .history-actions{width:100%;justify-content:flex-end}.sidebar nav{gap:0}.nav-item{padding:7px}.continue-section{margin-top:20px}.history-meta{font-size:10px}}
+
+/* Keep guidance quiet; show diagnostics only when requested. */
+.form-message:empty,.history-save-status:empty,.watch-actors:empty{display:none}
+.config-format-note{font-size:10px;line-height:1.7;color:#7f9073;margin:10px 0 0}
+.episode-panel .choice-list{margin-bottom:24px}
+.resume-notice{border:0;padding:0;color:#96a489;font-size:11px;margin:0 0 16px}
+.history-save-status{min-height:0;line-height:1.7;margin-bottom:12px}
+.error-details{border:0;padding:0;margin:12px 0 20px;font-size:11px;color:#8e9d82;max-width:100%}
+.error-details summary{width:fit-content;color:#98a68d;font-size:11px}
+.error-details p{white-space:pre-wrap;overflow-wrap:anywhere;max-height:180px;overflow:auto;line-height:1.8;margin:10px 0 0;padding:12px 14px;border:1px solid #30392b;border-radius:8px;background:#141a11;color:#9eab92}
+.empty-state .error-details{max-width:440px;margin:18px auto 0;text-align:left}
+.empty-state .error-details summary{margin:auto}
+.empty-state .error-details p{text-align:left;max-width:none}
+#history-view h1{margin-bottom:0}
+#catalog-title{overflow-wrap:anywhere}
+#browse-view:has(#search-results:not([hidden])) #continue-section{display:none}

@@ -6,6 +6,7 @@ export function createHistory({api,video,resume,onFailure,onEnd}) {
   let route=null,prepared=null,session=null,seq=0,epoch=0,ready=false,claiming=false,needsClaim=false,owns=true;
   let decisionBusy=false,seeking=false,choiceResolve=null,deleted=false,pendingSave=Promise.resolve(),hasPlayed=false,failed=false,lastStable=null;
   let historyPage=1,historyQuery='',refreshToken=0,searchTimer,removing=false;
+  function historyError(message,error){$('history-message').textContent=message;$('history-error-details').hidden=false;$('history-error-details').open=false;$('history-error-detail').textContent=error.message;}
   function choose(title,message,options){
     if(choiceResolve)choiceResolve(null);
     const dialog=$('history-choice');$('history-choice-title').textContent=title;$('history-choice-message').textContent=message;
@@ -24,7 +25,8 @@ export function createHistory({api,video,resume,onFailure,onEnd}) {
     const info=node('div','history-info'),ep=item.episode||{};
     info.append(node('strong','',item.title),node('span','history-meta',[item.year,item.type,ep.name,ep.completed?'已看完':format(ep.position)+' / '+format(ep.duration)].filter(Boolean).join(' · ')));
     const bar=node('progress','history-progress');bar.max=ep.duration||1;bar.value=ep.completed?bar.max:ep.position||0;bar.setAttribute('aria-label','观看进度');info.append(bar);
-    info.append(node('small','',new Date(item.lastPlayed).toLocaleString('zh-CN')+' · '+(ep.locator?.direct?'链接播放':[ep.locator?.configName,ep.locator?.sourceName,ep.locator?.lineName].filter(Boolean).join(' / '))));
+    const date=new Date(item.lastPlayed).toLocaleString('zh-CN',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'});
+    info.append(node('small','',date+' · '+(ep.locator?.direct?'链接播放':[ep.locator?.configName,ep.locator?.sourceName,ep.locator?.lineName].filter(Boolean).join(' / '))));
     const next=ep.locator?.hasNext&&item.kind==='vod'&&filmFamily(item.type)!=='movie';
     const actions=node('div','history-actions'),label=ep.completed?(next?'播放下一集':'重新播放'):'继续观看';
     if(compact){const play=node('button','button primary',label);play.addEventListener('click',()=>resume(item.id));actions.append(play);row.append(cover,info,actions);}
@@ -39,7 +41,7 @@ export function createHistory({api,video,resume,onFailure,onEnd}) {
   async function removeHistory(item){
     if(removing)return;removing=true;
     try{
-      const confirmed=await choose(item?'删除观看记录':'清空观看历史',item?'删除「'+item.title+'」及其各集进度？此操作无法恢复。':'删除所有设备共享的观看历史及各集进度？此操作无法恢复；搜索条件不会限制清空范围。',[
+      const confirmed=await choose(item?'删除观看记录':'清空观看历史',item?'删除「'+item.title+'」的观看记录和各集进度？删除后无法恢复。':'将删除全部观看记录和各集进度，包括未显示的记录。所有设备均受影响，删除后无法恢复。',[
         {label:'取消',value:false},{label:item?'删除':'清空全部历史',value:true}]);
       if(!confirmed)return;
       await pendingSave;
@@ -47,7 +49,7 @@ export function createHistory({api,video,resume,onFailure,onEnd}) {
       if(!item||session?.filmId===item.id||prepared?.filmId===item.id){epoch++;session=null;ready=false;deleted=true;claiming=false;needsClaim=false;}
       if(!item){historyPage=1;historyQuery='';$('history-search').value='';clearTimeout(searchTimer);}
       await refresh();
-    }catch(e){$('history-message').textContent=e.message;}
+    }catch(e){historyError('暂时无法删除，请稍后重试。',e);}
     finally{removing=false;}
   }
   async function refresh(){
@@ -57,14 +59,15 @@ export function createHistory({api,video,resume,onFailure,onEnd}) {
     try{const [data,latest]=await Promise.all([api('/api/history?'+params),api('/api/history/latest')]);
       if(token!==refreshToken)return;
       historyPage=data.page;$('history-list').replaceChildren(...data.items.map(item=>card(item)));
-      $('history-message').textContent=data.total?(historyQuery?'找到 '+data.total+' 条观看记录':'共 '+data.total+' 条观看记录，最多保留最近 100 条')+' · 点击记录即可续播 · 所有设备共用。':historyQuery?'没有找到匹配的观看记录。':'还没有观看记录。开始播放后会自动保存。';
+      $('history-message').textContent=data.total?(historyQuery?'找到 '+data.total+' 条记录':'共 '+data.total+' 条记录'):historyQuery?'没有找到相关记录，试试其他片名。':'还没有观看记录。';
+      $('history-error-details').hidden=true;
       $('history-clear').disabled=!data.totalAll;
       $('history-pagination').hidden=data.pages<=1;
       $('history-page-label').textContent=data.page+' / '+data.pages;
       $('history-previous').disabled=data.page<=1;$('history-next').disabled=data.page>=data.pages;
       $('continue-card').replaceChildren();$('continue-section').hidden=!latest.item;
       if(latest.item)$('continue-card').append(card(latest.item,true));
-    }catch(e){if(token===refreshToken)$('history-message').textContent=e.message;}
+    }catch(e){if(token===refreshToken)historyError('观看历史暂时无法加载，请稍后重试。',e);}
   }
   function searchHistory(){clearTimeout(searchTimer);historyQuery=$('history-search').value.trim();historyPage=1;void refresh();}
   $('history-search-form').addEventListener('submit',event=>{event.preventDefault();searchHistory();});
@@ -77,33 +80,33 @@ export function createHistory({api,video,resume,onFailure,onEnd}) {
     if(!ready||!session||deleted||video.seeking||video.readyState<2||!Number.isFinite(video.duration)||video.duration<=0||video.currentTime<0)return;
     const body={session:session.session,seq:++seq,position:Math.min(video.currentTime,video.duration),duration:video.duration,completed};
     if(beacon){navigator.sendBeacon('/api/history/progress',new Blob([JSON.stringify(body)],{type:'application/json'}));return;}
-    pendingSave=api('/api/history/progress',{method:'POST',body}).then(r=>{if(session?.session===body.session)owns=r.accepted;}).catch(()=>{$('history-save-status').textContent='进度暂未保存，请检查服务连接。';});return pendingSave;
+    pendingSave=api('/api/history/progress',{method:'POST',body}).then(r=>{if(session?.session===body.session)owns=r.accepted;}).catch(()=>{$('history-save-status').textContent='观看进度暂未保存，请检查连接。';});return pendingSave;
   }
   function reset(){save(video.ended);epoch++;ready=false;route=null;prepared=null;session=null;seq=0;decisionBusy=false;needsClaim=false;claiming=false;deleted=false;seeking=false;hasPlayed=false;failed=false;lastStable=null;
-    $('resume-notice').hidden=true;$('history-save-status').textContent='';choiceResolve?.(null);return pendingSave;}
+    $('resume-notice').hidden=true;$('history-save-status').textContent='';$('history-save-status').title='';choiceResolve?.(null);return pendingSave;}
   async function prepare(body,filmId,distinct=false){
     const token=epoch;route=body;
     try{
       const loaded=await api('/api/history/prepare',{method:'POST',body:{...body,filmId,distinct}});loaded.distinct=distinct;
       if(token!==epoch)return false;
       prepared=loaded;
-      if(prepared.candidates.length){const chosen=await choose('找到同名观看记录','请选择是否沿用已有影片进度。',[
-        ...prepared.candidates.map(r=>({label:r.title+' · '+(r.year||'年份未知')+' · '+(r.type||'类型未知'),value:r.id})),{label:'作为不同影片，从头播放',value:'distinct'}]);
+      if(prepared.candidates.length){const chosen=await choose('继续上次观看？','选择看过的版本继续，或从头开始。',[
+        ...prepared.candidates.map(r=>({label:r.title+' · '+(r.year||'年份未知')+' · '+(r.type||'类型未知'),value:r.id})),{label:'从头开始，另存记录',value:'distinct'}]);
         if(token!==epoch||chosen===null)return false;
         const selected=await api('/api/history/prepare',{method:'POST',body:{...body,filmId:chosen==='distinct'?undefined:chosen,distinct:chosen==='distinct'}});
         if(token!==epoch)return false;prepared=selected;
         prepared.distinct=chosen==='distinct';
       }
       return token===epoch;
-    }catch(e){$('history-save-status').textContent='历史读取失败：'+e.message;prepared=null;return token===epoch;}
+    }catch(e){$('history-save-status').textContent='暂时无法读取观看进度。';$('history-save-status').title=e.message;prepared=null;return token===epoch;}
   }
   async function claim(){
     if(!ready||!route||!prepared||claiming||deleted||failed||!hasPlayed||video.paused||video.seeking||video.readyState<3)return;
     claiming=true;const token=epoch,body={...route,filmId:prepared.filmId,distinct:prepared.distinct,position:video.currentTime,duration:video.duration};
     try{const result=await api('/api/history/sessions',{method:'POST',body});if(token!==epoch)return;
-      session=result;prepared.filmId=result.filmId;prepared.record=result.record||prepared.record;prepared.distinct=false;seq=0;owns=!result.superseded;needsClaim=false;$('history-save-status').textContent=result.superseded?'另一个窗口正在更新共享进度':'进度自动保存';
+      session=result;prepared.filmId=result.filmId;prepared.record=result.record||prepared.record;prepared.distinct=false;seq=0;owns=!result.superseded;needsClaim=false;$('history-save-status').textContent=result.superseded?'其他窗口正在观看，当前进度未同步。':'';
       if(!result.superseded)save(video.ended);
-    }catch(e){if(token===epoch)$('history-save-status').textContent='历史保存失败：'+e.message;}
+    }catch(e){if(token===epoch){$('history-save-status').textContent='观看进度暂未保存。';$('history-save-status').title=e.message;}}
     finally{if(token===epoch)claiming=false;}
   }
   function range(){if(!video.seekable.length)return null;return {start:video.seekable.start(0),end:video.seekable.end(video.seekable.length-1)};}
@@ -113,16 +116,16 @@ export function createHistory({api,video,resume,onFailure,onEnd}) {
     if(d.kind==='wait')return;
     decisionBusy=true;const token=epoch;let position=d.position||0;
     if(d.kind==='choice'){
-      video.pause();const value=await choose('当前线路时长与历史不同','历史位置 '+format(d.position)+'；当前总时长 '+format(video.duration)+'。可能是不同剪辑版本。',[
+      video.pause();const value=await choose('选择续播位置','上次看到 '+format(d.position)+'，当前视频时长 '+format(video.duration)+'。版本可能不同，请选择从哪里开始。',[
         ...(d.canResume?[{label:'按原时间继续',value:'resume'}]:[]),{label:'从头播放',value:'start'},{label:'手动定位',value:'manual'}]);
-      if(token!==epoch)return;if(value===null){decisionBusy=false;ready=false;failed=true;onFailure?.('已取消续播，原进度已保留。可重试或返回历史。');return;}
+      if(token!==epoch)return;if(value===null){decisionBusy=false;ready=false;failed=true;onFailure?.('已取消续播，观看进度已保留。');return;}
       if(value==='manual'){prepared.bookmark=null;decisionBusy=false;ready=true;return;}
       position=value==='resume'?d.position:0;
     }
     if(token!==epoch)return;
     if(position>0){seeking=true;try{video.currentTime=position;}catch{seeking=false;decisionBusy=false;return;}}
     ready=true;decisionBusy=false;
-    if(position>0){$('resume-notice').hidden=false;$('resume-notice').textContent='已恢复至 '+format(position);}
+    if(position>0){$('resume-notice').hidden=false;$('resume-notice').textContent='接着 '+format(position)+' 观看';}
     if(video.paused&&!video.ended)video.play().catch(()=>{});
     if(!video.paused&&!video.seeking){if(!session||needsClaim)void claim();else save();}
   }

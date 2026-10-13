@@ -82,7 +82,7 @@ export function createHistory({api,video,resume,onFailure,onEnd}) {
     if(d.kind==='choice'){
       video.pause();const value=await choose('当前线路时长与历史不同','历史位置 '+format(d.position)+'；当前总时长 '+format(video.duration)+'。可能是不同剪辑版本。',[
         ...(d.canResume?[{label:'按原时间继续',value:'resume'}]:[]),{label:'从头播放',value:'start'},{label:'手动定位',value:'manual'}]);
-      if(token!==epoch)return;if(value===null){decisionBusy=false;return;}
+      if(token!==epoch)return;if(value===null){decisionBusy=false;ready=false;failed=true;onFailure?.('已取消续播，原进度已保留。可重试或返回历史。');return;}
       if(value==='manual'){prepared.bookmark=null;decisionBusy=false;ready=true;return;}
       position=value==='resume'?d.position:0;
     }

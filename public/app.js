@@ -13,7 +13,7 @@ const state = {
   autoAttempt: 0, autoMode: false, failed: new Set(),
   controllers: {}, searching: false
 };
-history=createHistory({api,video,resume:resumeHistory});
+history=createHistory({api,video,resume:resumeHistory,onFailure:errorPlayback});
 state.historyRecord=null;state.recovering=false;
 state.resumeFailedSources=new Set();
 
@@ -385,7 +385,8 @@ async function playEpisode(index,automatic=false) {
     await saved;if(ctrl.signal.aborted||serial!==state.playSerial)return;
     const body=current.direct?{url:currentEpisode().url}:{config:state.config.id,source:current.source,id:current.id,line:state.line,episode:index};
     const prepared=await history.prepare({...body,configName:state.configName},state.historyRecord?.id);
-    if(!prepared||ctrl.signal.aborted||serial!==state.playSerial)return;
+    if(ctrl.signal.aborted||serial!==state.playSerial)return;
+    if(!prepared){errorPlayback('已取消播放，原进度已保留。可重试或返回历史。');return;}
     const result=await api('/api/play',{method:'POST',body,signal:ctrl.signal});
     if(ctrl.signal.aborted||serial!==state.playSerial)return;
     attachMedia(result,serial);

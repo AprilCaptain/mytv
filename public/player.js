@@ -5,13 +5,15 @@ export function createPlayer(video, stage, actions={}) {
   const controls = $('player-controls'), seek = $('player-seek'), tooltip = $('seek-tooltip');
   const toggle = $('player-toggle'), mute = $('player-mute'), volume = $('player-volume');
   const speed = $('player-speed'), fullscreen = $('player-fullscreen'), feedback = $('seek-feedback');
-  let idleTimer, feedbackTimer, scrubbing = false;
+  let idleTimer, feedbackTimer, scrubbing = false, controlsHovered = false, speedOpen = false;
   let lastVolume=video.volume||1;
   const bounds = () => seekBounds(video.duration, video.seekable);
 
   function showControls() {
     stage.classList.remove('controls-idle');clearTimeout(idleTimer);
-    if (!video.paused) idleTimer = setTimeout(() => stage.classList.add('controls-idle'), 2600);
+    const keyboardFocus = controls.contains(document.activeElement) && document.activeElement.matches(':focus-visible');
+    if (!video.paused && !video.ended && !controlsHovered && !scrubbing && !speedOpen && !keyboardFocus)
+      idleTimer = setTimeout(() => { stage.classList.add('controls-idle');tooltip.hidden = true; }, 2600);
   }
   function announce(text) {
     feedback.textContent = text;feedback.hidden = false;clearTimeout(feedbackTimer);
@@ -64,14 +66,19 @@ export function createPlayer(video, stage, actions={}) {
   video.addEventListener('dblclick', () => void toggleFullscreen());
   fullscreen.addEventListener('click', () => void toggleFullscreen());
   document.addEventListener('fullscreenchange', () => {
+    controlsHovered = controls.matches(':hover');
     fullscreen.setAttribute('aria-label', document.fullscreenElement ? '退出全屏' : '全屏');showControls();
   });
   mute.addEventListener('click', toggleMute);
   volume.addEventListener('input', () => { video.volume = Number(volume.value);video.muted = video.volume === 0;if(video.volume>0)lastVolume=video.volume;showControls(); });
-  speed.addEventListener('change', () => { video.defaultPlaybackRate=Number(speed.value);video.playbackRate = Number(speed.value);showControls(); });
-  seek.addEventListener('pointerdown', () => { scrubbing = true; });
-  window.addEventListener('pointerup', () => { scrubbing = false;refresh(); });
-  window.addEventListener('pointercancel', () => { scrubbing = false;refresh(); });
+  speed.addEventListener('pointerdown', () => { speedOpen = true;showControls(); });
+  speed.addEventListener('blur', () => { speedOpen = false;showControls(); });
+  speed.addEventListener('keydown', event => { if (event.key === 'Escape' || event.key === 'Enter') { speedOpen = false;showControls(); } });
+  speed.addEventListener('change', () => { speedOpen = false;video.defaultPlaybackRate=Number(speed.value);video.playbackRate = Number(speed.value);showControls(); });
+  seek.addEventListener('pointerdown', () => { scrubbing = true;showControls(); });
+  const endScrubbing = () => { if (scrubbing) { scrubbing = false;refresh();showControls(); } };
+  window.addEventListener('pointerup', endScrubbing);
+  window.addEventListener('pointercancel', endScrubbing);
   seek.addEventListener('input', () => { if (bounds()) { actions.onSeek?.();video.currentTime = Number(seek.value);refresh();showControls(); } });
   seek.addEventListener('pointermove', event => {
     const rect = seek.getBoundingClientRect(), range = bounds(), time = hoverTime(event.clientX, rect.left, rect.width, range);
@@ -82,8 +89,13 @@ export function createPlayer(video, stage, actions={}) {
   });
   seek.addEventListener('pointerleave', () => tooltip.hidden = true);
   seek.addEventListener('blur', () => { if (!seek.matches(':hover')) tooltip.hidden = true; });
-  stage.addEventListener('pointermove', showControls);
+  stage.addEventListener('pointermove', event => { if (event.target !== speed) speedOpen = false;showControls(); });
+  stage.addEventListener('pointerleave', showControls);
+  controls.addEventListener('pointerenter', event => { controlsHovered = event.pointerType !== 'touch';showControls(); });
+  controls.addEventListener('pointerleave', () => { controlsHovered = false;showControls(); });
   stage.addEventListener('focusin', showControls);
+  stage.addEventListener('focusout', () => { queueMicrotask(showControls); });
+  stage.addEventListener('keydown', showControls);
   document.addEventListener('keydown', event => {
     if ($('watch-view').hidden || document.querySelector('dialog[open]') || event.altKey || event.ctrlKey || event.metaKey) return;
     const target = event.target;
@@ -97,5 +109,5 @@ export function createPlayer(video, stage, actions={}) {
   for (const name of ['loadedmetadata','durationchange','timeupdate','progress','volumechange','ratechange','play','pause','ended','emptied'])
     video.addEventListener(name, () => { refresh();if (['play','pause','ended'].includes(name)) showControls(); });
   video.controls = false;video.tabIndex = 0;controls.hidden = false;refresh();
-  return { reset() { clearTimeout(idleTimer);clearTimeout(feedbackTimer);scrubbing = false;tooltip.hidden = true;feedback.hidden = true;stage.classList.remove('controls-idle');refresh(); } };
+  return { reset() { clearTimeout(idleTimer);clearTimeout(feedbackTimer);scrubbing = false;speedOpen = false;controlsHovered = controls.matches(':hover');tooltip.hidden = true;feedback.hidden = true;stage.classList.remove('controls-idle');refresh(); } };
 }

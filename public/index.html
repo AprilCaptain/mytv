@@ -73,7 +73,11 @@
           <footer class="browse-footer"><span>MY TV / 私人放映室</span><span>选好故事，按下播放。</span></footer>
         </div>
       </section>
-      <section id="history-view" hidden><header class="topbar"><span class="page-label">观看历史</span><button id="history-back" class="text-button">返回发现</button></header><div class="browse-body"><p class="eyebrow">CONTINUE YOUR STORY</p><h1>观看历史</h1><p id="history-message" class="intro-caption" role="status"></p><div id="history-list" class="history-list"></div></div></section>
+      <section id="history-view" hidden><header class="topbar"><span class="page-label">观看历史</span><button id="history-back" class="text-button">返回发现</button></header><div class="browse-body"><p class="eyebrow">CONTINUE YOUR STORY</p><h1>观看历史</h1>
+        <div class="history-tools"><form id="history-search-form" class="history-search" role="search" aria-label="搜索观看历史"><svg aria-hidden="true"><use href="#i-search"/></svg><input id="history-search" type="search" placeholder="搜索历史中的影片名称" aria-label="搜索历史影片名称" maxlength="200"><button type="submit">搜索</button></form><button id="history-clear" class="history-delete" disabled>清空历史</button></div>
+        <p id="history-message" class="intro-caption" role="status"></p><div id="history-list" class="history-list"></div>
+        <nav id="history-pagination" class="pagination" aria-label="观看历史分页" hidden><button id="history-previous" class="button secondary">上一页</button><span id="history-page-label"></span><button id="history-next" class="button secondary">下一页</button></nav>
+      </div></section>
       <section id="watch-view" hidden>
         <header class="watch-topbar"><button id="watch-back" class="back-button"><svg><use href="#i-arrow"/></svg>返回发现</button><span id="watch-source" class="watch-source"></span></header>
         <div class="watch-layout">

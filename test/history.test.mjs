@@ -7,6 +7,7 @@ import { openHistory as openHistoryRaw, supportedHistoryNode } from '../lib/hist
 import { historyEpisode, sameFilm, resumeDecision,nextHistoryEpisode } from '../public/history-utils.js';
 import { serverAddresses } from '../lib/network-mode.mjs';
 import { createApi } from '../lib/api.mjs';
+import { HistoryService } from '../lib/history-service.mjs';
 import { DatabaseSync } from 'node:sqlite';
 
 const stores=new Map();
@@ -58,8 +59,38 @@ test('100 条淘汰关联数据，删除后旧会话不重建记录',async t=>{
  for(let i=0;i<100;i++)s.start({...entry,meta:{...meta,title:'电影'+i},locator:{...locator,videoId:String(i)}});
  assert.equal(s.list().length,100);assert.throws(()=>s.get(first.filmId),/删除或被淘汰/);
  assert.equal(s.db.prepare('SELECT count(*) AS n FROM episodes').get().n,100);
+ assert.equal(s.db.prepare('SELECT count(*) AS n FROM films').get().n,100);
+ assert.equal(s.db.prepare('SELECT count(*) AS n FROM bindings').get().n,100);
+ assert.equal(s.sessions.has(first.session),false);
  const last=s.start({...entry,meta:{...meta,title:'最后'},locator:{...locator,videoId:'last'}});s.delete(last.filmId);
  assert.equal(s.update({session:last.session,seq:1,position:500,duration:2400}).accepted,false);
+});
+test('历史按片名搜索并分页，特殊字符是字面量，删掉最后一页时回到有效页',async t=>{
+ const s=await openHistory(await fixture(t));
+ for(let i=0;i<41;i++)s.start({...entry,meta:{...meta,title:'影视 Test '+i},locator:{...locator,videoId:String(i)}});
+ const first=s.page();assert.equal(first.items.length,20);assert.equal(first.total,41);assert.equal(first.pages,3);assert.equal(first.items[0].title,'影视 Test 40');
+ const second=s.page({page:2});assert.equal(second.items[0].title,'影视 Test 20');
+ const last=s.page({page:3});assert.equal(last.items.length,1);s.delete(last.items[0].id);assert.equal(s.page({page:3}).page,2);
+ const match=s.page({query:'  test 2  ',page:2});assert.equal(match.total,11);assert.equal(match.page,1);assert.equal(match.totalAll,40);
+ assert.equal(s.page({query:'不存在'}).total,0);assert.equal(s.page({query:"%' OR 1=1 --"}).total,0);
+ s.start({...entry,meta:{...meta,title:'100%_高清'},locator:{...locator,videoId:'literal'}});
+ assert.equal(s.page({query:'%_'}).total,1);assert.equal(s.page({page:'invalid',pageSize:-3}).page,1);
+});
+test('清空物理删除所有表关联数据，旧会话和已准备的旧入口不能重建',async t=>{
+ const root=await fixture(t),s=await openHistory(root),a=s.start(entry);
+ s.start({...entry,episodeKey:'episode:2',episodeName:'第02集'});
+ assert.equal(s.clear().deleted,1);
+ for(const table of ['films','episodes','bindings'])assert.equal(s.db.prepare('SELECT count(*) AS n FROM '+table).get().n,0);
+ assert.equal(s.sessions.size,0);assert.equal(s.update({session:a.session,seq:1,position:600,duration:2400}).accepted,false);
+ assert.throws(()=>s.start({...entry,filmId:a.filmId}),/不匹配/);assert.equal(s.clear().deleted,0);
+ s.close();const reopened=await openHistory(root);assert.equal(reopened.page().total,0);
+ const fresh=reopened.start(entry);assert.notEqual(fresh.filmId,a.filmId);
+});
+test('清空期间尚未解析完的会话请求被拒绝，防止晚到写入',async t=>{
+ const s=await openHistory(await fixture(t)),service=new HistoryService(s);
+ let finish;service.context=()=>new Promise(resolve=>finish=resolve);
+ const pending=service.start({position:300,duration:2400});s.clear();finish(entry);
+ await assert.rejects(pending,/历史已清空/);assert.equal(s.list().length,0);
 });
 test('最近主动会话优先、请求乱序、手动回退及结束标记',async t=>{
  const s=await openHistory(await fixture(t));t.after(()=>s.close());const a=s.start(entry),b=s.start({...entry,position:600});
@@ -105,4 +136,11 @@ test('历史 API 恢复重排配置/线路，不使用旧下标或代理地址',
  const denied=await api(new Request('http://127.0.0.1:3210/api/history',{headers:{origin:'https://other.example'}}));assert.equal(denied.status,403);
  const deleted=await call('/api/history/'+start.data.filmId,{},'DELETE');assert.equal(deleted.status,200);
  const late=await call('/api/history/progress',{session:start.data.session,seq:1,position:500,duration:2400});assert.equal(late.data.accepted,false);
+ const again=await call('/api/history/sessions',{...body,position:300,duration:2400});
+ const filtered=await call('/api/history?q='+encodeURIComponent('庆余年')+'&page=2',undefined,'GET');assert.equal(filtered.data.total,1);assert.equal(filtered.data.page,1);
+ const noMatch=await call('/api/history?q=missing',undefined,'GET');assert.equal(noMatch.data.items.length,0);assert.equal(noMatch.data.totalAll,1);
+ const deniedClear=await api(new Request('http://127.0.0.1:3210/api/history',{method:'DELETE',headers:{origin:'https://other.example'}}));assert.equal(deniedClear.status,403);assert.equal(store.list().length,1);
+ const cleared=await call('/api/history',{},'DELETE');assert.equal(cleared.data.deleted,1);
+ assert.equal((await call('/api/history/latest',undefined,'GET')).data.item,null);
+ const lateAfterClear=await call('/api/history/progress',{session:again.data.session,seq:1,position:500,duration:2400});assert.equal(lateAfterClear.data.accepted,false);
 });

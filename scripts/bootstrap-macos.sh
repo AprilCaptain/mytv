@@ -9,6 +9,9 @@ tv_node_ok() {
     const fs=require("fs"),path=require("path"),cp=require("child_process"),dir=path.dirname(process.execPath);
     if(Number(process.versions.node.split(".")[0])<22)process.exit(1);
     if(process.argv[1]==="--stop")process.exit(0);
+    const v=process.versions.node.split(".").map(Number);
+    if(v[0]===22&&v[1]<18)process.exit(1);
+    try{if(typeof require("node:sqlite").DatabaseSync!=="function")process.exit(1);}catch{process.exit(1);}
     const cli=[path.join(dir,"node_modules/npm/bin/npm-cli.js"),path.join(dir,"../lib/node_modules/npm/bin/npm-cli.js")].find(x=>fs.existsSync(x));
     if(!cli)process.exit(1);
     process.exit(cp.spawnSync(process.execPath,[cli,"--version"],{stdio:"ignore",timeout:15000}).status===0?0:1);
@@ -21,7 +24,7 @@ for tv_candidate in "$(command -v node || true)" /opt/homebrew/bin/node /usr/loc
   if [[ -n "$tv_candidate" ]] && tv_node_ok "$tv_candidate"; then tv_node="$tv_candidate"; break; fi
 done
 if [[ -z "$tv_node" ]]; then
-  print -u2 '未找到完整的 Node.js 22+ / npm。请手动安装后重试：https://nodejs.org/'
+  print -u2 '未找到完整的 Node.js 22.18+ / npm / 内置 SQLite。请手动安装兼容 Node.js 后重试：https://nodejs.org/（无需单独安装 sqlite3）'
   exit 1
 fi
 export PATH="$(dirname "$tv_node"):$PATH"

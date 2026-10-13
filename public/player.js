@@ -1,6 +1,6 @@
 import { formatTime, seekBounds, seekTarget, hoverTime } from './player-utils.js';
 
-export function createPlayer(video, stage) {
+export function createPlayer(video, stage, actions={}) {
   const $ = id => document.getElementById(id);
   const controls = $('player-controls'), seek = $('player-seek'), tooltip = $('seek-tooltip');
   const toggle = $('player-toggle'), mute = $('player-mute'), volume = $('player-volume');
@@ -37,14 +37,14 @@ export function createPlayer(video, stage) {
   }
   async function playPause() {
     if (!video.currentSrc) return;
-    if (video.paused) try { await video.play(); } catch { announce('暂时无法播放，请检查线路。'); }
+    if (video.paused) try { actions.onPlay?.();await video.play(); } catch { announce('暂时无法播放，请检查线路。'); }
     else video.pause();
     showControls();
   }
   function jump(delta) {
     const value = seekTarget(video.currentTime, delta, bounds());
     if (value === null) return;
-    try { video.currentTime = value;announce((delta < 0 ? '后退' : '前进') + Math.abs(delta) + ' 秒 · ' + formatTime(value));refresh(); } catch {}
+    try { actions.onSeek?.();video.currentTime = value;announce((delta < 0 ? '后退' : '前进') + Math.abs(delta) + ' 秒 · ' + formatTime(value));refresh(); } catch {}
   }
   async function toggleFullscreen() {
     try {
@@ -72,7 +72,7 @@ export function createPlayer(video, stage) {
   seek.addEventListener('pointerdown', () => { scrubbing = true; });
   window.addEventListener('pointerup', () => { scrubbing = false;refresh(); });
   window.addEventListener('pointercancel', () => { scrubbing = false;refresh(); });
-  seek.addEventListener('input', () => { if (bounds()) { video.currentTime = Number(seek.value);refresh();showControls(); } });
+  seek.addEventListener('input', () => { if (bounds()) { actions.onSeek?.();video.currentTime = Number(seek.value);refresh();showControls(); } });
   seek.addEventListener('pointermove', event => {
     const rect = seek.getBoundingClientRect(), range = bounds(), time = hoverTime(event.clientX, rect.left, rect.width, range);
     if (time === null) { tooltip.hidden = true;return; }

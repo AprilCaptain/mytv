@@ -72,8 +72,8 @@ async function freePort() {
   return port;
 }
 
-function runLauncher(port) {
-  const child = spawn(process.execPath, ['scripts/bootstrap.mjs', '--no-browser'], {
+function runLauncher(port,lan=false) {
+  const child = spawn(process.execPath, ['scripts/bootstrap.mjs', '--no-browser',...(lan?['--lan']:[])], {
     cwd: project, env: { ...process.env, PORT: String(port), MYTV_SKIP_PYTHON: '1', MYTV_SETUP_ONLY: '0' },
     stdio: ['pipe', 'pipe', 'pipe']
   });
@@ -93,6 +93,13 @@ test('启动入口遇到缺失 Python 时先退出，不进入项目依赖安装
   assert.equal(await new Promise(resolve => child.once('exit', resolve)), 1);
   assert.match(output, /请手动安装/);
   assert.doesNotMatch(output, /Node 依赖|正在安装|正在下载/);
+});
+
+test('缺少 Node 内置 SQLite 时先退出，不安装运行时或项目依赖',async()=>{
+  const child=spawn(process.execPath,['--no-experimental-sqlite','scripts/bootstrap.mjs','--setup-only'],{cwd:project,stdio:'pipe'});
+  let output='';child.stdout.on('data',x=>output+=x);child.stderr.on('data',x=>output+=x);
+  assert.equal(await new Promise(resolve=>child.once('exit',resolve)),1);
+  assert.match(output,/缺少内置 SQLite.*手动安装/);assert.doesNotMatch(output,/Node 依赖|正在.*安装|正在.*下载/);
 });
 
 test('重复启动仍保留控制窗口，输入 q 可停止服务并释放所有窗口', { timeout: 30_000 }, async t => {
@@ -147,4 +154,18 @@ test('普通端口占用与伪装的健康响应不会被误认为可用服务',
   const run = runLauncher(server.address().port);
   assert.equal(await run.finished, 1);
   assert.match(run.output(), /被其他程序或旧版服务占用/);
+});
+
+test('局域网模式共享历史、拒绝错误 Host/Origin，模式不一致不切换服务', {timeout:30_000}, async t=>{
+  const port=await freePort(),run=runLauncher(port,true);t.after(()=>run.child.kill('SIGTERM'));
+  for(let i=0;i<100&&!run.output().includes('此窗口可控制服务');i++)await new Promise(resolve=>setTimeout(resolve,50));
+  assert.match(run.output(),/局域网访问/);
+  const health=await(await fetch('http://127.0.0.1:'+port+'/api/health')).json();assert.equal(health.mode,'lan');
+  const local=await(await fetch('http://127.0.0.1:'+port+'/api/history')).json();
+  const {serverAddresses}=await import('../lib/network-mode.mjs');const url=serverAddresses(port,true).urls[0];
+  if(url){const shared=await(await fetch(url+'/api/history')).json();assert.deepEqual(shared,local);}
+  const denied=await new Promise((resolve,reject)=>{const req=http.get({hostname:'127.0.0.1',port,path:'/api/history',headers:{host:'evil.example:'+port}},response=>{response.resume();resolve(response.statusCode);});req.on('error',reject);});assert.equal(denied,403);
+  const cross=await fetch('http://127.0.0.1:'+port+'/api/history',{headers:{origin:'https://evil.example'}});assert.equal(cross.status,403);
+  const mismatch=runLauncher(port);assert.equal(await mismatch.finished,1);assert.match(mismatch.output(),/模式.*先用停止脚本/);
+  run.child.stdin.write('q\n');assert.equal(await run.finished,0);
 });

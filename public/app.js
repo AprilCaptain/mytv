@@ -1,7 +1,10 @@
 import { createPlayer } from './player.js';
+import { createHistory } from './history-ui.js';
+import { historyEpisode,filmFamily } from './history-utils.js';
 const $ = id => document.getElementById(id);
 const video = $('video');
-const player = createPlayer(video, $('video-stage'));
+let history;
+const player = createPlayer(video, $('video-stage'),{onPlay:()=>history?.requestClaim(),onSeek:()=>history?.requestClaim()});
 const state = {
   configs: [], config: null, configUrl: '', configName: '电视', generation: 0,
   catalogSource: '', categories: [], genre: 'all', category: '', page: 1, pageCount: 1, q: '',
@@ -10,6 +13,9 @@ const state = {
   autoAttempt: 0, autoMode: false, failed: new Set(),
   controllers: {}, searching: false
 };
+history=createHistory({api,video,resume:resumeHistory});
+state.historyRecord=null;state.recovering=false;
+state.resumeFailedSources=new Set();
 
 function element(tag, className, text) {
   const node = document.createElement(tag);
@@ -85,7 +91,7 @@ function renderConfigs() {
     $('config-select').append(option);
     const row=element('button','source-row'+(selected?' selected':''));
     row.append(element('span','',config.name),element('small','',selected?'当前配置':'选择'),icon('chevron'));
-    row.addEventListener('click',()=>{ $('configs-dialog').close(); selectConfig(config); });
+    row.addEventListener('click',()=>{ $('configs-dialog').close(); selectConfig(config).then(afterHistoryConfig); });
     $('config-dialog-list').append(row);
   }
   $('config-name').textContent=state.configName;
@@ -93,9 +99,9 @@ function renderConfigs() {
   $('config-summary').textContent=state.config ? total+' 个可尝试观影片源' : '正在读取配置…';
   $('source-count').textContent=state.config ? state.configName+' · '+total+' 个观影片源' : '正在读取配置…';
 }
-async function selectConfig(config) {
-  for(const key of Object.keys(state.controllers)) abort(key);
-  goHome(); state.generation++;
+async function selectConfig(config,initial=false) {
+  if(!initial){for(const key of Object.keys(state.controllers)) abort(key);goHome();}
+  state.generation++;
   const generation=state.generation, ctrl=controller('config');
   state.config=null; state.configUrl=config.url; state.configName=config.name;
   $('config-reference').href=config.reference||'https://github.com/qist/tvbox#readme';
@@ -270,33 +276,41 @@ async function searchConfig() {
   finally{if(generation===state.generation&&state.controllers.search===ctrl){state.searching=false;$('stop-search').hidden=true;}}
 }
 function stopPlayer() {
+  const saved=history.reset();
   state.playSerial++;abort('play');state.hls?.destroy();state.hls=null;state.mediaUrl='';
   video.pause();video.removeAttribute('src');video.load();
   player.reset();
   $('video-placeholder').hidden=false;$('play-error').hidden=true;$('video-quality').textContent='';
+  return saved;
 }
 function goHome() {
-  abort('detail');stopPlayer();state.current=null;state.detailSerial++;
+  abort('detail');abort('history-resume');stopPlayer();state.current=null;state.detailSerial++;
   $('watch-view').hidden=true;$('browse-view').hidden=false;
+  $('history-view').hidden=true;$('home-nav').classList.add('active');$('history-nav').classList.remove('active');void history.refresh();
+  if(state.historyCatalogDirty){state.historyCatalogDirty=false;void loadCatalog();}
   document.title='My TV · 看一部好故事';
 }
 function playerStatus(text,kind=''){$('player-status').textContent=text;$('player-status').dataset.kind=kind;}
 function currentEpisode(){return state.current?.lines[state.line]?.episodes[state.episode];}
 function errorPlayback(message) {
+  history.markFailed();
   playerStatus('播放未成功','error');$('play-error-text').textContent=message;$('play-error').hidden=false;
 }
-async function openMovie(item) {
+async function openMovie(item,restore=null) {
+  state.historyRecord=restore?.record||null;state.recovering=false;
+  if(!restore?.fallback)state.resumeFailedSources.clear();
   stopSearchRequests();state.current=null;state.autoAttempt=0;state.failed.clear();state.reverse=false;state.shown=180;
   if(state.searching)$('search-progress').textContent='搜索已暂停 · 已找到 '+searchCount()+' 条结果';
   $('browse-view').hidden=true;$('watch-view').hidden=false;
+  $('history-view').hidden=true;
   $('watch-title').textContent=item.title;$('watch-meta').textContent='';$('watch-actors').textContent='';
   $('watch-description').textContent='';$('line-list').replaceChildren();$('episode-list').replaceChildren();
   $('episode-count').textContent='';$('watch-source').textContent=state.configName+' / '+item.sourceName;
   document.title=item.title+' · My TV';window.scrollTo({top:0});
-  await loadCandidate(item,undefined,true);
+  await loadCandidate(item,restore?.record?.episode?.name,true,restore);
 }
 function lineRank(line) {return rank(line.name)*100+(line.episodes.some(ep=>ep.direct)?10:0);}
-async function loadCandidate(candidate,preserveName,automatic=false) {
+async function loadCandidate(candidate,preserveName,automatic=false,restore=null) {
   if(!candidate)return;
   state.pendingCandidate=candidate;
   const ctrl=controller('detail'),serial=++state.detailSerial;stopPlayer();
@@ -309,13 +323,22 @@ async function loadCandidate(candidate,preserveName,automatic=false) {
     if(!detail.lines.length)throw new Error('这个片源没有提供线路。');
     state.line=detail.lines.map((line,index)=>({index,score:lineRank(line)})).sort((a,b)=>b.score-a.score)[0].index;
     const episodes=detail.lines[state.line].episodes;
-    const matched=preserveName?episodes.findIndex(ep=>episodeKey(ep.name)===episodeKey(preserveName)):-1;
-    state.episode=matched>=0?matched:0;state.shown=Math.max(180,Math.ceil((state.episode+1)/180)*180);
+    if(restore?.line!==undefined&&detail.lines[restore.line])state.line=restore.line;
+    const activeEpisodes=detail.lines[state.line].episodes;
+    const matched=preserveName?activeEpisodes.findIndex(ep=>historyEpisode(ep.name,detail.type)===historyEpisode(preserveName,detail.type)):-1;
+    const missingEpisode=preserveName&&matched<0;
+    state.episode=restore?.episode??(matched>=0?matched:0);
+    const completed=restore?.record?.episode?.completed;
+    const nextMissing=completed&&restore.record.episode.locator.hasNext&&state.episode>=activeEpisodes.length-1;
+    if(completed&&filmFamily(detail.type)!=='movie'&&state.episode<activeEpisodes.length-1)state.episode++;
+    state.shown=Math.max(180,Math.ceil((state.episode+1)/180)*180);
     $('watch-title').textContent=detail.title;
     $('watch-meta').textContent=[detail.year,detail.area,detail.type,detail.remarks].filter(Boolean).join(' · ');
     $('watch-actors').textContent=[detail.director?'导演：'+detail.director:'',detail.actors?'演员：'+detail.actors:''].filter(Boolean).join('　');
     $('watch-description').textContent=detail.description||'这个片源暂未提供简介。';
     renderLines();renderEpisodes();
+    if(missingEpisode){errorPlayback('当前片源没有能对应历史的集数，请手动选择集数。');return;}
+    if(nextMissing){errorPlayback('原集已看完，当前片源没有下一集。可手动选择重播或更换片源。');return;}
     await playEpisode(state.episode,automatic);
   } catch(error){if(!ctrl.signal.aborted&&serial===state.detailSerial){errorPlayback(error.message);if(automatic)autoFallback();}}
 }
@@ -327,9 +350,10 @@ function renderLines() {
     button.setAttribute('aria-pressed',String(state.line===index));
     if(rank(line.name)>=40)button.append(element('span','choice-tag','4K'));
     button.addEventListener('click',()=>{
-      const old=currentEpisode()?.name;state.line=index;
-      const matched=line.episodes.findIndex(ep=>episodeKey(ep.name)===episodeKey(old||''));
-      state.episode=matched>=0?matched:Math.min(state.episode,line.episodes.length-1);
+      const old=currentEpisode()?.name;history.save();
+      const matched=line.episodes.findIndex(ep=>historyEpisode(ep.name,state.current.type)===historyEpisode(old||'',state.current.type));
+      if(matched<0){stopPlayer();errorPlayback('这条线路没有可对应的同一集，请手动选择集数。');state.line=index;renderLines();renderEpisodes();return;}
+      state.line=index;state.episode=matched;
       state.autoAttempt=0;state.failed.clear();renderLines();playEpisode(Math.max(0,state.episode),false);
     });
     $('line-list').append(button);
@@ -354,29 +378,69 @@ function renderEpisodes() {
 }
 async function playEpisode(index,automatic=false) {
   const current=state.current;if(!current||!current.lines[state.line]?.episodes[index])return;
-  stopPlayer();state.episode=index;state.autoMode=automatic;
+  const saved=stopPlayer();state.episode=index;state.autoMode=automatic;
   const serial=state.playSerial,ctrl=controller('play');renderEpisodes();
   playerStatus('正在连接 · '+currentEpisode().name);
   try {
+    await saved;if(ctrl.signal.aborted||serial!==state.playSerial)return;
     const body=current.direct?{url:currentEpisode().url}:{config:state.config.id,source:current.source,id:current.id,line:state.line,episode:index};
+    const prepared=await history.prepare({...body,configName:state.configName},state.historyRecord?.id);
+    if(!prepared||ctrl.signal.aborted||serial!==state.playSerial)return;
     const result=await api('/api/play',{method:'POST',body,signal:ctrl.signal});
     if(ctrl.signal.aborted||serial!==state.playSerial)return;
     attachMedia(result,serial);
   } catch(error){if(!ctrl.signal.aborted&&serial===state.playSerial){errorPlayback(error.message);if(automatic)autoFallback();}}
 }
 function autoFallback() {
-  if(!state.current||state.current.direct||state.autoAttempt++>=3)return;
+  if(!state.current){if(state.historyRecord&&!state.recovering){state.recovering=true;void recoverSource();}return;}
+  if(state.current.direct)return;
   const preserve=currentEpisode()?.name;
   state.failed.add(state.current.source+':'+state.line);
   const alternate=state.current.lines.map((line,index)=>({line,index})).sort((a,b)=>lineRank(b.line)-lineRank(a.line))
     .find(item=>!state.failed.has(state.current.source+':'+item.index));
-  if(alternate) {
+  if(alternate&&state.autoAttempt++<2) {
     state.line=alternate.index;
-    const matched=alternate.line.episodes.findIndex(ep=>episodeKey(ep.name)===episodeKey(preserve||''));
-    renderLines();playEpisode(matched>=0?matched:0,true);return;
+    const matched=alternate.line.episodes.findIndex(ep=>historyEpisode(ep.name,state.current.type)===historyEpisode(preserve||'',state.current.type));
+    if(matched>=0){renderLines();playEpisode(matched,true);return;}
+    state.failed.add(state.current.source+':'+alternate.index);autoFallback();return;
   }
-
+  if(!state.recovering&&state.historyRecord){state.recovering=true;void recoverSource();}
 }
+async function adoptHistoryConfig(config,record){
+  abort('config');abort('catalog');stopSearchRequests();state.generation++;
+  if(state.configUrl!==config.url){state.historyCatalogDirty=true;state.catalogSource='';state.category='';state.genre='all';state.categories=[];state.page=1;state.q='';$('search-input').value='';}
+  state.config=config;state.configUrl=config.url;state.configName=record.episode.locator.configName||'历史配置';
+  if(!state.configs.some(c=>c.url===config.url))state.configs.push({name:state.configName,url:config.url});
+  renderConfigs();$('config-name').textContent=state.configName;
+  const count=config.sources.filter(s=>s.supported&&s.playable).length;$('config-summary').textContent=count+' 个可尝试观影片源';$('source-count').textContent=state.configName+' · '+count+' 个观影片源';
+}
+async function historyCandidates(result){
+  const token=state.detailSerial;
+  if(result.candidate)return result.candidate;
+  if(result.candidates?.length){const value=await history.choose('选择续播片源',result.error||'请核对影片版本和集数。',result.candidates.map((c,i)=>({label:c.title+' · '+c.sourceName+' · '+(c.year||''),value:i})));
+    if(token!==state.detailSerial)return null;if(value!==null)return result.candidates[value];}
+  const change=await history.choose('原播放入口不可用',result.error||'可以更换配置寻找同片，原进度会保留。',[{label:'更换配置寻找',value:true},{label:'返回历史',value:false}]);
+  if(token!==state.detailSerial)return null;
+  if(change){showHistory();state.pendingHistory=result.record;$('configs-dialog').showModal();}else showHistory();return null;
+}
+async function recoverSource(){
+  const ctrl=controller('history-resume'),record=state.historyRecord;
+  const failed=state.current?.source||state.pendingCandidate?.source;if(failed)state.resumeFailedSources.add(failed);
+  try{const result=await api('/api/history/matches',{method:'POST',body:{id:record.id,config:state.config.id,exclude:[...state.resumeFailedSources]},signal:ctrl.signal});
+    if(ctrl.signal.aborted)return;
+    result.record=state.historyRecord;const candidate=await historyCandidates(result);if(candidate)await openMovie(candidate,{record:result.record,fallback:true});
+  }catch(e){errorPlayback(e.message);}
+}
+async function resumeHistory(id){
+  goHome();playerStatus('正在恢复历史…');
+  const ctrl=controller('history-resume');
+  try{const result=await api('/api/history/resume',{method:'POST',body:{id},signal:ctrl.signal});if(ctrl.signal.aborted)return;
+    if(result.directUrl){openDirect(result.directUrl,result.record);return;}
+    if(result.config)await adoptHistoryConfig(result.config,result.record);
+    const candidate=await historyCandidates(result);if(candidate)await openMovie(candidate,{...result,record:result.record});
+  }catch(e){if(!ctrl.signal.aborted){showHistory();$('history-message').textContent=e.message;}}
+}
+function showHistory(){goHome();$('browse-view').hidden=true;$('history-view').hidden=false;$('home-nav').classList.remove('active');$('history-nav').classList.add('active');document.title='观看历史 · My TV';void history.refresh();}
 function attachMedia(result,serial) {
   state.mediaUrl=result.url;$('video-placeholder').hidden=true;
   if(result.format==='hls'&&window.Hls?.isSupported()) {
@@ -429,14 +493,16 @@ for(const dialog of document.querySelectorAll('dialog'))dialog.addEventListener(
   if(event.clientX<box.left||event.clientX>box.right||event.clientY<box.top||event.clientY>box.bottom)dialog.close();
 });
 $('home-nav').addEventListener('click',goHome);$('watch-back').addEventListener('click',goHome);
-$('config-select').addEventListener('change',event=>{const config=state.configs.find(c=>c.url===event.target.value);if(config)selectConfig(config);});
+$('history-nav').addEventListener('click',showHistory);$('all-history').addEventListener('click',showHistory);$('history-back').addEventListener('click',goHome);
+function afterHistoryConfig(){if(state.pendingHistory&&state.config){state.historyRecord=state.pendingHistory;state.pendingHistory=null;void recoverSource();}}
+$('config-select').addEventListener('change',event=>{const config=state.configs.find(c=>c.url===event.target.value);if(config)selectConfig(config).then(afterHistoryConfig);});
 $('add-config').addEventListener('click',()=>$('configs-dialog').showModal());
 $('status-configs').addEventListener('click',()=>$('configs-dialog').showModal());
 $('config-form').addEventListener('submit',event=>{
   event.preventDefault();const url=$('config-url').value.trim();
   let config=state.configs.find(c=>c.url===url);
   if(!config){config={name:'自定义配置',url};state.configs.push(config);}
-  $('configs-dialog').close();selectConfig(config);
+  $('configs-dialog').close();selectConfig(config).then(afterHistoryConfig);
 });
 $('catalog-retry').addEventListener('click',()=>loadCatalog());
 $('category-select').addEventListener('change',event=>{state.category=event.target.value;state.genre='all';state.page=1;state.q='';
@@ -453,22 +519,25 @@ $('more-episodes').addEventListener('click',()=>{state.shown+=180;renderEpisodes
 $('next-episode').addEventListener('click',()=>{state.autoAttempt=0;playEpisode(state.episode+1,false);});
 $('play-retry').addEventListener('click',()=>{state.autoAttempt=0;state.current?playEpisode(state.episode,false):loadCandidate(state.pendingCandidate);});
 $('direct-nav').addEventListener('click',()=>$('direct-dialog').showModal());
+function openDirect(url,record=null){
+  goHome();state.historyRecord=record;$('direct-dialog').close();$('browse-view').hidden=true;$('watch-view').hidden=false;
+  state.current={direct:true,title:'链接播放 · '+new URL(url).hostname,sourceName:'直接播放',lines:[{name:'视频链接',episodes:[{name:'播放',url,direct:true}]}]};
+  state.line=0;state.episode=0;$('watch-title').textContent=state.current.title;$('watch-meta').textContent=new URL(url).hostname;
+  $('watch-actors').textContent='';$('watch-description').textContent='直接打开的视频链接。';$('watch-source').textContent='直接播放';
+  renderLines();renderEpisodes();void playEpisode(0,false);
+}
 $('direct-form').addEventListener('submit',event=>{
   event.preventDefault();const url=$('direct-url').value.trim();let parsed;
   try{parsed=new URL(url);if(!['http:','https:'].includes(parsed.protocol)||parsed.username||parsed.password)throw new Error();}
   catch{textForm('direct-message','请输入有效的 HTTP / HTTPS 视频地址。',true);return;}
-  goHome();$('direct-dialog').close();$('browse-view').hidden=true;$('watch-view').hidden=false;
-  state.current={direct:true,title:'链接播放',sourceName:'直接播放',lines:[{name:'视频链接',episodes:[{name:'播放',url,direct:true}]}]};
-  state.line=0;state.episode=0;$('watch-title').textContent='链接播放';$('watch-meta').textContent=parsed.hostname;
-  $('watch-actors').textContent='';$('watch-description').textContent='直接打开的视频链接。';
-  $('watch-source').textContent='直接播放';
-  renderLines();renderEpisodes();playEpisode(0,false);
+  openDirect(url);
 });
 window.addEventListener('pagehide',()=>{for(const key of Object.keys(state.controllers))abort(key);stopPlayer();});
 async function initialize() {
+  void history.refresh();
   try {
     const data=await api('/api/configs');state.configs=data.configs;
-    await selectConfig(state.configs.find(c=>c.default)||state.configs[0]);
+    if(!state.config)await selectConfig(state.configs.find(c=>c.default)||state.configs[0],true);else renderConfigs();
   } catch(error) {catalogStatus('服务尚未就绪',error.message+' 如果刚更新过版本，请先重启本机服务。');}
 }
 initialize();

@@ -1,6 +1,6 @@
 import { createPlayer } from './player.js';
 import { createHistory } from './history-ui.js';
-import { historyEpisode,filmFamily } from './history-utils.js';
+import { historyEpisode,filmFamily,nextHistoryEpisode } from './history-utils.js';
 const $ = id => document.getElementById(id);
 const video = $('video');
 let history;
@@ -298,6 +298,7 @@ function errorPlayback(message) {
 }
 async function openMovie(item,restore=null) {
   state.historyRecord=restore?.record||null;state.recovering=false;
+  state.historyDistinct=false;
   if(!restore?.fallback)state.resumeFailedSources.clear();
   stopSearchRequests();state.current=null;state.autoAttempt=0;state.failed.clear();state.reverse=false;state.shown=180;
   if(state.searching)$('search-progress').textContent='搜索已暂停 · 已找到 '+searchCount()+' 条结果';
@@ -322,15 +323,22 @@ async function loadCandidate(candidate,preserveName,automatic=false,restore=null
     state.current={...detail,source:candidate.source,sourceName:candidate.sourceName,kind:candidate.kind,card:candidate};
     if(!detail.lines.length)throw new Error('这个片源没有提供线路。');
     state.line=detail.lines.map((line,index)=>({index,score:lineRank(line)})).sort((a,b)=>b.score-a.score)[0].index;
-    const episodes=detail.lines[state.line].episodes;
+    if(!preserveName){
+      const lookedUp=await history.prepare({source:candidate.source,id:detail.id,line:state.line,episode:0,configName:state.configName});
+      if(ctrl.signal.aborted||serial!==state.detailSerial)return;
+      if(!lookedUp){errorPlayback('已取消播放，原进度已保留。');return;}
+      state.historyDistinct=!!history.distinct;
+      if(history.record){state.historyRecord=history.record;restore={record:history.record};preserveName=history.record.episode.name;}
+    }
     if(restore?.line!==undefined&&detail.lines[restore.line])state.line=restore.line;
     const activeEpisodes=detail.lines[state.line].episodes;
     const matched=preserveName?activeEpisodes.findIndex(ep=>historyEpisode(ep.name,detail.type)===historyEpisode(preserveName,detail.type)):-1;
     const missingEpisode=preserveName&&matched<0;
     state.episode=restore?.episode??(matched>=0?matched:0);
     const completed=restore?.record?.episode?.completed;
-    const nextMissing=completed&&restore.record.episode.locator.hasNext&&state.episode>=activeEpisodes.length-1;
-    if(completed&&filmFamily(detail.type)!=='movie'&&state.episode<activeEpisodes.length-1)state.episode++;
+    const nextIndex=nextHistoryEpisode(activeEpisodes,state.episode,detail.type);
+    const nextMissing=completed&&restore.record.episode.locator.hasNext&&nextIndex<0;
+    if(completed&&nextIndex>=0)state.episode=nextIndex;
     state.shown=Math.max(180,Math.ceil((state.episode+1)/180)*180);
     $('watch-title').textContent=detail.title;
     $('watch-meta').textContent=[detail.year,detail.area,detail.type,detail.remarks].filter(Boolean).join(' · ');
@@ -372,19 +380,20 @@ function renderEpisodes() {
     $('episode-list').append(button);
   });
   $('episode-count').textContent=episodes.length+' 集';
-  $('next-episode').disabled=!episodes.length||state.episode>=episodes.length-1;
+  $('next-episode').disabled=nextHistoryEpisode(episodes,state.episode,state.current?.type)<0;
   $('episode-order').textContent=state.reverse?'正序':'倒序';
   $('more-episodes').hidden=state.shown>=episodes.length;
 }
 async function playEpisode(index,automatic=false) {
   const current=state.current;if(!current||!current.lines[state.line]?.episodes[index])return;
+  if(history.filmId)state.historyDistinct=false;if(history.record)state.historyRecord=history.record;
   const saved=stopPlayer();state.episode=index;state.autoMode=automatic;
   const serial=state.playSerial,ctrl=controller('play');renderEpisodes();
   playerStatus('正在连接 · '+currentEpisode().name);
   try {
     await saved;if(ctrl.signal.aborted||serial!==state.playSerial)return;
     const body=current.direct?{url:currentEpisode().url}:{config:state.config.id,source:current.source,id:current.id,line:state.line,episode:index};
-    const prepared=await history.prepare({...body,configName:state.configName},state.historyRecord?.id);
+    const prepared=await history.prepare({...body,configName:state.configName},state.historyRecord?.id,state.historyDistinct);
     if(ctrl.signal.aborted||serial!==state.playSerial)return;
     if(!prepared){errorPlayback('已取消播放，原进度已保留。可重试或返回历史。');return;}
     const result=await api('/api/play',{method:'POST',body,signal:ctrl.signal});
@@ -425,11 +434,13 @@ async function historyCandidates(result){
   if(change){showHistory();state.pendingHistory=result.record;$('configs-dialog').showModal();}else showHistory();return null;
 }
 async function recoverSource(){
-  const ctrl=controller('history-resume'),record=state.historyRecord;
+  const ctrl=controller('history-resume'),old=state.historyRecord;
+  const target=currentEpisode()?.name;
+  const record=target?{...old,episode:{...old.episode,name:target,key:historyEpisode(target,state.current.type),completed:false}}:old;
   const failed=state.current?.source||state.pendingCandidate?.source;if(failed)state.resumeFailedSources.add(failed);
   try{const result=await api('/api/history/matches',{method:'POST',body:{id:record.id,config:state.config.id,exclude:[...state.resumeFailedSources]},signal:ctrl.signal});
     if(ctrl.signal.aborted)return;
-    result.record=state.historyRecord;const candidate=await historyCandidates(result);if(candidate)await openMovie(candidate,{record:result.record,fallback:true});
+    result.record=record;const candidate=await historyCandidates(result);if(candidate)await openMovie(candidate,{record:result.record,fallback:true});
   }catch(e){errorPlayback(e.message);}
 }
 async function resumeHistory(id){
@@ -486,7 +497,7 @@ video.addEventListener('playing',()=>{if(!state.mediaUrl)return;$('play-error').
 video.addEventListener('waiting',()=>{if(state.mediaUrl)playerStatus('正在缓冲…');});
 video.addEventListener('pause',()=>{if(state.mediaUrl&&!video.ended&&$('play-error').hidden)playerStatus('已暂停');});
 video.addEventListener('error',()=>{if(state.mediaUrl&&!state.hls){errorPlayback('浏览器无法播放这个视频，请切换线路，或返回搜索选择其他片源。');if(state.autoMode)autoFallback();}});
-video.addEventListener('ended',()=>{if($('auto-next').checked&&!$('next-episode').disabled)playEpisode(state.episode+1,false);else playerStatus('本集已播放完毕');});
+video.addEventListener('ended',()=>{if($('auto-next').checked&&!$('next-episode').disabled)playEpisode(nextHistoryEpisode(state.current.lines[state.line].episodes,state.episode,state.current.type),false);else playerStatus('本集已播放完毕');});
 
 for(const button of document.querySelectorAll('.dialog-close'))button.addEventListener('click',()=>button.closest('dialog').close());
 for(const dialog of document.querySelectorAll('dialog'))dialog.addEventListener('click',event=>{
@@ -517,11 +528,12 @@ $('previous-page').addEventListener('click',()=>{state.page--;loadCatalog();wind
 $('next-page').addEventListener('click',()=>{state.page++;loadCatalog();window.scrollTo({top:0});});
 $('episode-order').addEventListener('click',()=>{state.reverse=!state.reverse;renderEpisodes();});
 $('more-episodes').addEventListener('click',()=>{state.shown+=180;renderEpisodes();});
-$('next-episode').addEventListener('click',()=>{state.autoAttempt=0;playEpisode(state.episode+1,false);});
+$('next-episode').addEventListener('click',()=>{state.autoAttempt=0;playEpisode(nextHistoryEpisode(state.current.lines[state.line].episodes,state.episode,state.current.type),false);});
 $('play-retry').addEventListener('click',()=>{state.autoAttempt=0;state.current?playEpisode(state.episode,false):loadCandidate(state.pendingCandidate);});
 $('direct-nav').addEventListener('click',()=>$('direct-dialog').showModal());
 function openDirect(url,record=null){
   goHome();state.historyRecord=record;$('direct-dialog').close();$('browse-view').hidden=true;$('watch-view').hidden=false;
+  state.historyDistinct=false;
   state.current={direct:true,title:'链接播放 · '+new URL(url).hostname,sourceName:'直接播放',lines:[{name:'视频链接',episodes:[{name:'播放',url,direct:true}]}]};
   state.line=0;state.episode=0;$('watch-title').textContent=state.current.title;$('watch-meta').textContent=new URL(url).hostname;
   $('watch-actors').textContent='';$('watch-description').textContent='直接打开的视频链接。';$('watch-source').textContent='直接播放';

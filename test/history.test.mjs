@@ -4,7 +4,7 @@ import { mkdtemp, mkdir, writeFile, readFile, readdir, rm, chmod } from 'node:fs
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { openHistory as openHistoryRaw, supportedHistoryNode } from '../lib/history.mjs';
-import { historyEpisode, sameFilm, resumeDecision } from '../public/history-utils.js';
+import { historyEpisode, sameFilm, resumeDecision,nextHistoryEpisode } from '../public/history-utils.js';
 import { serverAddresses } from '../lib/network-mode.mjs';
 import { createApi } from '../lib/api.mjs';
 import { DatabaseSync } from 'node:sqlite';
@@ -41,6 +41,7 @@ test('跨配置同片合并，各集独立，年份/类型/季数分开',async t
  const a=s.start(entry);const b=s.start({...entry,locator:{...locator,configUrl:'https://config.example/b.json',sourceKey:'b'}});
  assert.equal(a.filmId,b.filmId);
  s.start({...entry,episodeKey:'episode:2',episodeName:'第02集',position:90});assert.equal(s.list().length,1);assert.equal(s.episode(a.filmId,'episode:1').position,300);
+ assert.equal(s.prepare(meta,locator,'episode:1').record.episode.name,'第02集');
  for(const changed of [{...meta,year:'2021'},{...meta,type:'国产动漫'},{...meta,title:'庆余年第一季'}])s.start({...entry,meta:changed,locator:{...locator,videoId:changed.title+changed.year+changed.type}});
  assert.equal(s.list().length,4);
 });
@@ -75,6 +76,8 @@ test('集数匹配不混淆上下集/番外；时长、范围与结束处理',()
  assert.equal(historyEpisode('EP01','国产剧'),historyEpisode('第1集','国产剧'));
  assert.notEqual(historyEpisode('第01集上','国产剧'),historyEpisode('第01集下','国产剧'));
  assert.notEqual(historyEpisode('番外1','国产剧'),historyEpisode('第01集','国产剧'));
+ assert.equal(nextHistoryEpisode([{name:'第03集'},{name:'第02集'},{name:'第01集'}],1,'国产剧'),0);
+ assert.equal(nextHistoryEpisode([{name:'第03集'},{name:'第01集'}],1,'国产剧'),-1);
  assert.equal(sameFilm(meta,{...meta,type:'国产动漫'}),false);
  assert.equal(sameFilm(meta,{...meta,title:'庆余年第2季'}),true);
  const b={position:600,duration:2400};assert.equal(resumeDecision(b,NaN).kind,'wait');assert.equal(resumeDecision(b,Infinity).kind,'wait');

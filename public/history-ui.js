@@ -48,10 +48,10 @@ export function createHistory({api,video,resume,onFailure,onEnd}) {
   }
   function reset(){save(video.ended);epoch++;ready=false;route=null;prepared=null;session=null;seq=0;decisionBusy=false;needsClaim=false;claiming=false;deleted=false;seeking=false;hasPlayed=false;failed=false;lastStable=null;
     $('resume-notice').hidden=true;$('history-save-status').textContent='';choiceResolve?.(null);return pendingSave;}
-  async function prepare(body,filmId){
+  async function prepare(body,filmId,distinct=false){
     const token=epoch;route=body;
     try{
-      const loaded=await api('/api/history/prepare',{method:'POST',body:{...body,filmId}});
+      const loaded=await api('/api/history/prepare',{method:'POST',body:{...body,filmId,distinct}});loaded.distinct=distinct;
       if(token!==epoch)return false;
       prepared=loaded;
       if(prepared.candidates.length){const chosen=await choose('找到同名观看记录','请选择是否沿用已有影片进度。',[
@@ -68,7 +68,7 @@ export function createHistory({api,video,resume,onFailure,onEnd}) {
     if(!ready||!route||!prepared||claiming||deleted||failed||!hasPlayed||video.paused||video.seeking||video.readyState<3)return;
     claiming=true;const token=epoch,body={...route,filmId:prepared.filmId,distinct:prepared.distinct,position:video.currentTime,duration:video.duration};
     try{const result=await api('/api/history/sessions',{method:'POST',body});if(token!==epoch)return;
-      session=result;prepared.filmId=result.filmId;prepared.distinct=false;seq=0;owns=!result.superseded;needsClaim=false;$('history-save-status').textContent=result.superseded?'另一个窗口正在更新共享进度':'进度自动保存';
+      session=result;prepared.filmId=result.filmId;prepared.record=result.record||prepared.record;prepared.distinct=false;seq=0;owns=!result.superseded;needsClaim=false;$('history-save-status').textContent=result.superseded?'另一个窗口正在更新共享进度':'进度自动保存';
       if(!result.superseded)save(video.ended);
     }catch(e){if(token===epoch)$('history-save-status').textContent='历史保存失败：'+e.message;}
     finally{if(token===epoch)claiming=false;}
@@ -106,5 +106,5 @@ export function createHistory({api,video,resume,onFailure,onEnd}) {
   const pollTimer=setInterval(()=>{if(!document.hidden&&($('watch-view').hidden||!$('history-view').hidden))void refresh();},10000);
   window.addEventListener('pagehide',()=>save(video.ended,true));
   document.addEventListener('visibilitychange',()=>{if(document.hidden)save();else if($('watch-view').hidden)void refresh();});
-  return {prepare,reset,save,refresh,choose,requestClaim(){if(ready)needsClaim=true;},markFailed(){ready=false;failed=true;},dispose(){clearInterval(timer);clearInterval(pollTimer);},get bookmark(){return prepared?.bookmark;}};
+  return {prepare,reset,save,refresh,choose,requestClaim(){if(ready)needsClaim=true;},markFailed(){ready=false;failed=true;},dispose(){clearInterval(timer);clearInterval(pollTimer);},get bookmark(){return prepared?.bookmark;},get record(){return prepared?.record;},get filmId(){return prepared?.filmId;},get distinct(){return prepared?.distinct;}};
 }

@@ -34,3 +34,8 @@ export function resumeDecision(bookmark, duration, seekable = null) {
   if(position>0&&(!seekable||position<seekable.start||position>seekable.end))return {kind:'wait'};
   return {kind:'resume',position};
 }
+export function nextHistoryEpisode(episodes,index,type=''){
+  if(filmFamily(type)==='movie')return -1;
+  const key=historyEpisode(episodes[index]?.name,type),n=key.match(/^episode:(\d+)$/);
+  return n?episodes.findIndex(ep=>historyEpisode(ep.name,type)==='episode:'+(Number(n[1])+1)):-1;
+}

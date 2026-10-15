@@ -8,6 +8,7 @@ import { timingSafeEqual } from 'node:crypto';
 import { registerServer, removeControl } from './lib/lifecycle.mjs';
 import { openHistory } from './lib/history.mjs';
 import { serverAddresses } from './lib/network-mode.mjs';
+import { localRequestUrl } from './lib/request-security.mjs';
 
 const root = new URL('./', import.meta.url);
 const publicRoot = new URL('./public/', root);
@@ -24,7 +25,7 @@ const types = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; ch
   '.css': 'text/css; charset=utf-8', '.svg': 'image/svg+xml' };
 const securityHeaders = {
   'x-content-type-options': 'nosniff', 'referrer-policy': 'no-referrer',
-  'content-security-policy': "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' https: http: data:; media-src 'self' blob:; connect-src 'self'; worker-src 'self' blob:; frame-src 'none'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'",
+  'content-security-policy': "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; media-src 'self' blob:; connect-src 'self'; worker-src 'self' blob:; frame-src 'none'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'",
   'cross-origin-resource-policy': 'same-origin'
 };
 
@@ -35,7 +36,7 @@ const server = http.createServer(async (incoming, outgoing) => {
     const hostname = incoming.headers.host || '';
     const expected = network.allowedHosts;
     if (!expected.has(hostname)) { outgoing.writeHead(403); outgoing.end('Invalid host'); return; }
-    const url = new URL(incoming.url, 'http://' + hostname);
+    const url = localRequestUrl(incoming.url,hostname);
     for (const [name, value] of Object.entries(securityHeaders)) outgoing.setHeader(name, value);
     if (url.pathname === '/api/shutdown') {
       const secret = String(incoming.headers['x-mytv-control'] || '');
@@ -90,7 +91,7 @@ const server = http.createServer(async (incoming, outgoing) => {
     outgoing.end(incoming.method === 'HEAD' ? undefined : data);
   } catch (error) {
     if (!controller.signal.aborted) console.error(error.message);
-    if (!outgoing.headersSent) outgoing.writeHead(500);
+    if (!outgoing.headersSent) outgoing.writeHead(error.status||500);
     outgoing.end();
   }
 });

@@ -4,7 +4,9 @@
   "private": true,
   "type": "module",
   "description": "本机运行的轻量点播网页",
-  "engines": { "node": ">=22.18" },
+  "engines": {
+    "node": ">=22.18"
+  },
   "scripts": {
     "start": "node server.mjs",
     "stop": "node scripts/control.mjs",
@@ -15,7 +17,8 @@
     "probe:sources": "node scripts/probe-sources.mjs",
     "setup:python": "node scripts/setup-python.mjs",
     "test": "node --test test/*.test.mjs",
-    "check": "node --check server.mjs && node --check public/app.js && node --check public/player.js && node --check public/player-utils.js && node --check public/history-ui.js && node --check public/history-utils.js && node --check lib/history.mjs && node --check lib/history-service.mjs && node --check lib/network-mode.mjs && node --check scripts/bootstrap.mjs && node --check scripts/environment.mjs && node --check scripts/setup-python.mjs && node --check scripts/control.mjs && node --check lib/lifecycle.mjs"
+    "check": "node --check server.mjs && node --check public/app.js && node --check public/player.js && node --check public/player-utils.js && node --check public/history-ui.js && node --check public/history-utils.js && node --check lib/history.mjs && node --check lib/history-service.mjs && node --check lib/network-mode.mjs && node --check scripts/bootstrap.mjs && node --check scripts/environment.mjs && node --check scripts/setup-python.mjs && node --check scripts/control.mjs && node --check lib/lifecycle.mjs && node --check lib/media-security.mjs && node --check lib/request-security.mjs && node --check lib/plugins/limits.mjs && node --check scripts/security-check.mjs",
+    "security:check": "node scripts/security-check.mjs"
   },
   "dependencies": {
     "fast-xml-parser": "5.11.2",

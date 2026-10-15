@@ -14,10 +14,12 @@ from lxml import etree
 
 for limit in (resource.RLIMIT_AS, resource.RLIMIT_DATA):
     try:
-        resource.setrlimit(limit, (512 * 1024 * 1024, resource.getrlimit(limit)[1]))
+        resource.setrlimit(limit, (512 * 1024 * 1024, 512 * 1024 * 1024))
     except (ValueError, OSError):
         pass
-resource.setrlimit(resource.RLIMIT_CPU, (90, resource.getrlimit(resource.RLIMIT_CPU)[1]))
+resource.setrlimit(resource.RLIMIT_CPU, (90, 90))
+resource.setrlimit(resource.RLIMIT_NPROC, (0, 0))
+resource.setrlimit(resource.RLIMIT_CORE, (0, 0))
 wire_out = sys.stdout
 sys.stdout = sys.stderr
 wire_lock = threading.RLock()

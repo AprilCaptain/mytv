@@ -82,16 +82,17 @@ test('JS 插件不能取得 Node 全局对象，动态 node:fs 导入被拒绝',
  assert.deepEqual(await spider.call('inspect',[]),{process:'undefined',require:'undefined',host:'undefined'});await assert.rejects(spider.call('read',[]));
 });
 test('JS 插件网络洪泛受并发限制，不会发出所有远程请求',async t=>{
- let calls=0,active=0,peak=0,cancelled=0;const code='export default {async search(){return await Promise.all(Array.from({length:20},()=>req("https://data.example/a")))}}';
- const spider=await IsolatedJavascriptSpider.create({api:'https://plugin.example/a.js'},new PluginBroker(async(url,{signal})=>{
+ let calls=0,active=0,peak=0,arrivals=0,release;const gate=new Promise(resolve=>{release=resolve;});
+ const code='export default {async search(){return await Promise.all(Array.from({length:20},()=>req("https://data.example/a")))}}';
+ const spider=await IsolatedJavascriptSpider.create({api:'https://plugin.example/a.js'},new PluginBroker(async url=>{
   if(url.endsWith('.js'))return new Response(code);calls++;active++;peak=Math.max(peak,active);
-  // Hold requests until the rejected plugin call cancels them. A 20 ms mock
-  // response races worker messages under CI load and measures total requests
-  // rather than the maximum number concurrently in flight.
-  try{await new Promise(resolve=>{if(signal.aborted)return resolve();signal.addEventListener('abort',resolve,{once:true});});cancelled++;return new Response('ok');}
+  // Hold responses until all 20 worker messages have reached the limiter.
+  // Timer-based responses race worker scheduling on a busy CI machine.
+  try{await gate;return new Response('ok');}
   finally{active--;}
- }),origin+'/api/plugin-proxy/test?token=x');t.after(()=>spider.close());
- await assert.rejects(spider.call('search',[],AbortSignal.timeout(5000)),/频繁/);assert.equal(calls,4);assert.equal(peak,4);assert.equal(cancelled,4);assert.equal(active,0);
+ }),origin+'/api/plugin-proxy/test?token=x');t.after(()=>{release();spider.close();});
+ spider.worker.on('message',m=>{if(m.type==='request'&&m.operation==='request'&&++arrivals===20)release();});
+ await assert.rejects(spider.call('search',[],AbortSignal.timeout(5000)),/频繁/);assert.equal(arrivals,20);assert.equal(calls,4);assert.equal(peak,4);assert.equal(active,0);
 });
 test('Python 通信不允许无换行的无限输出；正常多行和分块不会误报',async()=>{
  const wire=boundedLines(8);wire.resume();wire.write(Buffer.from('1234'));const error=once(wire,'error');wire.end(Buffer.from('56789'));assert.match((await error)[0].message,/大小限制/);

@@ -7,7 +7,7 @@ import {normalizedTitle} from '../lib/matching.mjs';
 const p=new Providers(remoteFetch),signal=()=>AbortSignal.timeout(18_000);
 const sourceFilter=process.argv.slice(2).find(a=>a.startsWith('--source='))?.slice(9)||'';
 const custom=process.argv.slice(2).filter(a=>!a.startsWith('--source='));
-const samples={HDmoli:['人生交换','哪吒','冰之城墙第二季'],A123TV:['流浪地球2','藏海传','仙逆'],'金牌影视':['流浪地球2','藏海传','仙逆']};
+const samples={HDmoli:['人生交换','哪吒','冰之城墙第二季'],A123TV:['流浪地球2','藏海传','仙逆'],'金牌影视':['流浪地球2','藏海传','仙逆'],'乌云影视':['流浪地球2','庆余年第二季','仙逆']};
 async function checkMedia(raw,headers){
  let url=raw,origin=new URL(raw).origin,resolutions=[];
  for(let n=0;n<4;n++){

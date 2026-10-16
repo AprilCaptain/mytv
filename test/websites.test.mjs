@@ -13,7 +13,7 @@ const a123Root=`<title>《样本》 - 国产剧 - 2024年 - A123TV</title><h1>�
 
 test('网页配置离线载入，适配器是受控注册项，原默认配置保持',async t=>{
  const p=new Providers(()=>assert.fail('内置配置不应访问网络'));t.after(()=>p.close());const c=await p.importConfig(WEB_CONFIG_URL);
- assert.equal(c.sources.length,3);assert.ok(c.sources.every(s=>s.kind==='web'&&s.supported));assert.equal(BUILTIN_CONFIGS.find(c=>c.default).name,'电视');
+ assert.equal(c.sources.length,4);assert.ok(c.sources.every(s=>s.kind==='web'&&s.supported));assert.equal(BUILTIN_CONFIGS.find(c=>c.default).name,'电视');
  const web=new WebSources(()=>assert.fail());assert.equal(web.capability('__proto__'),false);assert.equal(web.capability('constructor'),false);
  await assert.rejects(web.call({adapter:'https://evil.example/code.js'},'home',[]),/不受支持/);
 });
@@ -98,4 +98,33 @@ test('金牌访客接口保留真实集数和稳定入口，筛除无关搜索�
  assert.equal(calls.find(u=>u.pathname.endsWith('/url')).searchParams.get('nid'),'30');
  const n=calls.length;await assert.rejects(web.call(source,'detailContent',[['12&url=http://127.0.0.1']]),/标识无效/);assert.equal(calls.length,n);
  await assert.rejects(web.call(source,'constructor',[]),/不受支持/);
+});
+
+test('乌云使用真实季号拆分条目，各季入口独立，不按数量虚构季和集',async()=>{
+ const source={adapter:'wooyun',api:base},record={id:12,title:'样本剧',releaseYear:2024,seasonCount:2,mediaType:{name:'电视剧'}},seasons=[{seasonNo:1,videoList:[{id:101,epNo:1,playUrl:'https://media.example/1.m3u8'}]},{seasonNo:3,videoList:[{id:305,epNo:5,playUrl:'https://media.example/3.m3u8'}]}];
+ const web=new WebSources(async url=>{const u=new URL(url);if(u.pathname.endsWith('/search'))return Response.json({code:200,data:{records:[record],pages:1}});return Response.json({code:200,data:u.pathname.endsWith('/detail')?record:seasons});});
+ const result=await web.call(source,'searchContent',['样本剧',false,1]);assert.deepEqual(result.list.map(v=>v.vod_id),['12~1','12~3']);assert.deepEqual(result.list.map(v=>v.vod_name),['样本剧 第1季','样本剧 第3季']);assert.ok(result.list.every(v=>v.vod_year===''));
+ const detail=await web.call(source,'detailContent',[['12~3']]),lines=parseLines(detail.list[0]);assert.equal(detail.list[0].vod_name,'样本剧 第3季');assert.equal(lines[0].key,'season:3:auto:0');assert.deepEqual(lines[0].episodes,[{name:'第05集',url:'wooyun:12:3:305',direct:false}]);
+ await assert.rejects(web.call(source,'detailContent',[['12~2']]),/这一季/);
+ await assert.rejects(web.call(source,'detailContent',[['12']]),/具体季数/);
+});
+
+test('乌云只有一个实际季号时不把电影续集变成第2季，同集多来源分成线路',async()=>{
+ const record={id:12,title:'电影2',seasonCount:2,releaseYear:2023,mediaType:{name:'电影'}},data=[{seasonNo:2,videoList:[{id:1,epNo:1,remark:'正片',playUrl:'https://a.cdn1.example/a.m3u8'}]}];
+ const web=new WebSources(async url=>Response.json({code:200,data:url.endsWith('/search')?{records:[record]}:url.includes('/detail?')?record:data}));
+ const source={adapter:'wooyun',api:base},list=await web.call(source,'searchContent',['电影2',false,1]);assert.equal(list.list[0].vod_name,'电影2');assert.equal(list.list[0].vod_year,'2023');assert.equal(list.list[0].vod_id,'12');
+ record.title='样本剧';record.mediaType.name='电视剧';data[0].videoList=[{id:1,epNo:1,playUrl:'https://a.cdn1.example/a.m3u8'},{id:2,epNo:1,playUrl:'https://b.other.example/b.m3u8'},{id:3,epNo:2,playUrl:'https://a.cdn2.example/c.m3u8'},{id:4,epNo:2,playUrl:'https://b.other.example/d.m3u8'}];
+ const detail=await web.call(source,'detailContent',[['12']]),lines=parseLines(detail.list[0]);assert.equal(lines.length,2);assert.ok(lines.every(line=>line.episodes.map(ep=>ep.name).join(',')==='第01集,第02集'));
+});
+
+test('乌云播放重新读取原季和视频 ID，链接更新可用，失效时不跳到其它集',async()=>{
+ let available=true,version=1,requests=0;
+ const web=new WebSources(async url=>{requests++;const u=new URL(url);if(u.hostname==='media.example')return new Response('#EXTM3U\n#EXTINF:1,\na.ts\n');
+  assert.equal(u.pathname,'/movie/media/video/list');assert.equal(u.searchParams.get('mediaId'),'12');
+  return Response.json({code:200,data:[{seasonNo:1,videoList:[{id:101,playUrl:'https://media.example/other.m3u8'}]},{seasonNo:3,videoList:available?[{id:305,playUrl:'https://media.example/updated'+version+'.m3u8'}]:[]}]});
+ });
+ const source={adapter:'wooyun',api:base};assert.equal((await web.call(source,'playerContent',['默认','wooyun:12:3:305'])).url,'https://media.example/updated1.m3u8');version=2;
+ assert.equal((await web.call(source,'playerContent',['默认','wooyun:12:3:305'])).url,'https://media.example/updated2.m3u8');
+ available=false;await assert.rejects(web.call(source,'playerContent',['默认','wooyun:12:3:305']),/原选集/);
+ const n=requests;await assert.rejects(web.call(source,'playerContent',['默认','wooyun:12:3:305&url=http://127.0.0.1']),/入口无效/);assert.equal(requests,n);
 });

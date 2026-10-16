@@ -194,6 +194,14 @@
       "api": "https://m.jiabaide.cn",
       "adapter": "jinpai",
       "searchable": 1
+    },
+    {
+      "key": "wooyun_web",
+      "name": "乌云影视",
+      "type": 1,
+      "api": "https://wooyun.tv",
+      "adapter": "wooyun",
+      "searchable": 1
     }
   ]
 }

@@ -160,6 +160,22 @@ test('没有扩展名的 HLS 通过媒体类型识别', async () => {
   assert.equal((await player.create('https://media.example/watch?id=1')).format, 'hls');
 });
 
+test('HLS 子列表没有扩展名且标为纯文本时仍继续转发媒体；列表标识有签名保护',async()=>{
+ let count=0;const origin='http://127.0.0.1:3210',api=createApi(async raw=>{count++;if(raw.endsWith('main.m3u8'))return new Response('#EXTM3U\n#EXT-X-STREAM-INF:BANDWIDTH=1000000\nchild?id=1\n');if(raw.includes('/child?'))return new Response('#EXTM3U\n#EXTINF:5,\nsegment.bin\n#EXT-X-ENDLIST\n',{headers:{'content-type':'text/plain'}});return new Response(new Uint8Array([71,1,2]),{headers:{'content-type':'video/mp2t'}});});
+ const play=await api(new Request(origin+'/api/play',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({url:'https://media.example/main.m3u8'})})),data=await play.json();assert.equal(play.status,200);assert.equal(count,1);
+ const root=await(await api(new Request(origin+data.url))).text();assert.equal(count,1,'首次检查的列表复用，不重复请求');const child=root.split('\n').find(l=>l.startsWith('/api/media/'));
+ const body=await(await api(new Request(origin+child))).text();assert.match(body,/#EXTINF/);const segment=body.split('\n').find(l=>l.startsWith('/api/media/'));assert.deepEqual(new Uint8Array(await(await api(new Request(origin+segment))).arrayBuffer()),new Uint8Array([71,1,2]));
+ const altered=new URL(child,origin);altered.searchParams.delete('p');assert.equal((await api(new Request(altered))).status,403);
+});
+
+test('失效或伪装为 m3u8 的网页在建立播放会话前拒绝，DNS 失败有明确提示',async()=>{
+ for(const response of [new Response('not found',{status:404}),new Response('<html>verification</html>',{headers:{'content-type':'text/html'}})]){
+  const p=new Playback(async()=>response);await assert.rejects(p.create('https://media.example/a.m3u8'),/失效|播放列表/);assert.equal(p.sessions.items.size,0);
+ }
+ const api=createApi(async()=>{throw Object.assign(new Error('DNS lookup failed'),{code:'ENOTFOUND'});});
+ const r=await api(new Request(origin+'/api/play',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({url:'https://media.example/a.m3u8'})}));assert.equal(r.status,502);assert.match((await r.json()).error,/域名暂时无法解析/);
+});
+
 test('播放地址签名防止任意篡改代理目标', async () => {
   const f = fixture();
   const play = await f.call('/api/play', { method: 'POST', body: { url: 'https://media.example/a.mp4' } });

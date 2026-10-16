@@ -66,7 +66,7 @@ test('跨域 HLS 子资源保留播放所需 Referer，不携带 Cookie 或密�
   new Response('#EXTM3U\n#EXTINF:5,\nhttps://cdn.example/seg.ts\n'):
   new Response(new Uint8Array([1]),{headers:{'content-type':'video/mp2t'}});});
  const play=await player.create('https://video.example/main.m3u8',{Cookie:'private',Authorization:'Bearer secret','X-Api-Key':'secret',Referer:'https://source.example/'});
- const read=raw=>{const url=new URL(raw,origin);return player.media(url.pathname.split('/').pop(),url.searchParams.get('u'),url.searchParams.get('s'));};
+ const read=raw=>{const url=new URL(raw,origin);return player.media(url.pathname.split('/').pop(),url.searchParams.get('u'),url.searchParams.get('s'),null,undefined,url.searchParams.get('p')==='playlist');};
  const text=await(await read(play.url)).text(),child=text.split('\n').find(line=>line.startsWith('/api/media/'));
  await(await read(child)).body.cancel();assert.equal(calls[0].headers.cookie,'private');
  assert.equal(calls[1].headers.cookie,undefined);assert.equal(calls[1].headers.authorization,undefined);assert.equal(calls[1].headers['x-api-key'],undefined);assert.equal(calls[1].headers.referer,'https://source.example/');

@@ -94,6 +94,7 @@
                   <div class="player-toolbar-spacer"></div>
                   <button id="player-mute" class="player-button" aria-label="静音" title="静音（M）">♪</button>
                   <input id="player-volume" class="player-volume" type="range" min="0" max="1" step="0.05" value="1" aria-label="音量">
+                  <select id="player-quality" class="player-speed" aria-label="画质" title="选择片源提供的画质" hidden></select>
                   <select id="player-speed" class="player-speed" aria-label="播放速度"><option value="0.5">0.5×</option><option value="0.75">0.75×</option><option value="1" selected>1×</option><option value="1.25">1.25×</option><option value="1.5">1.5×</option><option value="2">2×</option></select>
                   <button id="player-fullscreen" class="player-button" aria-label="全屏" title="全屏（F）">⛶</button>
                 </div>
@@ -101,7 +102,8 @@
             </div>
             <div class="player-status-row"><span id="player-status" role="status" aria-live="polite">正在加载影片…</span><span id="video-quality" class="video-quality"></span><button id="next-episode" class="text-button" disabled><svg><use href="#i-next"/></svg>下一集</button></div>
             <p id="history-save-status" class="history-save-status" role="status"></p><p id="resume-notice" class="resume-notice" hidden></p>
-            <div class="error-banner" id="play-error" role="alert" hidden><span id="play-error-text"></span><button id="play-retry" class="button secondary small">重试播放</button></div>
+            <details id="playback-info" class="error-details playback-info" hidden><summary>播放信息</summary><p id="playback-info-text"></p></details>
+            <div class="error-banner" id="play-error" role="alert" hidden><span id="play-error-text"></span><button id="play-alternate" class="button secondary small" hidden>尝试备用线路</button><button id="play-retry" class="button secondary small">重试播放</button></div>
             <details id="play-error-details" class="error-details" hidden><summary>查看详情</summary><p id="play-error-detail"></p></details><div class="watch-info"><h1 id="watch-title"></h1><p class="watch-meta" id="watch-meta"></p><p id="watch-actors" class="watch-actors"></p></div>
           </div>
           <aside class="episode-panel">

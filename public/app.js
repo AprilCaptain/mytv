@@ -1,10 +1,11 @@
 import { createPlayer } from './player.js';
 import { createHistory } from './history-ui.js';
 import { historyEpisode,filmFamily,nextHistoryEpisode } from './history-utils.js';
+import {qualityOptions,alternateLine,streamFailure,watchPlayback} from './playback-utils.js';
 const $ = id => document.getElementById(id);
 const video = $('video');
 let history;
-const player = createPlayer(video, $('video-stage'),{onPlay:()=>history?.requestClaim(),onSeek:()=>history?.requestClaim()});
+const player = createPlayer(video, $('video-stage'),{onPlay:()=>history?.requestClaim(),onSeek:()=>history?.requestClaim(),onQualityChange:setPlaybackQuality});
 const state = {
   configs: [], config: null, configUrl: '', configName: '电视', generation: 0,
   catalogSource: '', categories: [], genre: 'all', category: '', page: 1, pageCount: 1, q: '',
@@ -278,11 +279,13 @@ async function searchConfig() {
   finally{if(generation===state.generation&&state.controllers.search===ctrl){state.searching=false;$('stop-search').hidden=true;}}
 }
 function stopPlayer() {
+  state.playWatchdog?.dispose();state.playWatchdog=null;
   const saved=history.reset();
   state.playSerial++;abort('play');state.hls?.destroy();state.hls=null;state.mediaUrl='';
   video.pause();video.removeAttribute('src');video.load();
   player.reset();
   $('video-placeholder').hidden=false;$('play-error').hidden=true;$('video-quality').textContent='';
+  $('player-quality').hidden=true;$('playback-info').hidden=true;$('playback-info').open=false;state.segmentRates=[];state.detectedCodecs={};
   errorDetails('play-error');
   return saved;
 }
@@ -295,12 +298,13 @@ function goHome() {
 }
 function playerStatus(text,kind=''){$('player-status').textContent=text;$('player-status').dataset.kind=kind;}
 function currentEpisode(){return state.current?.lines[state.line]?.episodes[state.episode];}
-function errorPlayback(message) {
+function errorPlayback(message,detail='') {
   history.markFailed();
   message=String(message||'暂时无法播放，请重试或切换线路。');
   const technical=/JSON|HTTP|Python|Node|SQLite|插件|运行环境|Module|Traceback|fetch failed|timeout|ECONN|ENOT|代理|接口|缓存|https?:\/\//i.test(message)||message.length>160;
   playerStatus('暂时无法播放','error');$('play-error-text').textContent=technical?'这条线路暂时不可用，请切换线路或选择其他片源。':message;$('play-error').hidden=false;
-  errorDetails('play-error',technical?message:'');
+  errorDetails('play-error',detail||(technical?message:''));
+  $('play-alternate').hidden=!currentEpisode()||!state.current||state.current.direct||!alternateLine(state.current.lines,state.line,state.failed,state.current.source,currentEpisode().name,state.current.type);
 }
 async function openMovie(item,restore=null) {
   state.historyRecord=restore?.record||null;state.recovering=false;
@@ -403,23 +407,20 @@ async function playEpisode(index,automatic=false) {
     const prepared=await history.prepare({...body,configName:state.configName},state.historyRecord?.id,state.historyDistinct);
     if(ctrl.signal.aborted||serial!==state.playSerial)return;
     if(!prepared){errorPlayback('已取消播放，观看进度已保留。');return;}
-    const result=await api('/api/play',{method:'POST',body,signal:ctrl.signal});
+    const result=await api('/api/play',{method:'POST',body,signal:AbortSignal.any([ctrl.signal,AbortSignal.timeout(15000)])});
     if(ctrl.signal.aborted||serial!==state.playSerial)return;
     attachMedia(result,serial);
-  } catch(error){if(!ctrl.signal.aborted&&serial===state.playSerial){errorPlayback(error.message);if(automatic)autoFallback();}}
+  } catch(error){if(!ctrl.signal.aborted&&serial===state.playSerial){errorPlayback(error.name==='TimeoutError'?'解析播放地址超时，请尝试其他线路。':error.message);if(automatic)autoFallback();}}
 }
 function autoFallback() {
   if(!state.current){if(state.historyRecord&&!state.recovering){state.recovering=true;void recoverSource();}return;}
   if(state.current.direct)return;
   const preserve=currentEpisode()?.name;
   state.failed.add(state.current.source+':'+state.line);
-  const alternate=state.current.lines.map((line,index)=>({line,index})).sort((a,b)=>lineRank(b.line)-lineRank(a.line))
-    .find(item=>!state.failed.has(state.current.source+':'+item.index));
+  const alternate=alternateLine(state.current.lines,state.line,state.failed,state.current.source,preserve||'',state.current.type);
   if(alternate&&state.autoAttempt++<2) {
     state.line=alternate.index;
-    const matched=alternate.line.episodes.findIndex(ep=>historyEpisode(ep.name,state.current.type)===historyEpisode(preserve||'',state.current.type));
-    if(matched>=0){renderLines();playEpisode(matched,true);return;}
-    state.failed.add(state.current.source+':'+alternate.index);autoFallback();return;
+    renderLines();playEpisode(alternate.episode,true);return;
   }
   if(!state.recovering&&state.historyRecord){state.recovering=true;void recoverSource();}
 }
@@ -462,41 +463,63 @@ async function resumeHistory(id){
 function showHistory(){goHome();$('browse-view').hidden=true;$('history-view').hidden=false;$('home-nav').classList.remove('active');$('history-nav').classList.add('active');document.title='观看历史 · My TV';void history.refresh();}
 function attachMedia(result,serial) {
   state.mediaUrl=result.url;$('video-placeholder').hidden=true;
+  state.qualityMode='best';state.segmentRates=[];state.detectedCodecs={};
+  let failed=false;
+  const fail=(message,detail='')=>{if(failed||serial!==state.playSerial)return;failed=true;state.playWatchdog?.dispose();
+    const hls=state.hls;state.hls=null;hls?.destroy();errorPlayback(message,detail);if(state.autoMode)autoFallback();};
+  state.playWatchdog=watchPlayback(video,fail);state.playWatchdog.start();
   if(result.format==='hls'&&window.Hls?.isSupported()) {
     const hls=new window.Hls({enableWorker:true,maxBufferLength:25,maxMaxBufferLength:45,
       maxBufferSize:48*1024*1024,backBufferLength:15,manifestLoadingTimeOut:15000,fragLoadingTimeOut:20000});
     state.hls=hls;let recovery=0;
     hls.on(Hls.Events.MANIFEST_PARSED,()=>{
       if(serial!==state.playSerial)return;
-      const choices=hls.levels.map((level,index)=>({index,height:level.height||0,bitrate:level.bitrate||0}))
-        .sort((a,b)=>b.height-a.height||b.bitrate-a.bitrate);
+      const choices=qualityOptions(hls.levels);
+      const select=$('player-quality');select.replaceChildren();select.hidden=false;select.disabled=choices.length<2;
+      select.title='选择片源提供的画质，实际画面尺寸显示在播放器下方。';
+      if(choices.length>1){for(const [value,label] of [['best','优先清晰'],['auto','自动匹配'],...qualityOptions(hls.levels).map(c=>[String(c.index),c.label])]){const option=element('option','',label);option.value=value;select.append(option);}}
+      else {const option=element('option','','片源画质');option.value='best';select.append(option);select.title='此线路只提供一个画质，清晰度不足时可更换线路。';}
       if(choices.length)hls.currentLevel=choices[0].index;
       video.play().catch(error=>{
         if(serial!==state.playSerial||error.name==='AbortError')return;
-        if(error.name==='NotAllowedError')playerStatus('点击播放，开始观看');
-        else errorPlayback('暂时无法播放，请切换线路或选择其他片源。');
+        if(error.name==='NotAllowedError'){state.playWatchdog?.stop();playerStatus('点击播放，开始观看');}
+        else fail('暂时无法播放，请切换线路或选择其他片源。');
       });
     });
+    hls.on(Hls.Events.LEVEL_SWITCHED,()=>{if(serial!==state.playSerial)return;if(hls.autoLevelEnabled&&state.qualityMode!=='auto'){state.qualityMode='auto';$('player-quality').value='auto';}actualQuality();});
+    hls.on(Hls.Events.BUFFER_CODECS,(_event,data)=>{if(serial!==state.playSerial)return;state.detectedCodecs={video:data.video?.codec,audio:data.audio?.codec};actualQuality();});
+    hls.on(Hls.Events.FRAG_BUFFERED,(_event,data)=>{if(serial!==state.playSerial||data.frag?.type!=='main')return;const bytes=data.frag.stats?.total||data.frag.stats?.loaded;
+      if(bytes>0&&data.frag.duration>0){state.segmentRates.push({bytes,seconds:data.frag.duration});state.segmentRates=state.segmentRates.slice(-3);actualQuality();}});
     hls.on(Hls.Events.ERROR,(_event,data)=>{
       if(serial!==state.playSerial||!data.fatal)return;
-      if(data.type===Hls.ErrorTypes.MEDIA_ERROR&&recovery++===0){hls.recoverMediaError();return;}
-      let message='这条线路暂时不可用，请切换线路或选择其他片源。';
+      if(data.type===Hls.ErrorTypes.MEDIA_ERROR&&!/codec|decod/i.test(data.details||'')&&recovery++===0){hls.recoverMediaError();return;}
+      const described=streamFailure(data);let message=described.message;
       try{message=JSON.parse(data.response?.data||data.response?.text).error||message;}catch{}
-      errorPlayback(message);hls.destroy();if(state.hls===hls)state.hls=null;
-      if(state.autoMode)autoFallback();
+      fail(message,described.detail);
     });
     hls.loadSource(result.url);hls.attachMedia(video);
   } else if(result.format!=='hls'||video.canPlayType('application/vnd.apple.mpegurl')) {
+    const select=$('player-quality');select.replaceChildren(element('option','','片源画质'));select.disabled=true;select.hidden=false;select.title='当前浏览器使用原生播放器，此线路的清晰度由片源提供。';
     video.src=result.url;video.play().catch(error=>{
       if(serial!==state.playSerial)return;
-      if(error.name==='NotAllowedError')playerStatus('点击播放，开始观看');
-      else if(error.name!=='AbortError')errorPlayback('当前浏览器无法播放这个视频，请切换线路。');
+      if(error.name==='NotAllowedError'){state.playWatchdog?.stop();playerStatus('点击播放，开始观看');}
+      else if(error.name!=='AbortError')fail('当前浏览器无法播放这个视频，请切换线路。');
     });
-  } else errorPlayback('当前浏览器不支持此视频格式，请使用 Chrome、Edge 或 Safari。');
+  } else fail('当前浏览器不支持此视频格式，请使用 Chrome、Edge 或 Safari。');
+}
+function setPlaybackQuality(value){
+  const hls=state.hls;if(!hls)return;state.qualityMode=value;
+  hls.currentLevel=value==='auto'?-1:value==='best'?qualityOptions(hls.levels)[0]?.index??-1:Number(value);actualQuality();
 }
 function actualQuality() {
   const width=video.videoWidth,height=video.videoHeight;
-  $('video-quality').textContent=width&&height?width+' × '+height+(width>=3800?' · 4K':''):'';
+  $('video-quality').textContent=width&&height?'实际 '+width+' × '+height+(width>=3800?' · 4K':''):'';
+  const level=state.hls?.levels[state.hls.currentLevel],rates=state.segmentRates||[],bits=rates.reduce((n,v)=>n+v.bytes,0)*8,seconds=rates.reduce((n,v)=>n+v.seconds,0);
+  const codecs=state.detectedCodecs||{},videoCodec=codecs.video||level?.videoCodec,audioCodec=codecs.audio||level?.audioCodec;
+  const codecLabel=value=>/^avc/i.test(value)?'H.264':/^(?:hvc|hev)/i.test(value)?'H.265 / HEVC':/^av01/i.test(value)?'AV1':/^vp0?9/i.test(value)?'VP9':value;
+  $('playback-info').hidden=!width;
+  $('playback-info-text').textContent=[width?'实际画面：'+width+'×'+height:'',level?.width&&level?.height?'播放列表标注：'+level.width+'×'+level.height:'',videoCodec?'视频编码：'+codecLabel(videoCodec):'',audioCodec?'音频编码：'+audioCodec:'',seconds?'最近分片码率：约 '+(bits/seconds/1e6).toFixed(2)+' Mbps':'',
+    level?.width&&level?.height&&width&&(level.width!==width||level.height!==height)?'片源标注与实际画面尺寸不同，以实际尺寸为准。':'',state.hls?.levels.length===1?'此线路只有一个画质档位；如果画面不清晰，可尝试其他线路。':''].filter(Boolean).join('\n');
 }
 video.addEventListener('loadedmetadata',actualQuality);video.addEventListener('resize',actualQuality);
 video.addEventListener('playing',()=>{if(!state.mediaUrl)return;$('play-error').hidden=true;
@@ -504,7 +527,7 @@ video.addEventListener('playing',()=>{if(!state.mediaUrl)return;$('play-error').
   playerStatus('正在播放 · '+(currentEpisode()?.name||''),'playing');actualQuality();});
 video.addEventListener('waiting',()=>{if(state.mediaUrl)playerStatus('正在缓冲…');});
 video.addEventListener('pause',()=>{if(state.mediaUrl&&!video.ended&&$('play-error').hidden)playerStatus('已暂停');});
-video.addEventListener('error',()=>{if(state.mediaUrl&&!state.hls){errorPlayback('暂时无法播放，请切换线路或选择其他片源。');if(state.autoMode)autoFallback();}});
+video.addEventListener('error',()=>{if(state.mediaUrl&&!state.hls){state.playWatchdog?.dispose();errorPlayback(video.error?.code===3?'当前浏览器无法解码这个视频，请尝试其他线路。':'视频格式不受支持或地址已失效，请尝试其他线路。');if(state.autoMode)autoFallback();}});
 video.addEventListener('ended',()=>{if($('auto-next').checked&&!$('next-episode').disabled)playEpisode(nextHistoryEpisode(state.current.lines[state.line].episodes,state.episode,state.current.type),false);else playerStatus('播放完毕');});
 
 for(const button of document.querySelectorAll('.dialog-close'))button.addEventListener('click',()=>button.closest('dialog').close());
@@ -538,6 +561,7 @@ $('episode-order').addEventListener('click',()=>{state.reverse=!state.reverse;re
 $('more-episodes').addEventListener('click',()=>{state.shown+=180;renderEpisodes();});
 $('next-episode').addEventListener('click',()=>{state.autoAttempt=0;playEpisode(nextHistoryEpisode(state.current.lines[state.line].episodes,state.episode,state.current.type),false);});
 $('play-retry').addEventListener('click',()=>{state.autoAttempt=0;state.current?playEpisode(state.episode,false):loadCandidate(state.pendingCandidate);});
+$('play-alternate').addEventListener('click',()=>{state.autoAttempt=0;state.failed.clear();autoFallback();});
 $('direct-nav').addEventListener('click',()=>$('direct-dialog').showModal());
 function openDirect(url,record=null){
   goHome();state.historyRecord=record;$('direct-dialog').close();$('browse-view').hidden=true;$('watch-view').hidden=false;

@@ -75,6 +75,11 @@ test('网页播放预检拒绝伪装播放列表的 HTML，并取消响应',asyn
  const web=new WebSources(async raw=>new URL(raw).hostname==='media.example'?new Response(new ReadableStream({start(c){c.enqueue(new TextEncoder().encode('<html>not a playlist</html>'));},cancel(){cancelled=true;}}),{headers:{'content-type':'text/html'}}):new Response(a123Root));
  await assert.rejects(web.call({adapter:'a123tv',api:base},'playerContent',['高清',base+'/v/sample/a1z0.html',[]]),/有效播放列表/);assert.equal(cancelled,true);
 });
+test('网页播放预检接受被拆开的 BOM 与 HLS 文件头，并取消剩余响应',async()=>{
+ let offset=0,cancelled=false;const bytes=new TextEncoder().encode('\uFEFF#EXTM3U\n#EXTINF:5,\na.ts\n');
+ const web=new WebSources(async raw=>new URL(raw).hostname==='media.example'?new Response(new ReadableStream({pull(c){if(offset<bytes.length)c.enqueue(bytes.slice(offset,++offset));else c.close();},cancel(){cancelled=true;}}),{headers:{'content-type':'application/vnd.apple.mpegurl'}}):new Response(a123Root));
+ const result=await web.call({adapter:'a123tv',api:base},'playerContent',['高清',base+'/v/sample/a1z0.html',[]]);assert.equal(result.url,'https://media.example/main.m3u8');assert.ok(cancelled);
+});
 
 test('金牌普通访客只选公开可用画质，不采用需要登录的地址',()=>{
  const denied={flag:true,needLogin:true,resolution:2160,url:'https://media.example/login.m3u8'};

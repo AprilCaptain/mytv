@@ -78,3 +78,6 @@ select option:checked{color:#e2f6c8;background:#34452a}
 #catalog-title{overflow-wrap:anywhere}
 #browse-view:has(#search-results:not([hidden])) #continue-section{display:none}
 .episode-heading h2 #episode-title{font-size:inherit;color:inherit;font-weight:inherit;margin:0}
+#player-quality{appearance:none;-webkit-appearance:none;color-scheme:dark;background:#1b2119;border:1px solid #394332;color:#d9e3d1;max-width:158px;min-height:30px;padding:4px 25px 4px 9px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 20 20' fill='none'%3E%3Cpath d='m5 7.5 5 5 5-5' stroke='%2398ad87' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center;background-size:12px}
+#player-quality:disabled{opacity:.65}.playback-info p{white-space:pre-line}.error-banner{flex-wrap:wrap}.error-banner>span{flex:1;min-width:150px}
+@media(max-width:550px){.player-toolbar{flex-wrap:wrap}.player-toolbar-spacer{min-width:0}#player-quality{max-width:115px;font-size:10px}.player-time{font-size:10px}}

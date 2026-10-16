@@ -77,6 +77,7 @@ const server = http.createServer(async (incoming, outgoing) => {
       ['/', new URL('index.html', publicRoot)], ['/index.html', new URL('index.html', publicRoot)],
       ['/app.js', new URL('app.js', publicRoot)], ['/style.css', new URL('style.css', publicRoot)],
       ['/player.js', new URL('player.js', publicRoot)], ['/player-utils.js', new URL('player-utils.js', publicRoot)],
+      ['/playback-utils.js', new URL('playback-utils.js', publicRoot)],
       ['/history-ui.js', new URL('history-ui.js', publicRoot)], ['/history-utils.js', new URL('history-utils.js', publicRoot)],
       ['/favicon.svg', new URL('favicon.svg', publicRoot)],
       ['/placeholder.svg', new URL('placeholder.svg', publicRoot)],

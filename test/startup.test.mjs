@@ -110,6 +110,13 @@ test('重复启动仍保留控制窗口，输入 q 可停止服务并释放所�
   assert.match(run.output(), /已就绪：/);
   const health = await (await fetch('http://127.0.0.1:' + port + '/api/health')).json();
   assert.equal(health.app, 'my-tv');
+  // Fetch the browser module graph too: an omitted static-route entry leaves
+  // the whole UI uninitialized even when API and syntax checks pass.
+  const pending=['/app.js'],seen=new Set();
+  while(pending.length){const path=pending.shift();if(seen.has(path))continue;seen.add(path);assert.ok(seen.size<30);
+    const response=await fetch('http://127.0.0.1:'+port+path);assert.equal(response.status,200,path);
+    const code=await response.text();for(const match of code.matchAll(/from\s+['"](\.[^'"]+)['"]/g))pending.push(new URL(match[1],'http://127.0.0.1:'+port+path).pathname);
+  }
   const again = runLauncher(port);
   t.after(() => again.child.kill('SIGTERM'));
   for (let i = 0; i < 100 && !again.output().includes('此窗口可控制服务'); i++) await new Promise(resolve => setTimeout(resolve, 50));

@@ -4,7 +4,7 @@ export function createPlayer(video, stage, actions={}) {
   const $ = id => document.getElementById(id);
   const controls = $('player-controls'), seek = $('player-seek'), tooltip = $('seek-tooltip');
   const toggle = $('player-toggle'), mute = $('player-mute'), volume = $('player-volume');
-  const speed = $('player-speed'), fullscreen = $('player-fullscreen'), feedback = $('seek-feedback');
+  const speed = $('player-speed'), quality=$('player-quality'),fullscreen = $('player-fullscreen'), feedback = $('seek-feedback');
   let idleTimer, feedbackTimer, scrubbing = false, controlsHovered = false, speedOpen = false;
   let lastVolume=video.volume||1;
   const bounds = () => seekBounds(video.duration, video.seekable);
@@ -71,9 +71,12 @@ export function createPlayer(video, stage, actions={}) {
   });
   mute.addEventListener('click', toggleMute);
   volume.addEventListener('input', () => { video.volume = Number(volume.value);video.muted = video.volume === 0;if(video.volume>0)lastVolume=video.volume;showControls(); });
-  speed.addEventListener('pointerdown', () => { speedOpen = true;showControls(); });
-  speed.addEventListener('blur', () => { speedOpen = false;showControls(); });
-  speed.addEventListener('keydown', event => { if (event.key === 'Escape' || event.key === 'Enter') { speedOpen = false;showControls(); } });
+  for(const menu of [speed,quality]){
+    menu.addEventListener('pointerdown', () => { speedOpen = true;showControls(); });
+    menu.addEventListener('blur', () => { speedOpen = false;showControls(); });
+    menu.addEventListener('keydown', event => { if (event.key === 'Escape' || event.key === 'Enter') { speedOpen = false;showControls(); } });
+  }
+  quality.addEventListener('change',()=>{speedOpen=false;actions.onQualityChange?.(quality.value);showControls();});
   speed.addEventListener('change', () => { speedOpen = false;video.defaultPlaybackRate=Number(speed.value);video.playbackRate = Number(speed.value);showControls(); });
   seek.addEventListener('pointerdown', () => { scrubbing = true;showControls(); });
   const endScrubbing = () => { if (scrubbing) { scrubbing = false;refresh();showControls(); } };
@@ -89,7 +92,7 @@ export function createPlayer(video, stage, actions={}) {
   });
   seek.addEventListener('pointerleave', () => tooltip.hidden = true);
   seek.addEventListener('blur', () => { if (!seek.matches(':hover')) tooltip.hidden = true; });
-  stage.addEventListener('pointermove', event => { if (event.target !== speed) speedOpen = false;showControls(); });
+  stage.addEventListener('pointermove', event => { if (event.target !== speed&&event.target!==quality) speedOpen = false;showControls(); });
   stage.addEventListener('pointerleave', showControls);
   controls.addEventListener('pointerenter', event => { controlsHovered = event.pointerType !== 'touch';showControls(); });
   controls.addEventListener('pointerleave', () => { controlsHovered = false;showControls(); });

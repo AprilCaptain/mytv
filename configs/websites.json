@@ -1,0 +1,10 @@
+{
+  "name": "网页精选",
+  "checkedAt": "2026-10-16",
+  "description": "通过项目内置网站适配器读取公开片库与播放信息，无需 Android、额外服务或常驻浏览器。清晰度以实际播放为准。",
+  "sites": [
+    { "key": "hdmoli_web", "name": "HDmoli", "type": 1, "api": "https://www.hdmoli.me", "adapter": "hdmoli", "searchable": 1 },
+    { "key": "a123tv_web", "name": "A123TV", "type": 1, "api": "https://a123tv.com", "adapter": "a123tv", "searchable": 1 },
+    { "key": "jinpai_web", "name": "金牌影视", "type": 1, "api": "https://m.jiabaide.cn", "adapter": "jinpai", "searchable": 1 }
+  ]
+}

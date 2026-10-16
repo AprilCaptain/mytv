@@ -144,3 +144,34 @@ test('历史 API 恢复重排配置/线路，不使用旧下标或代理地址',
  assert.equal((await call('/api/history/latest',undefined,'GET')).data.item,null);
  const lateAfterClear=await call('/api/history/progress',{session:again.data.session,seq:1,position:500,duration:2400});assert.equal(lateAfterClear.data.accepted,false);
 });
+
+test('同名网页线路重排或改名后，历史按稳定线路 key 恢复',async t=>{
+ const store=await openHistory(await fixture(t));let reordered=false;
+ const api=createApi(async raw=>{const u=new URL(raw);if(u.pathname==='/config.json')return Response.json({sites:[{key:'stable',name:'片源',type:1,api:'https://source.example/vod'}]});
+  const lines=[{key:'original',name:reordered?'新名称':'高清',episodes:[{name:'第01集',url:'https://media.example/a.m3u8'}]},{key:'other',name:'高清',episodes:[{name:'第01集',url:'https://media.example/b.m3u8'}]}];
+  return Response.json({list:[{vod_id:'1',vod_name:meta.title,vod_year:'2024',type_name:'国产剧',vod_play_sources:reordered?lines.reverse():lines}]});
+ },{history:store});t.after(()=>api.close());
+ const call=async(path,body)=>{const r=await api(new Request('http://127.0.0.1:3210'+path,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)}));return r.json();};
+ const c=await call('/api/config',{url:'https://config.example/config.json'});const start=await call('/api/history/sessions',{source:c.sources[0].id,id:'1',line:0,episode:0,position:200,duration:2400});
+ assert.equal(store.get(start.filmId).episode.locator.lineKey,'original');reordered=true;
+ // Use a fresh provider instance so persisted identities, not its detail cache, are exercised.
+ const {HistoryService}=await import('../lib/history-service.mjs');
+ const original=await api(new Request('http://127.0.0.1:3210/api/config-state?config='+c.id));assert.equal(original.status,200);
+ const resolver=new HistoryService(store,{importConfig:async()=>({sources:[{supported:true,key:'stable',id:'new'}]}),detail:async()=>({id:'1',title:meta.title,year:'2024',type:'国产剧',lines:[{key:'other',name:'高清',episodes:[{name:'第01集'}]},{key:'original',name:'新名称',episodes:[{name:'第01集'}]}]})});
+ const resumed=await resolver.resolveRecord(start.filmId);assert.equal(resumed.line,1);
+});
+
+test('电影同一线路有多个清晰度版本时，历史优先恢复原版本名',async t=>{
+ const {HistoryService}=await import('../lib/history-service.mjs'),store=await openHistory(await fixture(t));
+ const record=store.start({...entry,meta:{title:'电影',year:'2024',type:'剧情片'},locator:{...locator,lineKey:'stable',episodeName:'1080P'},episodeKey:'feature',episodeName:'1080P'});
+ const resolver=new HistoryService(store,{importConfig:async()=>({sources:[{supported:true,key:locator.sourceKey,id:'new'}]}),detail:async()=>({id:locator.videoId,title:'电影',year:'2024',type:'剧情片',lines:[{key:'stable',name:'高清',episodes:[{name:'2160P'},{name:'1080P'}]}]})});
+ const resumed=await resolver.resolveRecord(record.filmId);assert.equal(resumed.episode,1);
+});
+
+test('旧版剧情片按集名保存的进度仍可恢复，不清空原记录',async t=>{
+ const store=await openHistory(await fixture(t)),movie={title:'旧电影',year:'2024',type:'剧情片'},route={...locator,episodeName:'正片',lineKey:'stable'};
+ const record=store.start({...entry,meta:movie,locator:route,episodeKey:'named:正片',episodeName:'正片'});
+ const resolver=new HistoryService(store,{importConfig:async()=>({sources:[{supported:true,key:route.sourceKey,id:'new'}]}),detail:async()=>({...movie,id:route.videoId,lines:[{key:'stable',name:'高清',episodes:[{name:'正片'}]}]})});
+ assert.equal((await resolver.resolveRecord(record.filmId)).episode,0);
+ assert.equal(store.prepare(movie,route,'feature').bookmark.position,300);assert.equal(store.list().length,1);
+});

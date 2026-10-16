@@ -11,6 +11,7 @@ import { createApi } from '../lib/api.mjs';
 import { Playback } from '../lib/playback.mjs';
 import { posterResponse } from '../lib/media-security.mjs';
 import { PluginManager } from '../lib/plugins/manager.mjs';
+import { mediaType } from '../lib/media-security.mjs';
 import { cleanText } from '../lib/util.mjs';
 const origin='http://127.0.0.1:3210';
 
@@ -53,6 +54,7 @@ test('签名媒体代理拒绝 JS、SVG、HTML、XML，二进制媒体不传播�
  assert.equal(response.headers.get('set-cookie'),null);assert.equal(response.headers.get('content-security-policy'),"default-src 'none'; sandbox");assert.equal(response.headers.get('x-content-type-options'),'nosniff');await response.body.cancel();
 });
 test('海报检查实际格式并限制体积，HTML/SVG 伪装成图片也会拒绝',async()=>{
+ assert.equal(mediaType('image/png'),'application/octet-stream');assert.equal(mediaType('image/jpeg'),'application/octet-stream');assert.throws(()=>mediaType('image/svg+xml'),/没有返回可播放/);
  for(const content of ['<svg onload="alert(1)"></svg>','<html><script>alert(1)</script></html>'])await assert.rejects(posterResponse('https://image.example/a.jpg',async()=>new Response(content,{headers:{'content-type':'image/jpeg'}})),/海报格式/);
  const image=await posterResponse('https://image.example/a.jpg',async()=>new Response(Buffer.from([255,216,255,0]),{headers:{'content-type':'text/html'}}));
  assert.equal(image.headers.get('content-type'),'image/jpeg');assert.equal(image.headers.get('content-security-policy'),"default-src 'none'; sandbox");

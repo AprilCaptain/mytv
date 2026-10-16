@@ -77,3 +77,4 @@ select option:checked{color:#e2f6c8;background:#34452a}
 #history-view h1{margin-bottom:0}
 #catalog-title{overflow-wrap:anywhere}
 #browse-view:has(#search-results:not([hidden])) #continue-section{display:none}
+.episode-heading h2 #episode-title{font-size:inherit;color:inherit;font-weight:inherit;margin:0}

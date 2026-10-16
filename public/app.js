@@ -241,7 +241,7 @@ async function loadCatalog(skipSource='') {
     state.catalogSource=result.source;state.categories=result.categories;state.category=result.category;
     state.pageCount=result.pageCount;state.groups=result.list;renderCategories();renderGroups();
     $('catalog-caption').textContent='电影、剧集、动漫，选一部开始。';
-    $('result-count').textContent=result.sourceName+' · '+result.total.toLocaleString()+' 部';
+    $('result-count').textContent=result.sourceName+(result.totalKnown===false?'':' · '+result.total.toLocaleString()+' 部');
     if(!result.list.length)catalogStatus('暂无影片','试试其他分类，或换个片库。',false);
     else {
       $('pagination').hidden=result.pageCount<=1;$('page-indicator').textContent=result.page+' / '+result.pageCount;
@@ -384,7 +384,9 @@ function renderEpisodes() {
     button.addEventListener('click',()=>{state.autoAttempt=0;state.failed.clear();playEpisode(index,false);});
     $('episode-list').append(button);
   });
-  $('episode-count').textContent=episodes.length+' 集';
+  const movie=filmFamily(state.current?.type)==='movie';
+  $('episode-title').textContent=movie?'版本':'选集';
+  $('episode-count').textContent=episodes.length+(movie?' 个':' 集');
   $('next-episode').disabled=nextHistoryEpisode(episodes,state.episode,state.current?.type)<0;
   $('episode-order').textContent=state.reverse?'正序':'倒序';
   $('more-episodes').hidden=state.shown>=episodes.length;

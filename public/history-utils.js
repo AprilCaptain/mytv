@@ -3,7 +3,7 @@ export const filmTitle = value => String(value || '').normalize('NFKC').toLowerC
   .replace(/[\[(【]\s*(?:4k|2160p|1080p|uhd|hdr|蓝光)\s*[\])】]/gi, '')
   .replace(/\s+(?:4k|2160p|uhd)$/gi, '').replace(/[\s\p{P}\p{S}]/gu, '');
 export const filmYear = value => String(value || '').match(/(?:19|20)\d{2}/)?.[0] || '';
-export const filmFamily = value => /动漫|动画/.test(value || '') ? 'anime' : /剧|电视/.test(value || '') ? 'tv' : /电影|片/.test(value || '') ? 'movie' : '';
+export const filmFamily = value => /动漫|动画/.test(value || '') ? 'anime' : /电影|片/.test(value || '') ? 'movie' : /剧|电视/.test(value || '') ? 'tv' : '';
 export function sameFilm(a, b) {
   return !!filmTitle(a.title) && filmTitle(a.title) === filmTitle(b.title) &&
     !!filmYear(a.year) && filmYear(a.year) === filmYear(b.year) &&

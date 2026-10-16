@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { normalizeSourceConfig } from '../lib/source-config.mjs';
 import { Providers, DEFAULT_CONFIG } from '../lib/providers.mjs';
-import { SELECTED_CONFIG_URL, BUILTIN_CONFIGS } from '../lib/configs.mjs';
+import { SELECTED_CONFIG_URL,WEB_CONFIG_URL,LIBRARY_CONFIG_URL, BUILTIN_CONFIGS } from '../lib/configs.mjs';
 
 test('MoonTV api_site 转换为独立 HTTP 片源并去重、跳过禁用项', () => {
   const result = normalizeSourceConfig({ api_site: {
@@ -41,11 +41,30 @@ test('精选配置直接读取项目内文件，不访问 GitHub，不改变原�
   const providers = new Providers(() => { throw new Error('不应下载内置配置'); });
   t.after(() => providers.close());
   const config = await providers.importConfig(SELECTED_CONFIG_URL);
-  assert.equal(config.sources.length, 4);
-  assert.equal(config.checkedAt, '2026-10-12');
-  assert.equal(providers.eligible(config.id, true).length, 4);
+  assert.equal(config.sources.length, 21);
+  assert.equal(config.checkedAt, '2026-10-16');
+  assert.equal(providers.eligible(config.id, true).length, 21);
   assert.ok(config.sources.every(s => s.kind === 'http'));
   assert.equal(BUILTIN_CONFIGS.find(c => c.default).url, DEFAULT_CONFIG);
+});
+
+test('综合片库离线合并 HTTP 与网页片源，键和接口无重复，所有来源可被搜索',async t=>{
+ const p=new Providers(()=>assert.fail('内置合集不能下载远程文件'));t.after(()=>p.close());
+ const [combined,http,web]=await Promise.all([p.importConfig(LIBRARY_CONFIG_URL),p.importConfig(SELECTED_CONFIG_URL),p.importConfig(WEB_CONFIG_URL)]);
+ assert.equal(combined.sources.length,http.sources.length+web.sources.length);
+ assert.deepEqual(new Set(combined.sources.map(s=>s.api)),new Set([...http.sources,...web.sources].map(s=>s.api)));
+ assert.equal(new Set(combined.sources.map(s=>s.key)).size,combined.sources.length);
+ assert.equal(p.eligible(combined.id,true).length,combined.sources.length);
+});
+
+test('直连精选只展示实际媒体选集，外部配置默认保留解析线路',async t=>{
+ for(const directOnly of [true,false]){
+  const p=new Providers(async raw=>new URL(raw).pathname==='/config.json'?Response.json({sites:[{key:'s',name:'片源',type:1,api:'https://source.example/vod',directOnly}]}):Response.json({list:[{vod_id:'1',vod_name:'样本',vod_play_from:'网页$$$直连',vod_play_url:'正片$https://source.example/play.html$$$第01集$https://cdn.example/1.m3u8#第02集$https://source.example/missing.html#第03集$https://cdn.example/3.m3u8'}]}));t.after(()=>p.close());
+  const c=await p.importConfig('https://config.example/config.json'),d=await p.detail(c.sources[0].id,'1');
+  assert.equal(d.lines.length,directOnly?1:2);
+  assert.deepEqual(d.lines.at(-1).episodes.map(e=>e.name),directOnly?['第01集','第03集']:['第01集','第02集','第03集']);
+  if(directOnly)assert.equal((await p.resolve(c.sources[0].id,'1',0,0)).url,'https://cdn.example/1.m3u8');
+ }
 });
 
 test('远程 MoonTV 与 LibreTV 列表通过项目读取、搜索、详情和播放流程', async t => {

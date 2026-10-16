@@ -1,0 +1,199 @@
+{
+  "name": "综合片库",
+  "checkedAt": "2026-10-16",
+  "description": "合并精选点播与网页精选，一次搜索电影、剧集和动漫的多个来源。",
+  "sites": [
+    {
+      "key": "ikun",
+      "name": "ikun资源",
+      "type": 1,
+      "api": "https://ikunzyapi.com/api.php/provide/vod",
+      "searchable": 1,
+      "directOnly": true
+    },
+    {
+      "key": "guangsu",
+      "name": "光速资源",
+      "type": 1,
+      "api": "https://api.guangsuapi.com/api.php/provide/vod",
+      "searchable": 1,
+      "directOnly": true
+    },
+    {
+      "key": "baofeng",
+      "name": "暴风资源",
+      "type": 1,
+      "api": "https://bfzyapi.com/api.php/provide/vod",
+      "searchable": 1,
+      "directOnly": true
+    },
+    {
+      "key": "modu",
+      "name": "魔都资源",
+      "type": 1,
+      "api": "https://caiji.moduapi.cc/api.php/provide/vod",
+      "searchable": 1,
+      "directOnly": true
+    },
+    {
+      "key": "1080",
+      "name": "1080资源",
+      "type": 1,
+      "api": "https://api.1080zyku.com/inc/api_mac10.php",
+      "searchable": 1,
+      "directOnly": true
+    },
+    {
+      "key": "360",
+      "name": "360资源",
+      "type": 1,
+      "api": "https://360zy.com/api.php/provide/vod",
+      "searchable": 1,
+      "directOnly": true
+    },
+    {
+      "key": "uku",
+      "name": "U酷资源",
+      "type": 1,
+      "api": "https://api.ukuapi.com/api.php/provide/vod",
+      "searchable": 1,
+      "directOnly": true
+    },
+    {
+      "key": "wujin",
+      "name": "无尽资源",
+      "type": 1,
+      "api": "https://api.wujinapi.com/api.php/provide/vod",
+      "searchable": 1,
+      "directOnly": true
+    },
+    {
+      "key": "xinlang",
+      "name": "新浪资源",
+      "type": 1,
+      "api": "https://api.xinlangapi.com/xinlangapi.php/provide/vod",
+      "searchable": 1,
+      "directOnly": true
+    },
+    {
+      "key": "ruyi",
+      "name": "如意资源",
+      "type": 1,
+      "api": "https://cj.rycjapi.com/api.php/provide/vod",
+      "searchable": 1,
+      "directOnly": true
+    },
+    {
+      "key": "zuida",
+      "name": "最大资源",
+      "type": 1,
+      "api": "https://api.zuidapi.com/api.php/provide/vod",
+      "searchable": 1,
+      "directOnly": true
+    },
+    {
+      "key": "dytt",
+      "name": "电影天堂",
+      "type": 1,
+      "api": "https://caiji.dyttzyapi.com/api.php/provide/vod",
+      "searchable": 1,
+      "directOnly": true
+    },
+    {
+      "key": "baidu",
+      "name": "百度云资源",
+      "type": 1,
+      "api": "https://api.apibdzy.com/api.php/provide/vod",
+      "searchable": 1,
+      "directOnly": true
+    },
+    {
+      "key": "hongniu",
+      "name": "红牛资源",
+      "type": 1,
+      "api": "https://www.hongniuzy2.com/api.php/provide/vod",
+      "searchable": 1,
+      "directOnly": true
+    },
+    {
+      "key": "huya",
+      "name": "虎牙资源",
+      "type": 1,
+      "api": "https://www.huyaapi.com/api.php/provide/vod",
+      "searchable": 1,
+      "directOnly": true
+    },
+    {
+      "key": "haohua",
+      "name": "豪华资源",
+      "type": 1,
+      "api": "https://hhzyapi.com/api.php/provide/vod",
+      "searchable": 1,
+      "directOnly": true
+    },
+    {
+      "key": "subo",
+      "name": "速博资源",
+      "type": 1,
+      "api": "https://subocaiji.com/api.php/provide/vod",
+      "searchable": 1,
+      "directOnly": true
+    },
+    {
+      "key": "liangzi",
+      "name": "量子资源",
+      "type": 1,
+      "api": "https://cj.lziapi.com/api.php/provide/vod",
+      "searchable": 1,
+      "directOnly": true
+    },
+    {
+      "key": "jinying",
+      "name": "金鹰资源",
+      "type": 1,
+      "api": "https://jinyingzy.com/api.php/provide/vod",
+      "searchable": 1,
+      "directOnly": true
+    },
+    {
+      "key": "feifan",
+      "name": "非凡资源",
+      "type": 1,
+      "api": "https://cj.ffzyapi.com/api.php/provide/vod",
+      "searchable": 1,
+      "directOnly": true
+    },
+    {
+      "key": "jisu",
+      "name": "极速资源",
+      "type": 1,
+      "api": "https://jszyapi.com/api.php/provide/vod",
+      "searchable": 1,
+      "directOnly": true
+    },
+    {
+      "key": "hdmoli_web",
+      "name": "HDmoli",
+      "type": 1,
+      "api": "https://www.hdmoli.me",
+      "adapter": "hdmoli",
+      "searchable": 1
+    },
+    {
+      "key": "a123tv_web",
+      "name": "A123TV",
+      "type": 1,
+      "api": "https://a123tv.com",
+      "adapter": "a123tv",
+      "searchable": 1
+    },
+    {
+      "key": "jinpai_web",
+      "name": "金牌影视",
+      "type": 1,
+      "api": "https://m.jiabaide.cn",
+      "adapter": "jinpai",
+      "searchable": 1
+    }
+  ]
+}

@@ -1,0 +1,847 @@
+{
+  "checkedAt": "2026-10-16",
+  "environment": "macOS / Node 22.18 / 项目签名媒体代理 / FFprobe 抽样",
+  "notes": "解码尺寸来自指定影片、线路的短片段，不保证整站清晰度或长期可用性。不包含临时播放地址。",
+  "sources": [
+    {
+      "key": "ikun",
+      "name": "ikun资源",
+      "api": "https://ikunzyapi.com/api.php/provide/vod",
+      "categories": 53,
+      "homeItems": 20,
+      "searches": [
+        {
+          "query": "庆余年第二季",
+          "ok": true,
+          "matched": 1
+        },
+        {
+          "query": "流浪地球2",
+          "ok": true,
+          "matched": 1
+        },
+        {
+          "query": "仙逆",
+          "ok": true,
+          "matched": 4
+        }
+      ],
+      "sample": {
+        "title": "流浪地球2",
+        "videoId": "46256",
+        "line": 0,
+        "width": 1280,
+        "height": 536,
+        "videoCodec": "h264",
+        "audioCodec": "aac",
+        "durationSeconds": 10549.376884
+      },
+      "checks": {
+        "catalog": true,
+        "search": true,
+        "manifestAndSegment": true,
+        "decode": true
+      }
+    },
+    {
+      "key": "guangsu",
+      "name": "光速资源",
+      "api": "https://api.guangsuapi.com/api.php/provide/vod",
+      "categories": 44,
+      "homeItems": 20,
+      "searches": [
+        {
+          "query": "庆余年第二季",
+          "ok": true,
+          "matched": 1
+        },
+        {
+          "query": "流浪地球2",
+          "ok": true,
+          "matched": 2
+        },
+        {
+          "query": "仙逆",
+          "ok": true,
+          "matched": 7
+        }
+      ],
+      "sample": {
+        "title": "流浪地球2",
+        "videoId": "95400",
+        "line": 0,
+        "width": 1920,
+        "height": 804,
+        "videoCodec": "h264",
+        "audioCodec": "aac",
+        "durationSeconds": 10391.62506
+      },
+      "checks": {
+        "catalog": true,
+        "search": true,
+        "manifestAndSegment": true,
+        "decode": true
+      }
+    },
+    {
+      "key": "baofeng",
+      "name": "暴风资源",
+      "api": "https://bfzyapi.com/api.php/provide/vod",
+      "categories": 49,
+      "homeItems": 20,
+      "searches": [
+        {
+          "query": "庆余年第二季",
+          "ok": true,
+          "matched": 3
+        },
+        {
+          "query": "流浪地球2",
+          "ok": true,
+          "matched": 3
+        },
+        {
+          "query": "仙逆",
+          "ok": true,
+          "matched": 6
+        }
+      ],
+      "sample": {
+        "title": "流浪地球2",
+        "videoId": "48499",
+        "line": 0,
+        "width": 1280,
+        "height": 536,
+        "videoCodec": "h264",
+        "audioCodec": "aac",
+        "durationSeconds": 10053.96
+      },
+      "checks": {
+        "catalog": true,
+        "search": true,
+        "manifestAndSegment": true,
+        "decode": true
+      }
+    },
+    {
+      "key": "modu",
+      "name": "魔都资源",
+      "api": "https://caiji.moduapi.cc/api.php/provide/vod",
+      "categories": 42,
+      "homeItems": 20,
+      "searches": [
+        {
+          "query": "庆余年第二季",
+          "ok": true,
+          "matched": 0
+        },
+        {
+          "query": "流浪地球2",
+          "ok": true,
+          "matched": 1
+        },
+        {
+          "query": "仙逆",
+          "ok": true,
+          "matched": 4
+        }
+      ],
+      "sample": {
+        "title": "流浪地球2",
+        "videoId": "35125",
+        "line": 0,
+        "width": 3840,
+        "height": 1608,
+        "videoCodec": "h264",
+        "audioCodec": "aac",
+        "durationSeconds": 10579.557738
+      },
+      "checks": {
+        "catalog": true,
+        "search": true,
+        "manifestAndSegment": true,
+        "decode": true
+      }
+    },
+    {
+      "key": "1080",
+      "name": "1080资源",
+      "api": "https://api.1080zyku.com/inc/api_mac10.php",
+      "categories": 62,
+      "homeItems": 20,
+      "searches": [
+        {
+          "query": "庆余年第二季",
+          "ok": true,
+          "matched": 2
+        },
+        {
+          "query": "流浪地球2",
+          "ok": true,
+          "matched": 2
+        },
+        {
+          "query": "仙逆",
+          "ok": true,
+          "matched": 4
+        }
+      ],
+      "sample": {
+        "title": "流浪地球2",
+        "videoId": "36213",
+        "line": 0,
+        "width": 1280,
+        "height": 532,
+        "videoCodec": "h264",
+        "audioCodec": "aac",
+        "durationSeconds": 10489.27509
+      },
+      "checks": {
+        "catalog": true,
+        "search": true,
+        "manifestAndSegment": true,
+        "decode": true
+      }
+    },
+    {
+      "key": "360",
+      "name": "360资源",
+      "api": "https://360zy.com/api.php/provide/vod",
+      "categories": 51,
+      "homeItems": 20,
+      "searches": [
+        {
+          "query": "庆余年第二季",
+          "ok": true,
+          "matched": 1
+        },
+        {
+          "query": "流浪地球2",
+          "ok": true,
+          "matched": 1
+        },
+        {
+          "query": "仙逆",
+          "ok": true,
+          "matched": 5
+        }
+      ],
+      "sample": {
+        "title": "流浪地球2",
+        "videoId": "71142",
+        "line": 0,
+        "width": 1280,
+        "height": 538,
+        "videoCodec": "h264",
+        "audioCodec": "aac",
+        "durationSeconds": 10513.614877
+      },
+      "checks": {
+        "catalog": true,
+        "search": true,
+        "manifestAndSegment": true,
+        "decode": true
+      }
+    },
+    {
+      "key": "uku",
+      "name": "U酷资源",
+      "api": "https://api.ukuapi.com/api.php/provide/vod",
+      "categories": 29,
+      "homeItems": 20,
+      "searches": [
+        {
+          "query": "庆余年第二季",
+          "ok": true,
+          "matched": 0
+        },
+        {
+          "query": "流浪地球2",
+          "ok": true,
+          "matched": 2
+        },
+        {
+          "query": "仙逆",
+          "ok": true,
+          "matched": 5
+        }
+      ],
+      "sample": {
+        "title": "流浪地球2",
+        "videoId": "46778",
+        "line": 0,
+        "width": 1280,
+        "height": 534,
+        "videoCodec": "h264",
+        "audioCodec": "aac",
+        "durationSeconds": 10404.527983
+      },
+      "checks": {
+        "catalog": true,
+        "search": true,
+        "manifestAndSegment": true,
+        "decode": true
+      }
+    },
+    {
+      "key": "wujin",
+      "name": "无尽资源",
+      "api": "https://api.wujinapi.com/api.php/provide/vod",
+      "categories": 63,
+      "homeItems": 20,
+      "searches": [
+        {
+          "query": "庆余年第二季",
+          "ok": true,
+          "matched": 2
+        },
+        {
+          "query": "流浪地球2",
+          "ok": true,
+          "matched": 2
+        },
+        {
+          "query": "仙逆",
+          "ok": true,
+          "matched": 7
+        }
+      ],
+      "sample": {
+        "title": "庆余年第二季",
+        "videoId": "113692",
+        "line": 0,
+        "width": 1280,
+        "height": 720,
+        "videoCodec": "h264",
+        "audioCodec": "aac",
+        "durationSeconds": 2872.32
+      },
+      "checks": {
+        "catalog": true,
+        "search": true,
+        "manifestAndSegment": true,
+        "decode": true
+      }
+    },
+    {
+      "key": "xinlang",
+      "name": "新浪资源",
+      "api": "https://api.xinlangapi.com/xinlangapi.php/provide/vod",
+      "categories": 48,
+      "homeItems": 20,
+      "searches": [
+        {
+          "query": "庆余年第二季",
+          "ok": true,
+          "matched": 1
+        },
+        {
+          "query": "流浪地球2",
+          "ok": true,
+          "matched": 2
+        },
+        {
+          "query": "仙逆",
+          "ok": true,
+          "matched": 7
+        }
+      ],
+      "sample": {
+        "title": "流浪地球2",
+        "videoId": "92354",
+        "line": 0,
+        "width": 1920,
+        "height": 804,
+        "videoCodec": "h264",
+        "audioCodec": "aac",
+        "durationSeconds": 10404.5417
+      },
+      "checks": {
+        "catalog": true,
+        "search": true,
+        "manifestAndSegment": true,
+        "decode": true
+      }
+    },
+    {
+      "key": "ruyi",
+      "name": "如意资源",
+      "api": "https://cj.rycjapi.com/api.php/provide/vod",
+      "categories": 39,
+      "homeItems": 20,
+      "searches": [
+        {
+          "query": "庆余年第二季",
+          "ok": true,
+          "matched": 1
+        },
+        {
+          "query": "流浪地球2",
+          "ok": true,
+          "matched": 3
+        },
+        {
+          "query": "仙逆",
+          "ok": true,
+          "matched": 4
+        }
+      ],
+      "sample": {
+        "title": "流浪地球2",
+        "videoId": "6573",
+        "line": 0,
+        "width": 1920,
+        "height": 800,
+        "videoCodec": "h264",
+        "audioCodec": "aac",
+        "durationSeconds": 10457.701606
+      },
+      "checks": {
+        "catalog": true,
+        "search": true,
+        "manifestAndSegment": true,
+        "decode": true
+      }
+    },
+    {
+      "key": "zuida",
+      "name": "最大资源",
+      "api": "https://api.zuidapi.com/api.php/provide/vod",
+      "categories": 59,
+      "homeItems": 20,
+      "searches": [
+        {
+          "query": "庆余年第二季",
+          "ok": true,
+          "matched": 1
+        },
+        {
+          "query": "流浪地球2",
+          "ok": true,
+          "matched": 3
+        },
+        {
+          "query": "仙逆",
+          "ok": true,
+          "matched": 5
+        }
+      ],
+      "sample": {
+        "title": "流浪地球2",
+        "videoId": "7046",
+        "line": 0,
+        "width": 1280,
+        "height": 536,
+        "videoCodec": "h264",
+        "audioCodec": "aac",
+        "durationSeconds": 10420.76
+      },
+      "checks": {
+        "catalog": true,
+        "search": true,
+        "manifestAndSegment": true,
+        "decode": true
+      }
+    },
+    {
+      "key": "dytt",
+      "name": "电影天堂",
+      "api": "https://caiji.dyttzyapi.com/api.php/provide/vod",
+      "categories": 32,
+      "homeItems": 20,
+      "searches": [
+        {
+          "query": "庆余年第二季",
+          "ok": true,
+          "matched": 1
+        },
+        {
+          "query": "流浪地球2",
+          "ok": true,
+          "matched": 2
+        },
+        {
+          "query": "仙逆",
+          "ok": true,
+          "matched": 4
+        }
+      ],
+      "sample": {
+        "title": "流浪地球2",
+        "videoId": "40510",
+        "line": 0,
+        "width": 1920,
+        "height": 806,
+        "videoCodec": "h264",
+        "audioCodec": "aac",
+        "durationSeconds": 10461.333504
+      },
+      "checks": {
+        "catalog": true,
+        "search": true,
+        "manifestAndSegment": true,
+        "decode": true
+      }
+    },
+    {
+      "key": "baidu",
+      "name": "百度云资源",
+      "api": "https://api.apibdzy.com/api.php/provide/vod",
+      "categories": 54,
+      "homeItems": 20,
+      "searches": [
+        {
+          "query": "庆余年第二季",
+          "ok": true,
+          "matched": 1
+        },
+        {
+          "query": "流浪地球2",
+          "ok": true,
+          "matched": 1
+        },
+        {
+          "query": "仙逆",
+          "ok": true,
+          "matched": 3
+        }
+      ],
+      "sample": {
+        "title": "流浪地球2",
+        "videoId": "22254",
+        "line": 0,
+        "width": 1280,
+        "height": 536,
+        "videoCodec": "h264",
+        "audioCodec": "aac",
+        "durationSeconds": 10391.52
+      },
+      "checks": {
+        "catalog": true,
+        "search": true,
+        "manifestAndSegment": true,
+        "decode": true
+      }
+    },
+    {
+      "key": "hongniu",
+      "name": "红牛资源",
+      "api": "https://www.hongniuzy2.com/api.php/provide/vod",
+      "categories": 44,
+      "homeItems": 20,
+      "searches": [
+        {
+          "query": "庆余年第二季",
+          "ok": true,
+          "matched": 1
+        },
+        {
+          "query": "流浪地球2",
+          "ok": true,
+          "matched": 2
+        },
+        {
+          "query": "仙逆",
+          "ok": true,
+          "matched": 7
+        }
+      ],
+      "sample": {
+        "title": "流浪地球2",
+        "videoId": "71954",
+        "line": 0,
+        "width": 1920,
+        "height": 804,
+        "videoCodec": "h264",
+        "audioCodec": "aac",
+        "durationSeconds": 10391.62506
+      },
+      "checks": {
+        "catalog": true,
+        "search": true,
+        "manifestAndSegment": true,
+        "decode": true
+      }
+    },
+    {
+      "key": "huya",
+      "name": "虎牙资源",
+      "api": "https://www.huyaapi.com/api.php/provide/vod",
+      "categories": 44,
+      "homeItems": 20,
+      "searches": [
+        {
+          "query": "庆余年第二季",
+          "ok": true,
+          "matched": 1
+        },
+        {
+          "query": "流浪地球2",
+          "ok": true,
+          "matched": 2
+        },
+        {
+          "query": "仙逆",
+          "ok": true,
+          "matched": 7
+        }
+      ],
+      "sample": {
+        "title": "流浪地球2",
+        "videoId": "6098",
+        "line": 0,
+        "width": 1920,
+        "height": 804,
+        "videoCodec": "h264",
+        "audioCodec": "aac",
+        "durationSeconds": 10391.62506
+      },
+      "checks": {
+        "catalog": true,
+        "search": true,
+        "manifestAndSegment": true,
+        "decode": true
+      }
+    },
+    {
+      "key": "haohua",
+      "name": "豪华资源",
+      "api": "https://hhzyapi.com/api.php/provide/vod",
+      "categories": 48,
+      "homeItems": 20,
+      "searches": [
+        {
+          "query": "庆余年第二季",
+          "ok": true,
+          "matched": 1
+        },
+        {
+          "query": "流浪地球2",
+          "ok": true,
+          "matched": 2
+        },
+        {
+          "query": "仙逆",
+          "ok": true,
+          "matched": 7
+        }
+      ],
+      "sample": {
+        "title": "流浪地球2",
+        "videoId": "34380",
+        "line": 0,
+        "width": 1920,
+        "height": 804,
+        "videoCodec": "h264",
+        "audioCodec": "aac",
+        "durationSeconds": 10391.62506
+      },
+      "checks": {
+        "catalog": true,
+        "search": true,
+        "manifestAndSegment": true,
+        "decode": true
+      }
+    },
+    {
+      "key": "subo",
+      "name": "速博资源",
+      "api": "https://subocaiji.com/api.php/provide/vod",
+      "categories": 44,
+      "homeItems": 20,
+      "searches": [
+        {
+          "query": "庆余年第二季",
+          "ok": true,
+          "matched": 1
+        },
+        {
+          "query": "流浪地球2",
+          "ok": true,
+          "matched": 2
+        },
+        {
+          "query": "仙逆",
+          "ok": true,
+          "matched": 7
+        }
+      ],
+      "sample": {
+        "title": "流浪地球2",
+        "videoId": "1270",
+        "line": 0,
+        "width": 1920,
+        "height": 804,
+        "videoCodec": "h264",
+        "audioCodec": "aac",
+        "durationSeconds": 10404.5417
+      },
+      "checks": {
+        "catalog": true,
+        "search": true,
+        "manifestAndSegment": true,
+        "decode": true
+      }
+    },
+    {
+      "key": "liangzi",
+      "name": "量子资源",
+      "api": "https://cj.lziapi.com/api.php/provide/vod",
+      "categories": 44,
+      "homeItems": 20,
+      "searches": [
+        {
+          "query": "庆余年第二季",
+          "ok": true,
+          "matched": 1
+        },
+        {
+          "query": "流浪地球2",
+          "ok": true,
+          "matched": 4
+        },
+        {
+          "query": "仙逆",
+          "ok": true,
+          "matched": 7
+        }
+      ],
+      "sample": {
+        "title": "流浪地球2",
+        "videoId": "48245",
+        "line": 0,
+        "width": 1920,
+        "height": 800,
+        "videoCodec": "h264",
+        "audioCodec": "aac",
+        "durationSeconds": 10468.821847
+      },
+      "checks": {
+        "catalog": true,
+        "search": true,
+        "manifestAndSegment": true,
+        "decode": true
+      }
+    },
+    {
+      "key": "jinying",
+      "name": "金鹰资源",
+      "api": "https://jinyingzy.com/api.php/provide/vod",
+      "categories": 44,
+      "homeItems": 20,
+      "searches": [
+        {
+          "query": "庆余年第二季",
+          "ok": true,
+          "matched": 1
+        },
+        {
+          "query": "流浪地球2",
+          "ok": true,
+          "matched": 2
+        },
+        {
+          "query": "仙逆",
+          "ok": true,
+          "matched": 7
+        }
+      ],
+      "sample": {
+        "title": "流浪地球2",
+        "videoId": "40626",
+        "line": 0,
+        "width": 1920,
+        "height": 804,
+        "videoCodec": "h264",
+        "audioCodec": "aac",
+        "durationSeconds": 10391.62506
+      },
+      "checks": {
+        "catalog": true,
+        "search": true,
+        "manifestAndSegment": true,
+        "decode": true
+      }
+    },
+    {
+      "key": "feifan",
+      "name": "非凡资源",
+      "api": "https://cj.ffzyapi.com/api.php/provide/vod",
+      "categories": 31,
+      "homeItems": 20,
+      "searches": [
+        {
+          "query": "庆余年第二季",
+          "ok": true,
+          "matched": 2
+        },
+        {
+          "query": "流浪地球2",
+          "ok": true,
+          "matched": 2
+        },
+        {
+          "query": "仙逆",
+          "ok": true,
+          "matched": 3
+        }
+      ],
+      "sample": {
+        "title": "流浪地球2",
+        "videoId": "32627",
+        "line": 0,
+        "width": 1920,
+        "height": 800,
+        "videoCodec": "h264",
+        "audioCodec": "aac",
+        "durationSeconds": 10478.528497
+      },
+      "checks": {
+        "catalog": true,
+        "search": true,
+        "manifestAndSegment": true,
+        "decode": true
+      }
+    },
+    {
+      "key": "jisu",
+      "name": "极速资源",
+      "api": "https://jszyapi.com/api.php/provide/vod",
+      "categories": 48,
+      "homeItems": 20,
+      "searches": [
+        {
+          "query": "庆余年第二季",
+          "ok": true,
+          "matched": 1
+        },
+        {
+          "query": "流浪地球2",
+          "ok": true,
+          "matched": 2
+        },
+        {
+          "query": "仙逆",
+          "ok": true,
+          "matched": 7
+        }
+      ],
+      "sample": {
+        "title": "庆余年 第二季",
+        "videoId": "56056",
+        "line": 0,
+        "width": 1280,
+        "height": 720,
+        "videoCodec": "h264",
+        "audioCodec": "aac",
+        "durationSeconds": 2730.375017
+      },
+      "checks": {
+        "catalog": true,
+        "search": true,
+        "manifestAndSegment": true,
+        "decode": true
+      }
+    }
+  ]
+}

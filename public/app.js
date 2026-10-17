@@ -7,7 +7,7 @@ const video = $('video');
 let history;
 const player = createPlayer(video, $('video-stage'),{onPlay:()=>history?.requestClaim(),onSeek:()=>history?.requestClaim(),onQualityChange:setPlaybackQuality});
 const state = {
-  configs: [], config: null, configUrl: '', configName: '电视', generation: 0,
+  configs: [], config: null, configUrl: '', configName: '全部', generation: 0,
   catalogSource: '', categories: [], genre: 'all', category: '', page: 1, pageCount: 1, q: '',
   groups: [], searchSources: new Map(), searchFilter: 'all', current: null, line: 0, episode: 0,
   reverse: false, shown: 180, hls: null, mediaUrl: '', playSerial: 0, detailSerial: 0,
@@ -104,6 +104,11 @@ function renderConfigs() {
   const total=state.config?.sources.filter(s=>s.supported&&s.playable).length || 0;
   $('config-summary').textContent=state.config ? total+' 个片源' : '正在加载…';
   $('source-count').textContent=state.config ? state.configName+' · '+total+' 个观影片源' : '正在加载…';
+  const aggregate=state.config?.aggregate,failed=state.config?.members?.filter(m=>m.status!=='ok')||[];
+  $('aggregate-info').hidden=!aggregate;
+  $('aggregate-info-summary').textContent=failed.length?failed.length+' 个配置暂不可用，其余片源可正常使用':'已聚合 '+(state.config?.members?.length||0)+' 个配置';
+  $('aggregate-info-text').textContent=aggregate?['已合并 '+(state.config.duplicateCount||0)+' 个重复片源。',...state.config.members.map(m=>m.name+'：'+(m.status==='ok'?m.sourceCount+' 个可用条目':m.message||'暂不可用')),
+    state.config.omittedCount?'部分条目超过聚合上限，未纳入。':''].filter(Boolean).join('\n'):'';
 }
 async function selectConfig(config,initial=false) {
   if(!initial){for(const key of Object.keys(state.controllers)) abort(key);goHome();}
@@ -121,7 +126,7 @@ async function selectConfig(config,initial=false) {
   $('clear-search').hidden=true; $('result-count').textContent='正在加载影片…';
   textForm('config-message','正在导入…');
   try {
-    const result=await api('/api/config',{method:'POST',body:{url:config.url},signal:ctrl.signal});
+    const result=await api('/api/config',{method:'POST',body:{url:config.url,...(config.aggregate?{members:state.configs.filter(c=>!c.aggregate).map(({url,name})=>({url,name}))}:{})},signal:ctrl.signal});
     if(ctrl.signal.aborted||generation!==state.generation)return;
     state.config=result; renderConfigs();
     textForm('config-message','正在使用「'+config.name+'」');
@@ -331,6 +336,7 @@ async function loadCandidate(candidate,preserveName,automatic=false,restore=null
     const detail=await api('/api/detail?'+params({source:candidate.source,id:candidate.id}),{signal:ctrl.signal});
     if(ctrl.signal.aborted||serial!==state.detailSerial)return;
     state.current={...detail,source:candidate.source,sourceName:candidate.sourceName,kind:candidate.kind,card:candidate};
+    if(detail.originConfigName)$('watch-source').textContent=state.configName+' / '+candidate.sourceName+' · '+detail.originConfigName;
     if(!detail.lines.length)throw new Error('暂无播放线路，请选择其他片源。');
     state.line=detail.lines.map((line,index)=>({index,score:lineRank(line)})).sort((a,b)=>b.score-a.score)[0].index;
     if(!preserveName){

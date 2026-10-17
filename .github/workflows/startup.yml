@@ -50,3 +50,29 @@ jobs:
           call npm run check
           if errorlevel 1 exit /b 1
           call npm test
+      - name: Build and package native launcher
+        run: npm run package:launcher
+      - name: Verify macOS native executable
+        if: runner.os == 'macOS'
+        shell: bash
+        run: |
+          "./My TV.app/Contents/MacOS/MyTV" --self-test "$RUNNER_TEMP/mytv-launcher.json"
+          cat "$RUNNER_TEMP/mytv-launcher.json"
+          node --input-type=module -e 'import fs from "node:fs"; const v=JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP+"/mytv-launcher.json"));if(v.start.lan!==false)throw Error("Invalid native boolean");'
+          lipo -info "My TV.app/Contents/MacOS/MyTV"
+      - name: Verify Windows native executable
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $output = Join-Path $env:RUNNER_TEMP 'mytv-launcher.json'
+          $exe = Join-Path $PWD 'My TV.exe'
+          $result = Start-Process -FilePath $exe -ArgumentList @('--self-test', ('"' + $output + '"')) -Wait -PassThru
+          if ($result.ExitCode -ne 0) { throw 'Native launcher self-test failed' }
+          $value = Get-Content $output -Raw | ConvertFrom-Json
+          if ($value.start.lan -isnot [bool] -or $value.start.lan) { throw 'Invalid native boolean' }
+          Get-Content $output
+      - uses: actions/upload-artifact@v4
+        with:
+          name: My-TV-${{ runner.os }}
+          path: dist/My-TV-${{ runner.os }}.zip
+          if-no-files-found: error

@@ -13,7 +13,7 @@ const a123Root=`<title>《样本》 - 国产剧 - 2024年 - A123TV</title><h1>�
 
 test('网页配置离线载入，适配器是受控注册项，原默认配置保持',async t=>{
  const p=new Providers(()=>assert.fail('内置配置不应访问网络'));t.after(()=>p.close());const c=await p.importConfig(WEB_CONFIG_URL);
- assert.equal(c.sources.length,4);assert.ok(c.sources.every(s=>s.kind==='web'&&s.supported));assert.equal(BUILTIN_CONFIGS.find(c=>c.default).name,'电视');
+ assert.equal(c.sources.length,4);assert.ok(c.sources.every(s=>s.kind==='web'&&s.supported));assert.equal(BUILTIN_CONFIGS.find(c=>c.default).name,'全部');
  const web=new WebSources(()=>assert.fail());assert.equal(web.capability('__proto__'),false);assert.equal(web.capability('constructor'),false);
  await assert.rejects(web.call({adapter:'https://evil.example/code.js'},'home',[]),/不受支持/);
 });

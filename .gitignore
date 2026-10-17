@@ -6,3 +6,6 @@ test-results/
 .runtime/
 data/
 __pycache__/
+My TV.app/
+My TV.exe
+dist/

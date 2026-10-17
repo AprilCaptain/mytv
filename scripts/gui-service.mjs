@@ -2,6 +2,7 @@ import {spawn,execFile} from 'node:child_process';
 import {dirname,join,resolve} from 'node:path';
 import {managedServer,portAvailable,stopServer} from '../lib/lifecycle.mjs';
 import {serverAddresses} from '../lib/network-mode.mjs';
+import {systemProxyEnvironment} from './system-proxy.mjs';
 
 const delay=ms=>new Promise(r=>setTimeout(r,ms));
 const exited=child=>!child||child.exitCode!==null||child.signalCode!==null;
@@ -32,7 +33,7 @@ export class GuiService {
   stream.on('data',chunk=>{pending+=chunk;let n;while((n=pending.indexOf('\n'))>=0){this.log(pending.slice(0,n));pending=pending.slice(n+1);}if(pending.length>16000){this.log(pending);pending='';}});
   stream.on('end',()=>{if(pending)this.log(pending);});}}
  process(script,args=[],env={}){
-  const child=spawn(process.execPath,[join(this.root,script),...args],{cwd:this.root,env:{...process.env,PATH:dirname(process.execPath)+(process.platform==='win32'?';':':')+(process.env.PATH||''),...env},
+  const child=spawn(process.execPath,[join(this.root,script),...args],{cwd:this.root,env:{...process.env,...this.proxyEnvironment,PATH:dirname(process.execPath)+(process.platform==='win32'?';':':')+(process.env.PATH||''),...env},
    detached:process.platform!=='win32',windowsHide:true,stdio:['ignore','pipe','pipe']});
   this.attachLogs(child);return child;
  }
@@ -56,6 +57,9 @@ export class GuiService {
    if(active){if((active.mode==='lan')!==this.lan)throw new Error('已有服务的访问模式不同，请先停止再启动。');this.control=active;this.state('running','已连接到正在运行的 My TV');return;}
    if(!await portAvailable(this.port))throw new Error('端口被其他程序占用，请更换端口。');
    if(token!==this.generation||this.closing)return;
+   this.proxyEnvironment=await systemProxyEnvironment();
+   if(token!==this.generation||this.closing)return;
+   if(Object.keys(this.proxyEnvironment).length)this.log('已沿用系统 HTTP / HTTPS 代理设置。');
    this.state('preparing','正在检查环境与项目依赖…');
    if(this.prepare)await this.prepare();else{
     const child=this.preparing=this.process('scripts/bootstrap.mjs',['--setup-only'],{MYTV_NO_BROWSER:'1',PORT:String(this.port)});

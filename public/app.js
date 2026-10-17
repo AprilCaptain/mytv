@@ -1,3 +1,4 @@
+import {loadPoster} from './poster.js';
 import { createPlayer } from './player.js';
 import { createHistory } from './history-ui.js';
 import { historyEpisode,filmFamily,nextHistoryEpisode } from './history-utils.js';
@@ -157,8 +158,7 @@ function renderCategories() {
 }
 function posterCard(item) {
   const button=element('button','poster-card'),wrap=element('span','poster-wrap'),image=element('img');
-  image.src=item.poster?'/api/poster?'+params({url:item.poster}):'/placeholder.svg';image.alt='';image.loading='lazy';image.decoding='async';image.referrerPolicy='no-referrer';
-  image.addEventListener('error',()=>{image.src='/placeholder.svg';},{once:true});
+  loadPoster(image,item.poster);
   const play=element('span','poster-play');play.append(icon('play'));
   wrap.append(image,element('span','poster-gradient'),element('span','poster-badge',item.remarks),play);
   wrap.append(element('span','poster-origin',item.sourceName));

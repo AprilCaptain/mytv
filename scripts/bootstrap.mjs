@@ -7,6 +7,7 @@ import { managedServer, portAvailable } from '../lib/lifecycle.mjs';
 import { waitForService } from './control.mjs';
 import { sqliteRuntime, openHistory } from '../lib/history.mjs';
 import { serverAddresses } from '../lib/network-mode.mjs';
+import { systemProxyEnvironment } from './system-proxy.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const setupOnly = process.argv.includes('--setup-only') || process.env.MYTV_SETUP_ONLY === '1';
@@ -67,6 +68,7 @@ try {
   console.log('My TV · 检查运行环境（' + process.platform + ' / ' + process.arch + '，Node ' + process.versions.node + '）');
   // Validate both runtimes before any dependency install or venv creation.
   const runtime = skipPython ? null : checkPython(root);
+  Object.assign(process.env,await systemProxyEnvironment());
   if (checkOnly) {
     if (!await nodeDependenciesReady(root) || (!skipPython && !await pythonReady(root))) throw new Error('项目依赖未齐全，请运行启动脚本补装。');
     const checked=await openHistory(root,{checkOnly:true});

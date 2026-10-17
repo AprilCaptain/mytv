@@ -1,3 +1,4 @@
+import {loadPoster} from './poster.js';
 import { resumeDecision,filmFamily } from './history-utils.js';
 const $=id=>document.getElementById(id);
 const format=t=>{t=Math.max(0,Math.floor(t||0));return (t>=3600?Math.floor(t/3600)+':':'')+String(Math.floor(t/60)%60).padStart(2,'0')+':'+String(t%60).padStart(2,'0');};
@@ -21,7 +22,7 @@ export function createHistory({api,video,resume,onFailure,onEnd}) {
   $('history-choice').addEventListener('close',()=>choiceResolve?.(null));
   function card(item,compact=false){
     const row=node('article',compact?'history-card compact':'history-card');
-    const cover=node('img','history-cover');cover.src=/^https?:\/\//.test(item.poster||'')?'/api/poster?'+new URLSearchParams({url:item.poster}):'/placeholder.svg';cover.alt='';cover.loading='lazy';cover.addEventListener('error',()=>cover.src='/placeholder.svg',{once:true});
+    const cover=node('img','history-cover');loadPoster(cover,/^https?:\/\//.test(item.poster||'')?item.poster:'');
     const info=node('div','history-info'),ep=item.episode||{};
     info.append(node('strong','',item.title),node('span','history-meta',[item.year,item.type,ep.name,ep.completed?'已看完':format(ep.position)+' / '+format(ep.duration)].filter(Boolean).join(' · ')));
     const bar=node('progress','history-progress');bar.max=ep.duration||1;bar.value=ep.completed?bar.max:ep.position||0;bar.setAttribute('aria-label','观看进度');info.append(bar);

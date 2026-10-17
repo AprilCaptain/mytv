@@ -4,7 +4,6 @@ import { createInterface } from 'node:readline';
 import { managedServer, stopServer } from '../lib/lifecycle.mjs';
 
 export async function waitForService(root, port, control, child) {
-  console.log('此窗口可控制服务：按 Ctrl+C，或输入 q 回车停止并释放端口。');
   let finish;
   const done = new Promise(resolve => { finish = resolve; });
   let stopping = false;
@@ -33,6 +32,8 @@ export async function waitForService(root, port, control, child) {
       }
     } finally { checking = false; }
   }, 500);
+  // Announce readiness only after signal and input handlers are installed.
+  console.log('此窗口可控制服务：按 Ctrl+C，或输入 q 回车停止并释放端口。');
   try { await done; }
   finally {
     clearInterval(timer); lines.close();

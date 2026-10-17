@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { spawn } from 'node:child_process';
 import http from 'node:http';
 import net from 'node:net';
+import {stopServer} from '../lib/lifecycle.mjs';
 import { nodeDependenciesReady, acquireSetupLock } from '../scripts/environment.mjs';
 import { pythonPath, pythonReady, checkPython, supportedPython } from '../scripts/setup-python.mjs';
 
@@ -145,11 +146,11 @@ test('独立停止脚本无需 Python 或项目依赖，校验凭证并关闭服
 test('Ctrl+C 与终端关闭信号能停止前台服务', { timeout: 30_000, skip: process.platform === 'win32' }, async t => {
   for (const signal of ['SIGINT', 'SIGHUP']) {
     const port = await freePort(); const run = runLauncher(port);
-    t.after(() => run.child.kill('SIGTERM'));
+    t.after(async () => {await stopServer(project,port).catch(()=>{});run.child.kill('SIGTERM');});
     for (let i = 0; i < 100 && !run.output().includes('此窗口可控制服务'); i++) await new Promise(resolve => setTimeout(resolve, 50));
     assert.match(run.output(), /此窗口可控制服务/);
     run.child.kill(signal);
-    assert.equal(await run.finished, 0);
+    assert.equal(await run.finished, 0, JSON.stringify({signal,exitSignal:run.child.signalCode,output:run.output()}));
     await assert.rejects(fetch('http://127.0.0.1:' + port + '/api/health'));
   }
 });

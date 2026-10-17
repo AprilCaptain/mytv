@@ -9,6 +9,7 @@ function proxyUrl(raw){
  }catch{return '';}
 }
 function bypass(raw){return raw.split(/[;,\n]/).map(x=>x.trim()).filter(Boolean).flatMap(x=>{
+ if(x==='*')return ['*'];
  if(x==='<local>')return ['localhost','127.0.0.1','::1'];
  if(x.startsWith('*.'))x=x.slice(1);
  return /^[\w.:[\]-]+$/.test(x)?[x]:[];
@@ -47,6 +48,7 @@ export async function systemProxyEnvironment({env=process.env,platform=process.p
   else return {};
  }catch{return {};}
  if(!settings.HTTP_PROXY&&!settings.HTTPS_PROXY)return {};
+ settings.MYTV_SYSTEM_PROXY='1';
  if(env.NO_PROXY||env.no_proxy)delete settings.NO_PROXY;
  else settings.NO_PROXY=[settings.NO_PROXY,'localhost','127.0.0.1','::1'].filter(Boolean).join(',');
  return settings;

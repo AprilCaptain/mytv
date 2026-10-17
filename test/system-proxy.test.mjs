@@ -21,7 +21,7 @@ test('启动器只沿用已启用的系统 HTTP 代理，不执行 PAC 或修改
  assert.deepEqual(windowsSystemProxy(win.replace('0x1','0x0')),{});
  assert.equal(windowsSystemProxy('ProxyEnable REG_DWORD 0x1\nProxyServer REG_SZ 127.0.0.1:8888').HTTPS_PROXY,'http://127.0.0.1:8888/');
  const calls=[];const result=await systemProxyEnvironment({env:{},platform:'darwin',run:async(c,a)=>{calls.push([c,a]);return {stdout:mac};}});
- assert.equal(result.HTTP_PROXY,m.HTTP_PROXY);assert.match(result.NO_PROXY,/127.0.0.1/);assert.deepEqual(calls,[['/usr/sbin/scutil',['--proxy']]]);
+ assert.equal(result.HTTP_PROXY,m.HTTP_PROXY);assert.equal(result.MYTV_SYSTEM_PROXY,'1');assert.match(result.NO_PROXY,/127.0.0.1/);assert.deepEqual(calls,[['/usr/sbin/scutil',['--proxy']]]);
  assert.deepEqual(await systemProxyEnvironment({env:{https_proxy:'http://explicit.example:80'},platform:'darwin',run:()=>assert.fail('显式配置不读取系统代理')}),{});
  const explicit=await systemProxyEnvironment({env:{no_proxy:'chosen.example'},platform:'darwin',run:async()=>({stdout:mac})});assert.equal(explicit.NO_PROXY,undefined);
  assert.deepEqual(await systemProxyEnvironment({env:{},platform:'win32',run:async()=>{throw Error('Unavailable');}}),{});

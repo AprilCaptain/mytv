@@ -34,6 +34,7 @@ static NSDictionary *StartRequest(NSString *port,BOOL lan){return @{@"action":@"
 @end
 @implementation Launcher
 - (void)applicationDidFinishLaunching:(NSNotification*)note {
+    NSImage *icon=[[NSImage alloc]initWithContentsOfFile:[NSBundle.mainBundle pathForResource:@"MyTV" ofType:@"icns"]];if(icon)NSApp.applicationIconImage=icon;
     NSMenu *menu=[NSMenu new];NSMenuItem *item=[NSMenuItem new];NSMenu *appMenu=[NSMenu new];[appMenu addItemWithTitle:@"退出 My TV" action:@selector(terminate:) keyEquivalent:@"q"];item.submenu=appMenu;[menu addItem:item];NSApp.mainMenu=menu;
     self.root=ProjectRoot();
     NSData *bookmark=[NSUserDefaults.standardUserDefaults dataForKey:@"projectAccess"];
@@ -96,6 +97,6 @@ static NSDictionary *StartRequest(NSString *port,BOOL lan){return @{@"action":@"
 
 int main(int argc,const char *argv[]){@autoreleasepool{
     NSArray *args=NSProcessInfo.processInfo.arguments;NSUInteger at=[args indexOfObject:@"--self-test"];
-    if(at!=NSNotFound){NSString *root=ProjectRoot(),*node=NodeExecutable();NSData *data=[NSJSONSerialization dataWithJSONObject:@{@"platform":@"macOS",@"root":root?:@"",@"node":node?:@"",@"start":StartRequest(@"3210",NO)} options:0 error:NULL];if(args.count>at+1)[data writeToFile:args[at+1] atomically:YES];printf("%s\n",[[[NSString alloc]initWithData:data encoding:NSUTF8StringEncoding] UTF8String]);return root&&node?0:1;}
+    if(at!=NSNotFound){NSString *root=ProjectRoot(),*node=NodeExecutable();NSData *data=[NSJSONSerialization dataWithJSONObject:@{@"platform":@"macOS",@"icon":([[NSImage alloc]initWithContentsOfFile:[NSBundle.mainBundle pathForResource:@"MyTV" ofType:@"icns"]]?@YES:@NO),@"root":root?:@"",@"node":node?:@"",@"start":StartRequest(@"3210",NO)} options:0 error:NULL];if(args.count>at+1)[data writeToFile:args[at+1] atomically:YES];printf("%s\n",[[[NSString alloc]initWithData:data encoding:NSUTF8StringEncoding] UTF8String]);return root&&node?0:1;}
     NSApplication *app=NSApplication.sharedApplication;__attribute__((objc_precise_lifetime)) Launcher *delegate=[Launcher new];app.delegate=delegate;[app setActivationPolicy:NSApplicationActivationPolicyRegular];[app run];
 }return 0;}

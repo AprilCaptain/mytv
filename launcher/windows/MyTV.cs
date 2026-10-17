@@ -36,7 +36,7 @@ static class Program {
     [STAThread] public static int Main(string[] args) {
         Application.EnableVisualStyles();Application.SetCompatibleTextRenderingDefault(false);
         var root=FindRoot();
-        if(args.Length>0&&args[0]=="--self-test") {var node=FindNode();var json=new JavaScriptSerializer().Serialize(new {platform="Windows",root=root??"",node=node??"",start=new {action="start",port=3210,lan=false}});if(args.Length>1)File.WriteAllText(args[1],json,new UTF8Encoding(false));return root==null||node==null?1:0;}
+        if(args.Length>0&&args[0]=="--self-test") {var node=FindNode();var json=new JavaScriptSerializer().Serialize(new {platform="Windows",root=root??"",node=node??"",icon=System.Drawing.Icon.ExtractAssociatedIcon(Application.ExecutablePath)!=null,start=new {action="start",port=3210,lan=false}});if(args.Length>1)File.WriteAllText(args[1],json,new UTF8Encoding(false));return root==null||node==null?1:0;}
         if(root==null) {using(var picker=new FolderBrowserDialog()){picker.Description="选择 My TV 项目文件夹";if(picker.ShowDialog()!=DialogResult.OK)return 0;root=picker.SelectedPath;}}
         Application.Run(new Launcher(root));return 0;
     }
@@ -53,7 +53,7 @@ sealed class Launcher : Form {
     Process bridge;StreamWriter input;bool quitting=false,allowQuit=false;
     static readonly Color Background=Color.FromArgb(18,23,18),TextColor=Color.FromArgb(228,235,222),Accent=Color.FromArgb(200,244,139);
     public Launcher(string project) {
-        root=project;Text="My TV";ClientSize=new Size(650,540);MinimumSize=new Size(610,520);StartPosition=FormStartPosition.CenterScreen;BackColor=Background;ForeColor=TextColor;Font=new Font("Segoe UI",10);
+        root=project;Icon=System.Drawing.Icon.ExtractAssociatedIcon(Application.ExecutablePath);Text="My TV";ClientSize=new Size(650,540);MinimumSize=new Size(610,520);StartPosition=FormStartPosition.CenterScreen;BackColor=Background;ForeColor=TextColor;Font=new Font("Segoe UI",10);
         var title=new Label {Text="▶  My TV",Font=new Font("Segoe UI",26,FontStyle.Bold),ForeColor=Accent,AutoSize=true,Location=new Point(24,20)};Controls.Add(title);
         Controls.Add(new Label {Text="启动服务，在浏览器中开始观影。",AutoSize=true,Location=new Point(25,76),ForeColor=Color.Silver});
         status.Text="正在连接控制器…";status.SetBounds(25,112,595,28);status.Font=new Font("Segoe UI",12,FontStyle.Bold);Controls.Add(status);

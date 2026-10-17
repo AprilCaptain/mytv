@@ -32,6 +32,7 @@ test('Release 两个平台上传完毕才公开，失败保留草稿、不覆盖
  const read=async(path,encoding)=>encoding?'版本改进说明。':bytes;
  const request=async(url,opts)=>{calls.push({url,...opts});
   if(opts.method==='GET')return new Response('',{status:404});
+  if(url.includes('uploads.github.com'))return Response.json({name:new URL(url).searchParams.get('name'),state:'uploaded',size:bytes.length});
   return Response.json(opts.method==='PATCH'?{id:12,draft:false,html_url:'https://github.com/AprilCaptain/mytv/releases/tag/'+tag}:{id:12,draft:true,assets:[]});};
  const result=await publishRelease({repo:'AprilCaptain/mytv',tag,token:'test-token',read,request});assert.equal(result.draft,false);
  assert.equal(calls.length,5);assert.equal(JSON.parse(calls[1].body).draft,true);assert.match(calls[2].url,/uploads\.github\.com.*macOS/);assert.match(calls[3].url,/Windows/);assert.equal(JSON.parse(calls[4].body).draft,false);assert.match(JSON.parse(calls[4].body).body,/SHA256/);
@@ -39,6 +40,9 @@ test('Release 两个平台上传完毕才公开，失败保留草稿、不覆盖
  await assert.rejects(publishRelease({repo:'AprilCaptain/mytv',tag,token:'test-token',read,request:async(url,opts)=>{
   if(opts.method==='PATCH')published=true;if(url.includes('uploads.github.com'))return new Response('',{status:500});return request(url,opts);
  }}),/发布请求失败/);assert.equal(published,false);
+ await assert.rejects(publishRelease({repo:'AprilCaptain/mytv',tag,token:'test-token',read,request:async(url,opts)=>{
+  if(url.includes('uploads.github.com'))return Response.json({state:'starter'});return request(url,opts);
+ }}),/尚未上传完整/);
  await assert.rejects(publishRelease({repo:'AprilCaptain/mytv',tag,token:'test-token',read,request:async()=>Response.json({draft:false,assets:[]})}),/不能覆盖/);
  assert.throws(()=>verifyTag('v999.0.0'),/标签必须/);
 });

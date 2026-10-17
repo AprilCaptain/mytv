@@ -25,7 +25,8 @@ export async function publishRelease({repo,tag,token,request=fetch,read=readFile
  if(!release)release=await api(base+'/releases',{method:'POST',body:{tag_name:tag,name:'My TV '+tag,body,draft:true,prerelease:false}});
  for(const file of files){
   const old=release.assets?.find(a=>a.name===file.name);if(old)await api(base+'/releases/assets/'+old.id,{method:'DELETE'});
-  await api('https://uploads.github.com/repos/'+repo+'/releases/'+release.id+'/assets?name='+encodeURIComponent(file.name),{method:'POST',body:file.bytes,raw:true});
+  const uploaded=await api('https://uploads.github.com/repos/'+repo+'/releases/'+release.id+'/assets?name='+encodeURIComponent(file.name),{method:'POST',body:file.bytes,raw:true});
+  if(uploaded.name!==file.name||uploaded.state!=='uploaded'||uploaded.size!==file.bytes.length)throw Error('发布包尚未上传完整，已保留草稿。');
  }
  const published=await api(base+'/releases/'+release.id,{method:'PATCH',body:{body,draft:false,make_latest:'true'}});
  console.log('已发布：'+published.html_url);return published;

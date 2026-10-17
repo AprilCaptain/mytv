@@ -20,7 +20,7 @@ export function releaseInfo(current,release,platform=process.platform){
  const page='https://github.com/AprilCaptain/mytv/releases/tag/'+tag;
  if(release.html_url!==page)throw Error('版本发布信息无法确认，请稍后再试。');
  const filename=platform==='darwin'?'My-TV-macOS.zip':platform==='win32'?'My-TV-Windows.zip':'';
- const asset=release.assets?.find(a=>a.name===filename&&a.state==='uploaded'&&Number(a.size)>0);
+ const asset=(Array.isArray(release.assets)?release.assets:[]).find(a=>a.name===filename&&a.state==='uploaded'&&Number(a.size)>0);
  const download='https://github.com/AprilCaptain/mytv/releases/download/'+tag+'/'+filename;
  if(!asset||asset.browser_download_url!==download)throw Error('对应系统的安装包尚未就绪，请稍后再试。');
  return {current,version,available:compareVersions(version,current)>0,url:page,

@@ -1,5 +1,7 @@
-name: Startup on macOS and Windows
+name: Build, test and release My TV
 on: [push, pull_request, workflow_dispatch]
+permissions:
+  contents: read
 jobs:
   startup:
     strategy:
@@ -16,6 +18,9 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.13'
+      - name: Verify release version
+        if: startsWith(github.ref, 'refs/tags/')
+        run: node scripts/publish-release.mjs --verify-tag
       - name: Prepare project dependencies through macOS launcher
         if: runner.os == 'macOS'
         shell: bash
@@ -61,6 +66,7 @@ jobs:
           cat "$RUNNER_TEMP/mytv-launcher.json"
           node --input-type=module -e 'import fs from "node:fs"; const v=JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP+"/mytv-launcher.json"));if(v.start.lan!==false||v.icon!==true)throw Error("Invalid native boolean");'
           lipo -info "My TV.app/Contents/MacOS/MyTV"
+          node --input-type=module -e 'import fs from "node:fs";if(JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP+"/mytv-launcher.json")).version!==JSON.parse(fs.readFileSync("package.json")).version)throw Error("Invalid launcher version");'
       - name: Verify Windows native executable
         if: runner.os == 'Windows'
         shell: pwsh
@@ -72,9 +78,31 @@ jobs:
           $value = Get-Content $output -Raw | ConvertFrom-Json
           if ($value.start.lan -isnot [bool] -or $value.start.lan) { throw 'Invalid native boolean' }
           if ($value.icon -ne $true) { throw 'Missing native icon' }
+          if ($value.version -ne (Get-Content package.json -Raw | ConvertFrom-Json).version) { throw 'Invalid launcher version' }
           Get-Content $output
       - uses: actions/upload-artifact@v4
         with:
           name: My-TV-${{ runner.os }}
           path: dist/My-TV-${{ runner.os }}.zip
           if-no-files-found: error
+  publish:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: startup
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: My-TV-*
+          merge-multiple: true
+          path: dist
+      - name: Publish both platforms after all checks succeed
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node scripts/publish-release.mjs

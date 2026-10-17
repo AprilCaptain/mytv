@@ -36,7 +36,7 @@ static class Program {
     [STAThread] public static int Main(string[] args) {
         Application.EnableVisualStyles();Application.SetCompatibleTextRenderingDefault(false);
         var root=FindRoot();
-        if(args.Length>0&&args[0]=="--self-test") {var node=FindNode();var json=new JavaScriptSerializer().Serialize(new {platform="Windows",root=root??"",node=node??"",icon=System.Drawing.Icon.ExtractAssociatedIcon(Application.ExecutablePath)!=null,start=new {action="start",port=3210,lan=false}});if(args.Length>1)File.WriteAllText(args[1],json,new UTF8Encoding(false));return root==null||node==null?1:0;}
+        if(args.Length>0&&args[0]=="--self-test") {var node=FindNode();var json=new JavaScriptSerializer().Serialize(new {platform="Windows",version=BuildInfo.Version,root=root??"",node=node??"",icon=System.Drawing.Icon.ExtractAssociatedIcon(Application.ExecutablePath)!=null,start=new {action="start",port=3210,lan=false}});if(args.Length>1)File.WriteAllText(args[1],json,new UTF8Encoding(false));return root==null||node==null?1:0;}
         if(root==null) {using(var picker=new FolderBrowserDialog()){picker.Description="选择 My TV 项目文件夹";if(picker.ShowDialog()!=DialogResult.OK)return 0;root=picker.SelectedPath;}}
         Application.Run(new Launcher(root));return 0;
     }
@@ -47,7 +47,8 @@ sealed class Launcher : Form {
     readonly Label status=new Label(),address=new Label();
     readonly NumericUpDown port=new NumericUpDown();
     readonly CheckBox lan=new CheckBox();
-    readonly Button start=new Button(),stop=new Button(),browse=new Button();
+    readonly Button start=new Button(),stop=new Button(),browse=new Button(),update=new Button();
+    string version=BuildInfo.Version;const string ReleasesPage="https://github.com/AprilCaptain/mytv/releases/latest";
     readonly TextBox log=new TextBox();
     readonly JavaScriptSerializer json=new JavaScriptSerializer();
     Process bridge;StreamWriter input;bool quitting=false,allowQuit=false;
@@ -56,6 +57,7 @@ sealed class Launcher : Form {
         root=project;Icon=System.Drawing.Icon.ExtractAssociatedIcon(Application.ExecutablePath);Text="My TV";ClientSize=new Size(650,540);MinimumSize=new Size(610,520);StartPosition=FormStartPosition.CenterScreen;BackColor=Background;ForeColor=TextColor;Font=new Font("Segoe UI",10);
         var title=new Label {Text="▶  My TV",Font=new Font("Segoe UI",26,FontStyle.Bold),ForeColor=Accent,AutoSize=true,Location=new Point(24,20)};Controls.Add(title);
         Controls.Add(new Label {Text="启动服务，在浏览器中开始观影。",AutoSize=true,Location=new Point(25,76),ForeColor=Color.Silver});
+        ConfigureButton(update,"检查更新 · v"+version,452,69,168);update.Height=29;update.Font=new Font("Segoe UI",9);update.Click+=delegate {if(bridge==null||bridge.HasExited){OpenRelease(ReleasesPage);return;}update.Enabled=false;update.Text="正在检查…";Send(new {action="update"});};
         status.Text="正在连接控制器…";status.SetBounds(25,112,595,28);status.Font=new Font("Segoe UI",12,FontStyle.Bold);Controls.Add(status);
         address.SetBounds(25,145,595,35);address.ForeColor=Color.Silver;Controls.Add(address);
         Controls.Add(new Label {Text="端口",AutoSize=true,Location=new Point(25,191)});
@@ -97,10 +99,20 @@ sealed class Launcher : Form {
             status.Text=Value(value,"message");status.ForeColor=running?Accent:TextColor;int p;if(Int32.TryParse(Value(value,"port"),out p)&&p>=1&&p<=65535)port.Value=p;lan.Checked=Value(value,"lan").ToLowerInvariant()=="true";
             start.Enabled=!busy&&!running&&!quitting;stop.Enabled=(running||phase=="preparing"||phase=="starting")&&!quitting;browse.Enabled=running&&!quitting;port.Enabled=!busy&&!running&&!quitting;lan.Enabled=port.Enabled;
             address.Text=running?Value(value,"url"):"";object urls;if(running&&value.TryGetValue("addresses",out urls)&&urls is System.Collections.IEnumerable&&!(urls is string))foreach(var u in (System.Collections.IEnumerable)urls)address.Text+="   "+u;
-        } else if(type=="log")Append(Value(value,"message"));
+        } else if(type=="meta"){version=Value(value,"version");update.Text="检查更新 · v"+version;}
+        else if(type=="update"){update.Enabled=true;update.Text="检查更新 · v"+version;if(!quitting)ShowUpdate(value,null);}
+        else if(type=="log")Append(Value(value,"message"));
         else if(type=="closed"){allowQuit=true;Close();}
-        else if(type=="error"){Append(Value(value,"message"));if(quitting){quitting=false;status.Text="停止未完成，请查看运行详情";stop.Enabled=true;}}
+        else if(type=="error"){Append(Value(value,"message"));if(Value(value,"action")=="update"){update.Enabled=true;update.Text="检查更新 · v"+version;if(!quitting)ShowUpdate(null,Value(value,"message"));}if(quitting){quitting=false;status.Text="停止未完成，请查看运行详情";stop.Enabled=true;}}
     }catch(Exception e){Append("控制信息无法读取："+e.Message);}}
+    void OpenRelease(string url){try{Process.Start(new ProcessStartInfo(url){UseShellExecute=true});}catch(Exception e){Append(e.Message);}}
+    void ShowUpdate(Dictionary<string,object> value,string error){
+        bool available=value!=null&&Value(value,"available").ToLowerInvariant()=="true";
+        string notes=value==null?"":Value(value,"notes");if(notes.Length>1400)notes=notes.Substring(0,1400)+"\n完整说明请查看发布页。";
+        string title=error!=null?"暂时无法检查更新":available?"发现新版本 v"+Value(value,"version"):"当前已是最新版本 · v"+version;
+        string detail=error??(notes+"\n\n"+Value(value,"guide"));
+        if(MessageBox.Show(this,detail+"\n\n是否打开版本发布页？",title,MessageBoxButtons.YesNo,MessageBoxIcon.Information)==DialogResult.Yes)OpenRelease(value==null?ReleasesPage:Value(value,"url"));
+    }
     void Send(object value){try{if(input!=null)input.WriteLine(json.Serialize(value));}catch(Exception e){Append(e.Message);}}
     void ClosingWindow(object sender,FormClosingEventArgs e){if(allowQuit)return;if(bridge==null||bridge.HasExited)return;e.Cancel=true;if(quitting)return;quitting=true;status.Text="正在停止并释放端口…";start.Enabled=false;stop.Enabled=false;browse.Enabled=false;Send(new {action="quit"});}
 }

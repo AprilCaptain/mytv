@@ -4,11 +4,15 @@
 
 ## 图形启动器（推荐）
 
-从 [GitHub Actions](https://github.com/AprilCaptain/mytv/actions/workflows/startup.yml) 最近一次成功构建下载对应系统的 `My-TV-macOS` 或 `My-TV-Windows` 附件，解压附件及其中的 ZIP。包内已包含项目源码与启动器：macOS 双击 `My TV.app`，Windows 双击 `My TV.exe`；无需选择命令行脚本。启动器内置统一的浅绿色播放图标，应用文件、Dock / 任务栏与窗口使用同一标识。Mac 包同时支持 Apple Silicon / Intel，Windows 启动器使用系统 .NET Framework，不需要 Electron 或额外 Python GUI 库。
+从 [最新正式版本](https://github.com/AprilCaptain/mytv/releases/latest) 下载 `My-TV-macOS.zip` 或 `My-TV-Windows.zip`，完整解压。请选这两个成品包，Source code 归档只有源码。包内已包含项目源码与启动器：macOS 双击 `My TV.app`，Windows 双击 `My TV.exe`；无需选择命令行脚本。启动器内置统一的浅绿色播放图标，应用文件、Dock / 任务栏与窗口使用同一标识。Mac 包同时支持 Apple Silicon / Intel，Windows 启动器使用系统 .NET Framework，不需要 Electron 或额外 Python GUI 库。
 
-窗口提供「启动服务」「停止服务」「打开观影网页」，可设置端口和「允许局域网访问」。**关闭窗口或退出应用，会同时停止当前项目在所选端口上的 My TV，并等待端口释放**；观看历史保留。重复打开会识别已有实例；端口或访问模式需要先停止再修改。无法确认为当前项目的服务不会被结束；冲突时可更换端口。窗口本身通过私有进程管道控制服务，不另占管理端口。
+窗口提供「启动服务」「停止服务」「打开观影网页」及「检查更新」，显示当前版本；更新检查展示版本说明并打开发布页，不自动替换文件。可设置端口和「允许局域网访问」。**关闭窗口或退出应用，会同时停止当前项目在所选端口上的 My TV，并等待端口释放**；观看历史保留。重复打开会识别已有实例；端口或访问模式需要先停止再修改。无法确认为当前项目的服务不会被结束；冲突时可更换端口。窗口本身通过私有进程管道控制服务，不另占管理端口。
 
-启动前仍需自行安装下述 Node / Python 运行时；项目依赖由启动器检查并补齐。Mac 首次使用会请你选择项目文件夹，以授权读取项目与保存历史，后续会记住该目录；Windows 仅在找不到项目时提示选择。建议启动器与项目放在同一文件夹。源码仓库不提交平台二进制文件，开发者可在对应系统执行 `npm run build:launcher` 生成原生入口，或 `npm run package:launcher` 生成不含历史、依赖及本机凭证的完整分享包（需 Git；Mac 编译还需 Xcode Command Line Tools）。普通用户使用 Actions 包，无需编译工具。图标源文件与生成后的 `.icns` / `.ico` 位于 `launcher/assets/`；调整设计后可在 Mac 执行 `npm run icons:launcher` 重新生成，普通构建不增加图像处理依赖。原生入口未使用开发者证书签名 / 公证，首次运行可能出现系统提示。
+启动前仍需自行安装下述 Node / Python 运行时；项目依赖由启动器检查并补齐。Mac 首次使用会请你选择项目文件夹，以授权读取项目与保存历史，后续会记住该目录；Windows 仅在找不到项目时提示选择。建议启动器与项目放在同一文件夹。源码仓库不提交平台二进制文件，开发者可在对应系统执行 `npm run build:launcher` 生成原生入口，或 `npm run package:launcher` 生成不含历史、依赖及本机凭证的完整分享包（需 Git；Mac 编译还需 Xcode Command Line Tools）。普通用户使用 Release 包，无需编译工具；[Actions 开发构建](https://github.com/AprilCaptain/mytv/actions/workflows/startup.yml) 仍保留。图标源文件与生成后的 `.icns` / `.ico` 位于 `launcher/assets/`；调整设计后可在 Mac 执行 `npm run icons:launcher` 重新生成，普通构建不增加图像处理依赖。原生入口未使用开发者证书签名 / 公证，首次运行可能出现系统提示。
+
+## 更新
+
+退出旧启动器，将新版 ZIP 解压到新目录，在首次启动新版之前复制旧目录的整个 `data` 文件夹，保留旧目录作为备份。不要迁移 `.venv`，项目依赖会在新目录重新准备。Git 用户可保留原目录执行 `git pull --ff-only`；原生启动器有变化时需重新构建。详见 [更新与版本发布](docs/UPDATING.md)。
 
 ## 命令行启动（保留入口）
 
@@ -194,7 +198,7 @@ Windows PowerShell：
 
 ## 分享到 GitHub
 
-上传源代码、启动入口、scripts、public、lib、测试及两个依赖锁文件即可。`.gitignore` 已排除 `data`、`.runtime`、`.venv`、node_modules、测试截图和日志；通过 Git 提交时不上传观看历史或本机安装环境。接收者自行安装兼容 Node / Python，启动脚本再准备依赖和空历史数据库，不能跨平台复制 node_modules / .venv 使用。
+上传源代码、启动入口、scripts、public、lib、测试及两个依赖锁文件即可。普通用户下载 Releases 完整包，可同时获得原生启动器。`.gitignore` 已排除 `data`、`.runtime`、`.venv`、node_modules、测试截图和日志；通过 Git 提交时不上传观看历史或本机安装环境。接收者自行安装兼容 Node / Python，启动脚本再准备依赖和空历史数据库，不能跨平台复制 node_modules / .venv 使用。
 
 ## 主要文件
 

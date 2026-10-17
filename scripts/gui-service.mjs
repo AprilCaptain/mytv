@@ -7,12 +7,17 @@ const delay=ms=>new Promise(r=>setTimeout(r,ms));
 const exited=child=>!child||child.exitCode!==null||child.signalCode!==null;
 export function validPort(value){const port=Number(value);if(!Number.isInteger(port)||port<1||port>65535)throw new Error('端口必须是 1–65535 之间的整数。');return port;}
 export async function terminateTree(child){
- if(exited(child))return;
+ if(!child?.pid)return;
+ const alive=()=>{if(process.platform==='win32')return !exited(child);try{process.kill(-child.pid,0);return true;}catch{return !exited(child);}};
+ if(!alive())return;
  if(process.platform==='win32')await new Promise(resolve=>execFile('taskkill.exe',['/PID',String(child.pid),'/T','/F'],{windowsHide:true,timeout:5000},()=>resolve()));
  else {try{process.kill(-child.pid,'SIGTERM');}catch{try{child.kill('SIGTERM');}catch{}}}
- for(let i=0;i<50&&!exited(child);i++)await delay(100);
- if(!exited(child)&&process.platform!=='win32'){try{process.kill(-child.pid,'SIGKILL');}catch{}}
- if(!exited(child))throw new Error('进程尚未结束，请稍后再试。');
+ for(let i=0;i<50&&alive();i++)await delay(100);
+ if(alive()&&process.platform!=='win32'){
+  try{process.kill(-child.pid,'SIGKILL');}catch{try{child.kill('SIGKILL');}catch{}}
+  for(let i=0;i<30&&alive();i++)await delay(100);
+ }
+ if(alive())throw new Error('进程尚未结束，请稍后再试。');
 }
 export class GuiService {
  constructor(root,{port=3210,emit=()=>{},prepare}={}){
@@ -31,10 +36,10 @@ export class GuiService {
    detached:process.platform!=='win32',windowsHide:true,stdio:['ignore','pipe','pipe']});
   this.attachLogs(child);return child;
  }
- async refresh(){if(this.busy||this.closing)return this.snapshot();const active=await managedServer(this.root,this.port);
-  if(this.busy||this.closing)return this.snapshot();
+ async refresh(){if(this.busy||this.closing)return this.snapshot();const generation=this.generation,active=await managedServer(this.root,this.port);
+  if(this.busy||this.closing||generation!==this.generation)return this.snapshot();
   const available=active?false:await portAvailable(this.port);
-  if(this.busy||this.closing)return this.snapshot();
+  if(this.busy||this.closing||generation!==this.generation)return this.snapshot();
   if(active){this.control=active;this.lan=active.mode==='lan';if(this.phase!=='running')this.state('running','服务正在运行');}
   else if(available){this.control=null;if(this.phase==='running'||this.phase==='occupied')this.state('stopped','服务已停止，端口已释放');}
   else if(this.phase!=='occupied')this.state('occupied','此端口被其他程序或无法确认的服务占用，请更换端口。');

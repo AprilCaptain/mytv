@@ -17,7 +17,8 @@ test('图形控制器可启动、复用、停止并关闭服务，关闭后端�
  await second.stop();assert.ok(await portAvailable(p));await first.refresh();assert.equal(first.phase,'stopped');await first.start();assert.equal(first.phase,'running');await first.close();assert.ok(await portAvailable(p));
 });
 test('启动期间关闭会结束依赖准备及子进程，不能迟到启动服务',async t=>{
- const root=await fixture(t,'import {spawn} from "node:child_process";import {writeFileSync} from "node:fs";const c=spawn(process.execPath,["-e","setInterval(()=>{},1000)"],{stdio:"ignore"});writeFileSync("preparing-child.pid",String(c.pid));setInterval(()=>{},1000);'),p=await port(),gui=new GuiService(root,{port:p});t.after(()=>gui.close());
+ const childCode='process.on("SIGTERM",()=>{});require("node:fs").writeFileSync("preparing-child.pid",String(process.pid));setInterval(()=>{},1000);';
+ const root=await fixture(t,`import {spawn} from "node:child_process";spawn(process.execPath,["-e",${JSON.stringify(childCode)}],{stdio:"ignore"});setInterval(()=>{},1000);`),p=await port(),gui=new GuiService(root,{port:p});t.after(()=>gui.close());
  const starting=gui.start();await until(async()=>{try{return Boolean(await readFile(join(root,'preparing-child.pid')));}catch{return false;}});
  const child=Number(await readFile(join(root,'preparing-child.pid'),'utf8'));await gui.close();await starting;await pause(150);assert.ok(await portAvailable(p));
  await until(()=>{try{process.kill(child,0);return false;}catch{return true;}});

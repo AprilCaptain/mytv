@@ -1,0 +1,2236 @@
+{
+  "schemaVersion": 1,
+  "notes": [
+    "仅溯源索引，不能作为播放配置导入；未保存请求头、凭证、内联 ext 或播放地址。",
+    "URL 去除用户信息、查询参数和片段；可能不足以重建插件参数。",
+    "originalAuthor 为 null 表示未确认，仓库持有人仅作为配置或规则托管者。",
+    "条目分类仅依据声明类型及脚本后缀，不代表平台实际支持或可播。"
+  ],
+  "configurations": [
+    {
+      "configUrl": "https://raw.githubusercontent.com/qist/tvbox/master/jsm.json",
+      "checkedAt": "2026-10-18T05:28:08.468Z",
+      "totalDefinitions": 151,
+      "definitionKinds": {
+        "js": 25,
+        "android_or_other": 104,
+        "python": 7,
+        "http": 15
+      },
+      "scope": "all declared entries, including non-viewing and unsupported entries; not an eligibility or playback report",
+      "entries": [
+        {
+          "key": "drpy_js_豆瓣",
+          "name": "搜索 • 豆瓣",
+          "kind": "js",
+          "apiReference": "https://raw.githubusercontent.com/qist/tvbox/master/lib/drpy2.min.js",
+          "pluginClass": null,
+          "extReference": "https://raw.githubusercontent.com/qist/tvbox/master/js/drpy.js",
+          "originalAuthor": null
+        },
+        {
+          "key": "配置中心",
+          "name": "配置 • 中心",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_Config",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "本地",
+          "name": "本地 • 视频",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_LocalFile",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "预告",
+          "name": "新片 • 预告",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_YGP",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "新闪雷",
+          "name": "新闪雷 • MP4",
+          "kind": "js",
+          "apiReference": "https://raw.githubusercontent.com/qist/tvbox/master/lib/drpy2.min.js",
+          "pluginClass": null,
+          "extReference": "https://raw.githubusercontent.com/qist/tvbox/master/js/新闪雷.js",
+          "originalAuthor": null
+        },
+        {
+          "key": "fyyy",
+          "name": "飞宇影院",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_XBPQ",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "cupfox_in",
+          "name": "茶杯狐 • cupfox.in",
+          "kind": "js",
+          "apiReference": "https://raw.githubusercontent.com/qist/tvbox/master/lib/drpy2.min.js",
+          "pluginClass": null,
+          "extReference": "https://raw.githubusercontent.com/qist/tvbox/master/js/茶杯狐.js",
+          "originalAuthor": null
+        },
+        {
+          "key": "italkbbtv",
+          "name": "ITalkBB • 外",
+          "kind": "python",
+          "apiReference": "https://raw.githubusercontent.com/qist/tvbox/master/py/ITalkBBTV.py",
+          "pluginClass": null,
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "OleLive",
+          "name": "欧乐影院 • 外",
+          "kind": "python",
+          "apiReference": "https://raw.githubusercontent.com/qist/tvbox/master/py/OleLive.py",
+          "pluginClass": null,
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "华数",
+          "name": "华数 • 影视",
+          "kind": "python",
+          "apiReference": "https://raw.githubusercontent.com/qist/tvbox/master/py/华数.py",
+          "pluginClass": null,
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "华谊影视",
+          "name": "华谊 • 影视",
+          "kind": "python",
+          "apiReference": "https://raw.githubusercontent.com/qist/tvbox/master/py/华谊影视.py",
+          "pluginClass": null,
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "Didahd",
+          "name": "嘀嗒影视",
+          "kind": "python",
+          "apiReference": "https://raw.githubusercontent.com/qist/tvbox/master/py/Didahd.py",
+          "pluginClass": null,
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "TVB云播",
+          "name": "TVB云播",
+          "kind": "python",
+          "apiReference": "https://raw.githubusercontent.com/qist/tvbox/master/py/TVB云播.py",
+          "pluginClass": null,
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "热播影视",
+          "name": "热播 • APP",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_AppRJ",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "一起影视",
+          "name": "一起 • APP",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_AppYQK",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "番茄影视",
+          "name": "番茄 • APP",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_AppFQ",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "咕噜",
+          "name": "咕噜 • APP",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_Gulu",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "布布",
+          "name": "布布 • APP",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_YunDuo",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "马猴影视",
+          "name": "马猴 • APP",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_App3Q",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "韩圈",
+          "name": "韩圈 • APP",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_Hxq",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "剧圈99",
+          "name": "剧圈 • APP",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_App99",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "半日99",
+          "name": "半日 • APP",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_App99",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "天堂",
+          "name": "天堂 • APP",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_AppDrama",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "橘汁",
+          "name": "橘汁 • APP",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_AppDrama",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "华谊",
+          "name": "华谊 • APP",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_AppDrama",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "苹果",
+          "name": "苹果 • APP",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_AppDrama",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "蓝鹰",
+          "name": "蓝鹰 • APP",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_AppQi",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "蓝鸟",
+          "name": "蓝鸟 • APP",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_AppQi",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "王子",
+          "name": "王子 • APP",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_AppGet",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "茉莉Get",
+          "name": "茉莉 • APP",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_AppGet",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "哔哩合集",
+          "name": "哔哩 • 合集",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_Bili",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "哔哩视频",
+          "name": "哔哩 • 视频",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_BiliYS",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "玩偶",
+          "name": "玩偶 • 4K",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_Wogg",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "快映",
+          "name": "快映 • 4K",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_PanWebShare",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "木偶",
+          "name": "木偶 • 4K",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_PanWebShare",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "闪电",
+          "name": "闪电 • 4K",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_PanWebShare",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "蜡笔",
+          "name": "蜡笔 • 4K",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_PanWebShare",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "多多",
+          "name": "多多 • 4K",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_PanWebShare",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "八零",
+          "name": "八零 • 4K",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_PanWebShare",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "虎斑",
+          "name": "虎斑 • 4K",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_PanWebShare",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "花卷",
+          "name": "花卷 • 4K",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_PanWebShareHJ",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "种子",
+          "name": "种子 • 4K",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_SeedHub",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "指南",
+          "name": "指南 • 4K",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_4KZhinan",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "茉莉",
+          "name": "茉莉 • 4K",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_HDmoli",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "爱盼",
+          "name": "爱盼 • 4K",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_AiPan",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "移动",
+          "name": "移动 • 4K",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_Yidong4K",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "人人",
+          "name": "人人 • 4K",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_RenRen",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "即刻",
+          "name": "即刻 • 4K",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_Jike",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "双星",
+          "name": "双星 • 4K",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_ShuangXing",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "卡卡",
+          "name": "卡卡 • 4K",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_KKPan",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "七猫短剧",
+          "name": "七猫 • 短剧",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_ShortQimao",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "河马短剧",
+          "name": "河马 • 短剧",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_ShortHema",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "围观短剧",
+          "name": "围观 • 短剧",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_ShortWeiguan",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "好看短剧",
+          "name": "好看 • 短剧",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_ShortHaokan",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "星芽短剧",
+          "name": "星芽 • 短剧",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_ShortXingya",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "果果短剧",
+          "name": "果果 • 短剧",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_XBPQ",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "飞娱影视",
+          "name": "飞娱 • 影视",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_Feiyu",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "旺旺影视",
+          "name": "旺旺 • 影视",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_Wwys",
+          "extReference": "https://vip.wwgz.cn:5200",
+          "originalAuthor": null
+        },
+        {
+          "key": "独播影视",
+          "name": "独播 • 影视",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_Duboku",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "瓜子影视",
+          "name": "瓜子 • 影视",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_Gz360",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "厂长影视",
+          "name": "厂长 • 影视",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_Czsapp",
+          "extReference": "https://cz01.vip",
+          "originalAuthor": null
+        },
+        {
+          "key": "金牌影视",
+          "name": "金牌 • 影视",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_Jpys",
+          "extReference": "https://y2s52n7.com,https//m.hkybqufgh.com,https://m.sizhengxt.com,https://m.9zhoukj.com,https://m.sizhengxt.com,https://m.jiabaide.cn",
+          "originalAuthor": null
+        },
+        {
+          "key": "骚火影视",
+          "name": "骚火 • 影视",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_SaoHuo",
+          "extReference": "https://shdy5.us",
+          "originalAuthor": null
+        },
+        {
+          "key": "枫叶影视",
+          "name": "枫叶 • 影视",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_FengYe",
+          "extReference": "https://www.vip1949.com/",
+          "originalAuthor": null
+        },
+        {
+          "key": "爱看机器人",
+          "name": "爱看 • 影视",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_Ikanbot",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "面包影视",
+          "name": "面包 • 影视",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_XBPQ",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "1905",
+          "name": "1905 • 影视",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_Web1905",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "番社动漫",
+          "name": "番社 • 动漫",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_XBPQ",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "巴士动漫",
+          "name": "巴士 • 动漫",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_XBPQ",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "荐片",
+          "name": "荐片 • 磁力",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_JianPian",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "New6v",
+          "name": "New6V • 磁力",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_New6v",
+          "extReference": "https://www.xb6v.com",
+          "originalAuthor": null
+        },
+        {
+          "key": "美剧迷",
+          "name": "美剧迷 • 磁力",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_MeijuMi",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "迅雷吧",
+          "name": "迅雷吧 • 磁力",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_Xunlei8",
+          "extReference": "https://xunlei8.me",
+          "originalAuthor": null
+        },
+        {
+          "key": "阿里云盘",
+          "name": "阿里 • 云盘",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_PanAli",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "夸克网盘",
+          "name": "夸克 • 网盘",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_PanQuark",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "UC网盘",
+          "name": "UC • 网盘",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_PanUC",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "百度网盘",
+          "name": "百度 • 网盘",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_PanBaidu",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "迅雷云盘",
+          "name": "迅雷 • 云盘",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_PanXunlei",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "光鸭云盘",
+          "name": "光鸭 • 云盘",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_PanGuangya",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "天翼云盘",
+          "name": "天翼 • 云盘",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_PanTianyi",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "123云盘",
+          "name": "123 • 云盘",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_Pan123",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "觅盘",
+          "name": "觅盘 • 搜索",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_MiPan",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "盘搜",
+          "name": "盘搜 • 搜索",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_PanSou",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "百酷",
+          "name": "百酷 • 搜索",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_Baiku",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "酷乐",
+          "name": "酷乐 • 搜索",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_KuLe",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "鬼鬼",
+          "name": "鬼鬼 • 搜索",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_GuiGui",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "趣盘",
+          "name": "趣盘 • 搜索",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_QuPanSo",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "88看球",
+          "name": "88 • 看球",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_Sports88",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "飞球体育",
+          "name": "飞球 • 体育",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_SportsFeiqiu",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "瓜子体育",
+          "name": "瓜子 • 体育",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_SportsGuazi",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "咖啡体育",
+          "name": "咖啡 • 体育",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_SportsKafei",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "呦呦DJ",
+          "name": "呦呦 • DJ",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_Djuu",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "蜻蜓FM",
+          "name": "蜻蜓 • FM",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_QingtingFM",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "听友听书",
+          "name": "听友 • 听书",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_TingTingyou",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "世界听书",
+          "name": "世界 • 听书",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_TingShijie",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "堇夏听书",
+          "name": "堇夏 • 听书",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_TingJinxia",
+          "extReference": "https://m.ting15.com",
+          "originalAuthor": null
+        },
+        {
+          "key": "博看听书",
+          "name": "博看 • 听书",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_TingBokan",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "戏曲多多",
+          "name": "戏曲 • 多多",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_AppLY",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "童趣",
+          "name": "童趣 • 儿童",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_TongQu",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "兔小贝",
+          "name": "兔小贝 • 儿童",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_TuXiaoBei",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "贝乐虎",
+          "name": "贝乐虎 • 儿童",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_BeiLeHu",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "哔哩哔哩音乐",
+          "name": "哔哩 • 音乐",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_Bili",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "哔哩哔哩听书",
+          "name": "哔哩 • 听书",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_Bili",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "哔哩哔哩相声",
+          "name": "哔哩 • 相声",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_Bili",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "哔哩哔哩小品",
+          "name": "哔哩 • 小品",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_Bili",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "哔哩哔哩戏曲",
+          "name": "哔哩 • 戏曲",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_Bili",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "少儿教育",
+          "name": "少儿 • 教育",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_Bili",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "小学课堂",
+          "name": "小学 • 课堂",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_Bili",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "初中课堂",
+          "name": "初中 • 课堂",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_Bili",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "高中课堂",
+          "name": "高中 • 课堂",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_Bili",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "急救教学",
+          "name": "急救 • 教学",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_FirstAid",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "养生堂",
+          "name": "养生 • 知识",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_YST",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "电影天堂",
+          "name": "影视 • 电影天堂",
+          "kind": "http",
+          "apiReference": "http://caiji.dyttzyapi.com/api.php/provide/vod",
+          "pluginClass": null,
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "天涯采集",
+          "name": "影视 • 天涯",
+          "kind": "http",
+          "apiReference": "http://tyyszy.com/api.php/provide/vod",
+          "pluginClass": null,
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "量子",
+          "name": "影视 • 量子[直连]",
+          "kind": "http",
+          "apiReference": "https://cj.lziapi.com/api.php/provide/vod/",
+          "pluginClass": null,
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "非凡",
+          "name": "影视 • 非凡[直连]",
+          "kind": "http",
+          "apiReference": "http://ffzy.tv/api.php/provide/vod/",
+          "pluginClass": null,
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "索尼",
+          "name": "影视 • 索尼[直连]",
+          "kind": "http",
+          "apiReference": "https://suoniapi.com/api.php/provide/vod/at/xml/",
+          "pluginClass": null,
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "卧龙资源",
+          "name": "影视 • 卧龙资源[直连]",
+          "kind": "http",
+          "apiReference": "https://wolongzyw.com/api.php/provide/vod/",
+          "pluginClass": null,
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "U酷资源風",
+          "name": "影视 • 尤酷[直连]",
+          "kind": "http",
+          "apiReference": "https://api.ukuapi.com/api.php/provide/vod/",
+          "pluginClass": null,
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "极速资源",
+          "name": "影视 • 极速[直连]",
+          "kind": "http",
+          "apiReference": "https://jszyapi.com/api.php/provide/vod/",
+          "pluginClass": null,
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "建安采集",
+          "name": "影视 • 建安",
+          "kind": "http",
+          "apiReference": "http://154.219.117.232:9981/jacloudapi.php/provide/vod",
+          "pluginClass": null,
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "金蝉采集",
+          "name": "影视 • 金蝉",
+          "kind": "http",
+          "apiReference": "https://zy.jinchancaiji.com/api.php/provide/vod",
+          "pluginClass": null,
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "小绵阳采集",
+          "name": "影视 • 小绵阳",
+          "kind": "http",
+          "apiReference": "https://vs.okcdn100.top/api.php/provide/vod",
+          "pluginClass": null,
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "789采集",
+          "name": "789采集",
+          "kind": "http",
+          "apiReference": "https://zy.jinchancaiji.com/api.php/provide/vod/",
+          "pluginClass": null,
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "率率",
+          "name": "影视 • 率率[直连]",
+          "kind": "http",
+          "apiReference": "https://suoniapi.com/api.php/provide/vod/",
+          "pluginClass": null,
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "百度",
+          "name": "百度",
+          "kind": "http",
+          "apiReference": "https://api.apibdzy.com/api.php/provide/vod",
+          "pluginClass": null,
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "暴風",
+          "name": "影视 • 暴風[直连]",
+          "kind": "http",
+          "apiReference": "https://bfzyapi.com/api.php/provide/vod/",
+          "pluginClass": null,
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "Ncat",
+          "name": "网飞猫",
+          "kind": "python",
+          "apiReference": "https://raw.githubusercontent.com/qist/tvbox/master/py/Ncat.py",
+          "pluginClass": null,
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "drpy_js_360影视",
+          "name": "官源 • 360",
+          "kind": "js",
+          "apiReference": "https://raw.githubusercontent.com/qist/tvbox/master/lib/drpy2.min.js",
+          "pluginClass": null,
+          "extReference": "https://raw.githubusercontent.com/qist/tvbox/master/js/360影视.js",
+          "originalAuthor": null
+        },
+        {
+          "key": "drpy_js_百忙无果",
+          "name": "官源 • 芒果",
+          "kind": "js",
+          "apiReference": "https://raw.githubusercontent.com/qist/tvbox/master/lib/drpy2.min.js",
+          "pluginClass": null,
+          "extReference": "https://raw.githubusercontent.com/qist/tvbox/master/js/百忙无果.js",
+          "originalAuthor": null
+        },
+        {
+          "key": "drpy_js_腾云驾雾",
+          "name": "官源 • 腾讯",
+          "kind": "js",
+          "apiReference": "https://raw.githubusercontent.com/qist/tvbox/master/lib/drpy2.min.js",
+          "pluginClass": null,
+          "extReference": "https://raw.githubusercontent.com/qist/tvbox/master/js/腾云驾雾.js",
+          "originalAuthor": null
+        },
+        {
+          "key": "drpy_js_奇珍异兽",
+          "name": "官源 • 爱奇艺",
+          "kind": "js",
+          "apiReference": "https://raw.githubusercontent.com/qist/tvbox/master/lib/drpy2.min.js",
+          "pluginClass": null,
+          "extReference": "https://raw.githubusercontent.com/qist/tvbox/master/js/奇珍异兽.js",
+          "originalAuthor": null
+        },
+        {
+          "key": "drpy_js_菜狗",
+          "name": "官源 • 搜狗",
+          "kind": "js",
+          "apiReference": "https://raw.githubusercontent.com/qist/tvbox/master/lib/drpy2.min.js",
+          "pluginClass": null,
+          "extReference": "https://raw.githubusercontent.com/qist/tvbox/master/js/菜狗.js",
+          "originalAuthor": null
+        },
+        {
+          "key": "drpy_js_优酷",
+          "name": "官源 • 优酷",
+          "kind": "js",
+          "apiReference": "https://raw.githubusercontent.com/qist/tvbox/master/lib/drpy2.min.js",
+          "pluginClass": null,
+          "extReference": "https://raw.githubusercontent.com/qist/tvbox/master/js/优酷.js",
+          "originalAuthor": null
+        },
+        {
+          "key": "drpy_js_Anime1动畫",
+          "name": "动漫 • Anime1动畫",
+          "kind": "js",
+          "apiReference": "https://raw.githubusercontent.com/qist/tvbox/master/lib/drpy2.min.js",
+          "pluginClass": null,
+          "extReference": "https://raw.githubusercontent.com/qist/tvbox/master/js/Anime1动畫.js",
+          "originalAuthor": null
+        },
+        {
+          "key": "drpy_js_NT动漫",
+          "name": "动漫 • NT动漫",
+          "kind": "js",
+          "apiReference": "https://raw.githubusercontent.com/qist/tvbox/master/lib/drpy2.min.js",
+          "pluginClass": null,
+          "extReference": "https://raw.githubusercontent.com/qist/tvbox/master/js/NT动漫.js",
+          "originalAuthor": null
+        },
+        {
+          "key": "drpy_js_路漫漫",
+          "name": "动漫 • 路漫漫",
+          "kind": "js",
+          "apiReference": "https://raw.githubusercontent.com/qist/tvbox/master/lib/drpy2.min.js",
+          "pluginClass": null,
+          "extReference": "https://raw.githubusercontent.com/qist/tvbox/master/js/路漫漫.js",
+          "originalAuthor": null
+        },
+        {
+          "key": "drpy_js_去看吧",
+          "name": "动漫 • 去看吧",
+          "kind": "js",
+          "apiReference": "https://raw.githubusercontent.com/qist/tvbox/master/lib/drpy2.min.js",
+          "pluginClass": null,
+          "extReference": "https://raw.githubusercontent.com/qist/tvbox/master/js/去看吧.js",
+          "originalAuthor": null
+        },
+        {
+          "key": "drpy_js_A8音乐",
+          "name": "音频 • A8音乐",
+          "kind": "js",
+          "apiReference": "https://raw.githubusercontent.com/qist/tvbox/master/lib/drpy2.min.js",
+          "pluginClass": null,
+          "extReference": "https://raw.githubusercontent.com/qist/tvbox/master/js/A8音乐.js",
+          "originalAuthor": null
+        },
+        {
+          "key": "drpy_js_DJ音乐",
+          "name": "音频 • DJ音乐",
+          "kind": "js",
+          "apiReference": "https://raw.githubusercontent.com/qist/tvbox/master/lib/drpy2.min.js",
+          "pluginClass": null,
+          "extReference": "https://raw.githubusercontent.com/qist/tvbox/master/js/DJ音乐.js",
+          "originalAuthor": null
+        },
+        {
+          "key": "drpy_js_蜻蜓FM",
+          "name": "广播 • 蜻蜓FM",
+          "kind": "js",
+          "apiReference": "https://raw.githubusercontent.com/qist/tvbox/master/lib/drpy2.min.js",
+          "pluginClass": null,
+          "extReference": "https://raw.githubusercontent.com/qist/tvbox/master/js/蜻蜓FM.js",
+          "originalAuthor": null
+        },
+        {
+          "key": "drpy_js_爱上你听书网",
+          "name": "听书 • 爱上你听书",
+          "kind": "js",
+          "apiReference": "https://raw.githubusercontent.com/qist/tvbox/master/lib/drpy2.min.js",
+          "pluginClass": null,
+          "extReference": "https://raw.githubusercontent.com/qist/tvbox/master/js/爱上你听书网.js",
+          "originalAuthor": null
+        },
+        {
+          "key": "drpy_js_博看听书",
+          "name": "听书 • 博看听书",
+          "kind": "js",
+          "apiReference": "https://raw.githubusercontent.com/qist/tvbox/master/lib/drpy2.min.js",
+          "pluginClass": null,
+          "extReference": "https://raw.githubusercontent.com/qist/tvbox/master/js/博看听书.js",
+          "originalAuthor": null
+        },
+        {
+          "key": "drpy_js_海洋听书",
+          "name": "听书 • 海洋听书",
+          "kind": "js",
+          "apiReference": "https://raw.githubusercontent.com/qist/tvbox/master/lib/drpy2.min.js",
+          "pluginClass": null,
+          "extReference": "https://raw.githubusercontent.com/qist/tvbox/master/js/海洋听书.js",
+          "originalAuthor": null
+        },
+        {
+          "key": "drpy_js_有声小说",
+          "name": "听书 • 有声小说",
+          "kind": "js",
+          "apiReference": "https://raw.githubusercontent.com/qist/tvbox/master/lib/drpy2.min.js",
+          "pluginClass": null,
+          "extReference": "https://raw.githubusercontent.com/qist/tvbox/master/js/有声小说吧.js",
+          "originalAuthor": null
+        },
+        {
+          "key": "drpy_js_播客",
+          "name": "聚合 • 播客",
+          "kind": "js",
+          "apiReference": "https://raw.githubusercontent.com/qist/tvbox/master/lib/drpy2.min.js",
+          "pluginClass": null,
+          "extReference": "https://raw.githubusercontent.com/qist/tvbox/master/js/播客.js",
+          "originalAuthor": null
+        },
+        {
+          "key": "drpy_js_酷6网",
+          "name": "聚合 • 酷6网",
+          "kind": "js",
+          "apiReference": "https://raw.githubusercontent.com/qist/tvbox/master/lib/drpy2.min.js",
+          "pluginClass": null,
+          "extReference": "https://raw.githubusercontent.com/qist/tvbox/master/js/酷6网.js",
+          "originalAuthor": null
+        },
+        {
+          "key": "drpy_js_网易公版影像",
+          "name": "聚合 • 网易公版",
+          "kind": "js",
+          "apiReference": "https://raw.githubusercontent.com/qist/tvbox/master/lib/drpy2.min.js",
+          "pluginClass": null,
+          "extReference": "https://raw.githubusercontent.com/qist/tvbox/master/js/网易公版影像.js",
+          "originalAuthor": null
+        },
+        {
+          "key": "push_agent",
+          "name": "手机｜推送",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_Push",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "bb",
+          "name": "配置接口完全免费",
+          "kind": "js",
+          "apiReference": "https://raw.githubusercontent.com/qist/tvbox/master/lib/drpy2.min.js",
+          "pluginClass": null,
+          "extReference": "https://raw.githubusercontent.com/qist/tvbox/master/js/drpy.js",
+          "originalAuthor": null
+        },
+        {
+          "key": "cc",
+          "name": "请勿相信视频中任何广告",
+          "kind": "js",
+          "apiReference": "https://raw.githubusercontent.com/qist/tvbox/master/lib/drpy2.min.js",
+          "pluginClass": null,
+          "extReference": "https://raw.githubusercontent.com/qist/tvbox/master/js/drpy.js",
+          "originalAuthor": null
+        }
+      ],
+      "spiderReference": "https://raw.githubusercontent.com/qist/tvbox/master/jar/spider.jar"
+    },
+    {
+      "configUrl": "https://raw.githubusercontent.com/hackyjso/box/main/jzy.txt",
+      "checkedAt": "2026-10-18T05:28:08.468Z",
+      "totalDefinitions": 93,
+      "definitionKinds": {
+        "android_or_other": 71,
+        "js": 19,
+        "http": 3
+      },
+      "scope": "all declared entries, including non-viewing and unsupported entries; not an eligibility or playback report",
+      "entries": [
+        {
+          "key": "豆瓣",
+          "name": "💘公众号:【橘子柚影视】💘",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_Douban",
+          "extReference": "https://gitee.com/hackyjso/TVbox/raw/main/json/douban.json",
+          "originalAuthor": null
+        },
+        {
+          "key": "ziji2",
+          "name": "💘橘子柚┃4K|弹幕💘",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_Zijijiekou",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "Wexconfig",
+          "name": "💘配置┃中心💘",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_Wexconfig",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "我的阿里",
+          "name": "💘我的┃阿里💘",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_MyAli",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "Wexduanjuvip",
+          "name": "💘短剧💘",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_Wexduanjuvip",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "ShiJue",
+          "name": "💘珏珏┃弹幕💘",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_ShiJue",
+          "extReference": "https://www.80yy3.com/",
+          "originalAuthor": null
+        },
+        {
+          "key": "Wexkukantv",
+          "name": "💘酷看┃App💘",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_Wexkukantv",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "两个BT",
+          "name": "💘两个BT|弹幕💘",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_Bttwo",
+          "extReference": "https://www.bttwoo.com/",
+          "originalAuthor": null
+        },
+        {
+          "key": "laikan",
+          "name": "💘莱莱┃弹幕💘",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_Naikan",
+          "extReference": "https://lkvod.us/",
+          "originalAuthor": null
+        },
+        {
+          "key": "賤賤",
+          "name": "💘贱贱┃直连💘",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_Jianpian",
+          "extReference": "https://gitee.com/hackyjso/TVbox/raw/main/json/jianpian.json",
+          "originalAuthor": null
+        },
+        {
+          "key": "天天",
+          "name": "💘天天┃弹幕💘",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_TTian",
+          "extReference": "http://op.ysdqjs.cn$$$null$$$1",
+          "originalAuthor": null
+        },
+        {
+          "key": "玩偶",
+          "name": "💘玩偶┃阿里4K💘",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_Wogg",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "drjs_子子影视",
+          "name": "💘子子┃直连💘",
+          "kind": "js",
+          "apiReference": "https://gitee.com/hackyjso/TVbox/raw/main/drpy_js/libs/drpy.min.js",
+          "pluginClass": null,
+          "extReference": "https://gitee.com/hackyjso/TVbox/raw/main/drpy_js/js/子子影视.js",
+          "originalAuthor": null
+        },
+        {
+          "key": "subai",
+          "name": "💘素素┃弹幕💘",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_Subaibai",
+          "extReference": "https://www.subaibaiys.com/",
+          "originalAuthor": null
+        },
+        {
+          "key": "玩偶1",
+          "name": "💘玩偶┃综合4K💘",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_Wogg",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "Wexyingchao",
+          "name": "💘影巢┃综合4K💘",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_Wexyingchao",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "土豆",
+          "name": "💘土豆┃阿里4K💘",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_Wextudou",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "土豆弹幕",
+          "name": "💘土豆┃4K弹幕💘",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_Wobg",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "玩偶表哥",
+          "name": "💘表哥┃4K弹幕💘",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_Wobg",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "多多弹幕",
+          "name": "💘多多┃4K弹幕💘",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_Wobg",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "团长弹幕",
+          "name": "💘团长┃4K弹幕💘",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_Tzfile",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "阿里合集",
+          "name": "💘阿里┃合集💘",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_AliShare",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "FreeOK",
+          "name": " 💘FreeOK┃弹幕💘",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_Freeok",
+          "extReference": "https://www.freeok.pro/",
+          "originalAuthor": null
+        },
+        {
+          "key": "南瓜",
+          "name": "💘梦梦┃弹幕💘",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_NanGua",
+          "extReference": "http://ys.changmengyun.com",
+          "originalAuthor": null
+        },
+        {
+          "key": "Wexhanxiaoquan",
+          "name": "💘韩圈┃App💘",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_Wexhanxiaoquan",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "Wexdiguatv",
+          "name": "💘好剧┃App💘",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_Wexdiguatv",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "Wexshandian",
+          "name": "💘闪电┃直连💘",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_Wexshandian",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "Wexhuayang",
+          "name": "💘花花┃App💘",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_Wexhuayang",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "Wexjiajia",
+          "name": "💘佳佳┃App💘",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_Wexjiajia",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "NanGua",
+          "name": "💘南瓜|直连💘",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_NanGua",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "Wexwencai",
+          "name": "💘文文┃直连💘",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_Wexwencai",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "本地",
+          "name": "💘本地💘",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_Local",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "Aid",
+          "name": "🚑急救┃教学🚑",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_FirstAid",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "csp_CandyMuj_taoju",
+          "name": "💘淘剧┃直连",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_CandyMuj_taoju",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "drjs_人人影视",
+          "name": "💘人人┃直连💘",
+          "kind": "js",
+          "apiReference": "https://gitee.com/hackyjso/TVbox/raw/main/drpy_js/libs/drpy.min.js",
+          "pluginClass": null,
+          "extReference": "https://gitee.com/hackyjso/TVbox/raw/main/drpy_js/js/人人影视.js",
+          "originalAuthor": null
+        },
+        {
+          "key": "骚火电影",
+          "name": "💘骚骚┃直连💘",
+          "kind": "js",
+          "apiReference": "https://gitee.com/hackyjso/TVbox/raw/main/drpy_js/libs/drpy2.min.js",
+          "pluginClass": null,
+          "extReference": "https://gitee.com/hackyjso/TVbox/raw/main/drpy_js/js/saohuo.js",
+          "originalAuthor": null
+        },
+        {
+          "key": "naikan",
+          "name": "💘奈奈┃直连💘",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_Naikan",
+          "extReference": "https://nkvod.com/",
+          "originalAuthor": null
+        },
+        {
+          "key": "Auete",
+          "name": "💘特特┃嗅探💘",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_Auete",
+          "extReference": "https://auete.pro/",
+          "originalAuthor": null
+        },
+        {
+          "key": "drjs_8号影院",
+          "name": "💘8号┃嗅探💘",
+          "kind": "js",
+          "apiReference": "https://gitee.com/hackyjso/TVbox/raw/main/drpy_js/libs/drpy.min.js",
+          "pluginClass": null,
+          "extReference": "https://gitee.com/hackyjso/TVbox/raw/main/drpy_js/js/8号影院.js",
+          "originalAuthor": null
+        },
+        {
+          "key": "Jugege",
+          "name": "💘聚聚┃嗅探💘",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_Jugege",
+          "extReference": "https://www.jugege.cc/",
+          "originalAuthor": null
+        },
+        {
+          "key": "XBPQ_星辰",
+          "name": "💘辰辰┃嗅探💘",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_XBPQ",
+          "extReference": "https://gitee.com/hackyjso/TVbox/raw/main/json/星辰影视.json",
+          "originalAuthor": null
+        },
+        {
+          "key": "js_ddys",
+          "name": "💘低端┃外剧💘",
+          "kind": "js",
+          "apiReference": "https://gitee.com/hackyjso/TVbox/raw/main/drpy_js/libs/drpy2.min.js",
+          "pluginClass": null,
+          "extReference": "https://gitee.com/hackyjso/TVbox/raw/main/drpy_js/js/ddys.js",
+          "originalAuthor": null
+        },
+        {
+          "key": "SeedHub",
+          "name": "🧲SeedHub┃磁力🧲",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_SeedHub",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "迅雷吧",
+          "name": "🧲迅雷┃磁力🧲",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_Xunlei8",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "Mp4电影",
+          "name": "🧲Mp4┃磁力🧲",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_Mp4Mov",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "酷吧电影",
+          "name": "🧲酷吧┃磁力🧲",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_KubaCL",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "美剧天堂",
+          "name": "🧲美剧┃磁力🧲",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_MeijuTT",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "新6V",
+          "name": "🧲新6V┃磁力🧲",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_Xb6v",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "新飘花",
+          "name": "🧲飘花┃磁力🧲",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_PiaoHua",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "drpy_js_优酷",
+          "name": "💘酷酷┃官源💘",
+          "kind": "js",
+          "apiReference": "https://github.moeyy.xyz/https://raw.githubusercontent.com/hjdhnx/dr_py/main/libs/drpy2.min.js",
+          "pluginClass": null,
+          "extReference": "https://github.moeyy.xyz/https://raw.githubusercontent.com/hjdhnx/dr_py/main/js/优酷.js",
+          "originalAuthor": null
+        },
+        {
+          "key": "drpy_js_奇珍异兽",
+          "name": "💘奇异┃官源💘",
+          "kind": "js",
+          "apiReference": "http://alist.xn--z7x900a.live/ddrpy2.m.js",
+          "pluginClass": null,
+          "extReference": "http://alist.xn--z7x900a.live/爱奇.js",
+          "originalAuthor": null
+        },
+        {
+          "key": "搜狗",
+          "name": "💘狗㺃┃官源💘",
+          "kind": "js",
+          "apiReference": "https://weixine.net/js/lib/drpy2.min.js",
+          "pluginClass": null,
+          "extReference": "https://weixine.net/js/caigou.js",
+          "originalAuthor": null
+        },
+        {
+          "key": "360",
+          "name": "💘360┃解析💘",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_SP360",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "MGTV",
+          "name": "💘MGTV┃解析💘",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_MGTV",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "哔哩",
+          "name": "💘哔哔哩哩💘",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_Bili",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "酷狗",
+          "name": "💘狗狗┃音乐💘",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_Kugou",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "csp_酷奇",
+          "name": "🎸酷奇┃音乐🎸",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_XBPQ",
+          "extReference": "https://gitee.com/hackyjso/TVbox/raw/main/json/酷奇MV.json",
+          "originalAuthor": null
+        },
+        {
+          "key": "open_视聚场",
+          "name": " 💘央视网┃直连💘",
+          "kind": "js",
+          "apiReference": "https://gitee.com/hackyjso/TVbox/raw/main/js/cntv_open.js",
+          "pluginClass": null,
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "cctv",
+          "name": "💘CCTV｜大全💘",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_CCTV",
+          "extReference": "https://gitee.com/hackyjso/TVbox/raw/main/json/央视大全.json",
+          "originalAuthor": null
+        },
+        {
+          "key": "幼儿教育",
+          "name": "📚幼小┃衔接📚",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_Bili",
+          "extReference": "https://gitee.com/hackyjso/TVbox/raw/main/json/哔哩幼小.json",
+          "originalAuthor": null
+        },
+        {
+          "key": "open_兔小贝",
+          "name": "📚兔小贝📚",
+          "kind": "js",
+          "apiReference": "https://gitee.com/hackyjso/TVbox/raw/main/js/tuxiaobei_open.js",
+          "pluginClass": null,
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "open_贝乐虎",
+          "name": "📚贝乐虎📚",
+          "kind": "js",
+          "apiReference": "https://gitee.com/hackyjso/TVbox/raw/main/js/ubestkid_open.js",
+          "pluginClass": null,
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "少儿教育",
+          "name": "📚少儿┃教育📚",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_Bili",
+          "extReference": "https://gitee.com/hackyjso/TVbox/raw/main/json/少儿教育.json",
+          "originalAuthor": null
+        },
+        {
+          "key": "小学课堂",
+          "name": "📚小学┃课堂📚",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_Bili",
+          "extReference": "https://gitee.com/hackyjso/TVbox/raw/main/json/小学课堂.json",
+          "originalAuthor": null
+        },
+        {
+          "key": "初中课堂",
+          "name": "📚初中┃课堂📚",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_Bili",
+          "extReference": "https://gitee.com/hackyjso/TVbox/raw/main/json/初中课堂.json",
+          "originalAuthor": null
+        },
+        {
+          "key": "高中教育",
+          "name": "📚高中┃课堂📚",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_Bili",
+          "extReference": "https://gitee.com/hackyjso/TVbox/raw/main/json/高中课堂.json",
+          "originalAuthor": null
+        },
+        {
+          "key": "js_爱上你听书网",
+          "name": "📚️┃听书┃爱尚📚️",
+          "kind": "js",
+          "apiReference": "https://gitee.com/hackyjso/TVbox/raw/main/drpy_js/libs/drpy2.min.js",
+          "pluginClass": null,
+          "extReference": "https://mirror.ghproxy.com/https://raw.githubusercontent.com/hackyjso/box/main/drpy_js/js/爱上你听书网.js",
+          "originalAuthor": null
+        },
+        {
+          "key": "js_博看听书",
+          "name": "📚️┃听书┃博看📚️",
+          "kind": "js",
+          "apiReference": "https://gitee.com/hackyjso/TVbox/raw/main/drpy_js/libs/drpy2.min.js",
+          "pluginClass": null,
+          "extReference": "https://gitee.com/hackyjso/TVbox/raw/main/drpy_js/js/bokan.js",
+          "originalAuthor": null
+        },
+        {
+          "key": "js_海洋听书",
+          "name": "📚️┃听书┃海洋📚️",
+          "kind": "js",
+          "apiReference": "https://gitee.com/hackyjso/TVbox/raw/main/drpy_js/libs/drpy2.min.js",
+          "pluginClass": null,
+          "extReference": "https://gitee.com/hackyjso/TVbox/raw/main/drpy_js/js/sea.js",
+          "originalAuthor": null
+        },
+        {
+          "key": "js_六月听书",
+          "name": "📚️┃听书┃六月📚️",
+          "kind": "js",
+          "apiReference": "https://gitee.com/hackyjso/TVbox/raw/main/drpy_js/libs/drpy2.min.js",
+          "pluginClass": null,
+          "extReference": "https://gitee.com/hackyjso/TVbox/raw/main/drpy_js/js/6yue.js",
+          "originalAuthor": null
+        },
+        {
+          "key": "js_有声小说",
+          "name": "📚️┃听书┃有声📚️",
+          "kind": "js",
+          "apiReference": "https://gitee.com/hackyjso/TVbox/raw/main/drpy_js/libs/drpy2.min.js",
+          "pluginClass": null,
+          "extReference": "https://mirror.ghproxy.com/https://raw.githubusercontent.com/hackyjso/box/main/drpy_js/js/yousheng.js",
+          "originalAuthor": null
+        },
+        {
+          "key": "js_中华听书网",
+          "name": "📚️┃听书┃中华📚️",
+          "kind": "js",
+          "apiReference": "https://gitee.com/hackyjso/TVbox/raw/main/drpy_js/libs/drpy2.min.js",
+          "pluginClass": null,
+          "extReference": "https://gitee.com/hackyjso/TVbox/raw/main/drpy_js/js/zhonghua.js",
+          "originalAuthor": null
+        },
+        {
+          "key": "JustLive",
+          "name": "JustLive",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_JustLive",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "88kanqiu",
+          "name": "⚽88看球⚽",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_Kanqiu",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "Jrsjs",
+          "name": "⚽ Jrs┃球迷⚽",
+          "kind": "js",
+          "apiReference": "https://gh-proxy.com/https://raw.githubusercontent.com/hackyjso/box/main/drpy_js/libs/drpy2.min.js",
+          "pluginClass": null,
+          "extReference": "https://gh-proxy.com/https://raw.githubusercontent.com/hackyjso/box/main/drpy_js/js/jrk.js",
+          "originalAuthor": null
+        },
+        {
+          "key": "看球",
+          "name": "🌐88┃看球🌐",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_Kanqiu",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "企鹅体育xp",
+          "name": "🐧大鹅┃看球🐧",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_XPath",
+          "extReference": "https://gitcode.net/wexfnw/wex/-/raw/master/qie.json",
+          "originalAuthor": null
+        },
+        {
+          "key": "js_武享吧",
+          "name": "🥎┃格斗┃直播🥎",
+          "kind": "js",
+          "apiReference": "https://gitee.com/hackyjso/TVbox/raw/main/drpy_js/libs/drpy2.min.js",
+          "pluginClass": null,
+          "extReference": "https://gitee.com/hackyjso/TVbox/raw/main/drpy_js/js/武享吧.js",
+          "originalAuthor": null
+        },
+        {
+          "key": "巴士",
+          "name": "💘巴士┃动漫💘",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_Dm84",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "csp_Anime1",
+          "name": "💘日本┃动漫💘",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_Anime1",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "相声",
+          "name": "📻相声┃BPQ📻",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_XBPQ",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "评书",
+          "name": "📻评书┃BPQ📻",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_XBPQ",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "xml_火狐",
+          "name": "️💘火狐┃接口💘",
+          "kind": "http",
+          "apiReference": "https://hhzyapi.com/api.php/provide/vod/",
+          "pluginClass": null,
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "暴風",
+          "name": "💘暴風┃接口💘",
+          "kind": "http",
+          "apiReference": "https://bfzyapi.com/api.php/provide/vod",
+          "pluginClass": null,
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "索尼",
+          "name": "💘索尼┃接口💘 ",
+          "kind": "http",
+          "apiReference": "https://suoniapi.com/api.php/provide/vod",
+          "pluginClass": null,
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "AList",
+          "name": "💘AList💘",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_AList",
+          "extReference": "https://gitee.com/hackyjso/TVbox/raw/main/json/alist.json",
+          "originalAuthor": null
+        },
+        {
+          "key": "WebDAV",
+          "name": "💘WebDAV💘",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_WebDAV",
+          "extReference": "https://gitee.com/hackyjso/TVbox/raw/main/json/webdav.json",
+          "originalAuthor": null
+        },
+        {
+          "key": "易搜",
+          "name": "💘易搜┃4K💘",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_YiSo",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "雲搜",
+          "name": "💘UP云搜┃4K💘",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_UpYun",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "盤搜",
+          "name": "💘盤搜┃4K💘",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_PanSou",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "盤搜索",
+          "name": "💘盤搜索┃4K💘",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_PanSearch",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "push_agent",
+          "name": "💘推送💘",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_Push",
+          "extReference": null,
+          "originalAuthor": null
+        },
+        {
+          "key": "找資源",
+          "name": "💘找資源💘",
+          "kind": "android_or_other",
+          "apiReference": null,
+          "pluginClass": "csp_Zhaozy",
+          "extReference": null,
+          "originalAuthor": null
+        }
+      ],
+      "spiderReference": "https://gitee.com/hackyjso/TVbox/raw/main/jar/custom_spider.txt"
+    }
+  ]
+}

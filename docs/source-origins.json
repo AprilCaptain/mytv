@@ -1,0 +1,1004 @@
+{
+  "schemaVersion": 1,
+  "metadataReviewedAt": "2026-10-18",
+  "lastLocalPlaybackSamplingAt": "2026-10-16",
+  "scope": "checked-in builtins and public upstream references; excludes in-memory custom imports",
+  "notes": [
+    "元数据可访问不代表影片可播放。",
+    "unknown originalAuthor uses null; collectors are not assumed to be original authors.",
+    "Publisher brand, operator identity and content rights are distinct; no operator or rights verification claimed.",
+    "Maintenance URLs and alternatives are documentation only, never automatically followed by startup or used to replace runtime endpoints."
+  ],
+  "references": [
+    {
+      "id": "qist",
+      "role": "config_collector",
+      "repository": "https://github.com/qist/tvbox",
+      "branch": "master",
+      "revision": "b89d4dd2047d38b9ca0adddb26a2c07d3b103e6a",
+      "revisionScope": "jsm.json latest file commit and repository HEAD",
+      "revisionAt": "2026-10-17T05:30:06Z",
+      "license": "not_detected",
+      "notes": "README 声明 jsm.json 合并 js.json 和 0826.json；并非各规则原作者证明。"
+    },
+    {
+      "id": "jzy",
+      "role": "config_collector",
+      "repository": "https://github.com/hackyjso/TVbox",
+      "previousRepository": "https://github.com/hackyjso/box",
+      "branch": "main",
+      "revision": "e685ef1731c0dfc40195db2345d2a12dfe0f0628",
+      "revisionScope": "jzy.txt latest file commit, not repository HEAD",
+      "revisionAt": "2024-06-06T09:06:22Z",
+      "license": "not_detected",
+      "notes": "旧仓库重命名；运行入口仍可读取，保留原配置 URL 以兼容历史绑定。"
+    },
+    {
+      "id": "moontv-list",
+      "role": "discovery_list",
+      "repository": "https://github.com/666zmy/moontv-v0",
+      "file": "config.json",
+      "branch": "main",
+      "revision": "91dde906835413606916d0f3409292b2ef11684a",
+      "revisionScope": "config.json latest file commit",
+      "revisionAt": "2025-08-13T03:10:46Z",
+      "license": "MIT",
+      "parentRepository": "https://github.com/marshu9999/moontv",
+      "notes": "21 个 HTTP 来源的发现清单；fork 关系不证明每个接口由父仓库最初收集，MIT 不覆盖外部影片。"
+    },
+    {
+      "id": "omnibox",
+      "role": "adapter_research",
+      "repository": "https://github.com/Silent1566/OmniBox-Spider",
+      "branch": "main",
+      "revision": "05098f037ce1babfb998057b9d04f30ee376c724",
+      "revisionScope": "repository HEAD",
+      "revisionAt": "2026-09-23T09:01:12Z",
+      "license": "not_detected",
+      "files": [
+        "影视/采集/HDmoli.js",
+        "影视/采集/金牌.js",
+        "影视/采集/乌云影视.js"
+      ],
+      "notes": "网站入口与能力研究参考；My TV 自有适配器不在运行时加载该仓库。没有找到同名 A123TV 文件，不作其来源归属。"
+    },
+    {
+      "id": "libretv-format",
+      "role": "format_reference",
+      "url": "https://github.com/LibreSpark/LibreTV/wiki/Data-Sources",
+      "notes": "通用 HTTP 接口格式参考，并非所有片源的原始作者。"
+    },
+    {
+      "id": "drpy-original",
+      "role": "historical_framework_reference",
+      "repository": "https://github.com/hjdhnx/dr_py",
+      "url": "https://hjdhnx.github.io/dr_py/",
+      "archived": true,
+      "license": "LGPL-3.0",
+      "notes": "qist README 提及道长 drpy；尚不能逐文件确认当前规则原作者或确切衍生关系。"
+    },
+    {
+      "id": "drpy-node",
+      "role": "framework_reference",
+      "repository": "https://github.com/Hululu007/drpy-node",
+      "license": "GPL-3.0",
+      "notes": "生态参考，未作为 My TV 运行依赖引入，不当作现有规则的已证实上游。"
+    }
+  ],
+  "configurations": [
+    {
+      "name": "全部",
+      "url": "https://raw.githubusercontent.com/AprilCaptain/mytv/main/configs/all.json",
+      "localFile": "configs/all.json",
+      "kind": "dynamic_aggregate",
+      "upstreams": [
+        "builtin_configs",
+        "current_custom_imports"
+      ],
+      "notes": "动态聚合，不是额外影源；兼容性及去重逻辑见 lib/aggregate.mjs。"
+    },
+    {
+      "name": "电视",
+      "url": "https://raw.githubusercontent.com/qist/tvbox/master/jsm.json",
+      "kind": "remote_config",
+      "referenceIds": [
+        "qist"
+      ],
+      "snapshot": "source-origin-snapshot-2026-10-18.json"
+    },
+    {
+      "name": "综合片库",
+      "url": "https://raw.githubusercontent.com/AprilCaptain/mytv/main/configs/library.json",
+      "localFile": "configs/library.json",
+      "kind": "local_snapshot",
+      "upstreams": [
+        "configs/selected.json",
+        "configs/websites.json"
+      ]
+    },
+    {
+      "name": "精选点播",
+      "url": "https://raw.githubusercontent.com/AprilCaptain/mytv/main/configs/selected.json",
+      "localFile": "configs/selected.json",
+      "kind": "local_snapshot",
+      "referenceIds": [
+        "moontv-list"
+      ]
+    },
+    {
+      "name": "网页精选",
+      "url": "https://raw.githubusercontent.com/AprilCaptain/mytv/main/configs/websites.json",
+      "localFile": "configs/websites.json",
+      "kind": "local_snapshot",
+      "referenceIds": [
+        "omnibox"
+      ]
+    },
+    {
+      "name": "橘子柚",
+      "url": "https://raw.githubusercontent.com/hackyjso/box/main/jzy.txt",
+      "canonicalUrl": "https://raw.githubusercontent.com/hackyjso/TVbox/main/jzy.txt",
+      "kind": "remote_config",
+      "referenceIds": [
+        "jzy"
+      ],
+      "snapshot": "source-origin-snapshot-2026-10-18.json"
+    }
+  ],
+  "sources": [
+    {
+      "key": "ikun",
+      "name": "ikun资源",
+      "kind": "http_api",
+      "endpoint": "https://ikunzyapi.com/api.php/provide/vod",
+      "localFiles": [
+        "configs/selected.json",
+        "configs/library.json"
+      ],
+      "discoveryReferenceIds": [
+        "moontv-list"
+      ],
+      "publisherEvidence": "self_identified_publication_page",
+      "originalAuthor": null,
+      "maintenanceUrls": [
+        "https://ikunzyapi.com/",
+        "https://www.ikunzy.com/ikun/gonggao.html"
+      ],
+      "alternativeEndpoints": [],
+      "metadataCheckedAt": "2026-10-18",
+      "observations": [
+        {
+          "scope": "api_host_root",
+          "url": "https://ikunzyapi.com",
+          "httpStatus": 200,
+          "finalUrl": "https://ikunzyapi.com/"
+        },
+        {
+          "scope": "publisher_page",
+          "url": "https://www.ikunzy.com/ikun/gonggao.html",
+          "httpStatus": 200,
+          "finalUrl": "https://www.ikunzy.com/ikun/gonggao.html"
+        }
+      ],
+      "notes": "API 首页直接链接域名公告。"
+    },
+    {
+      "key": "guangsu",
+      "name": "光速资源",
+      "kind": "http_api",
+      "endpoint": "https://api.guangsuapi.com/api.php/provide/vod",
+      "localFiles": [
+        "configs/selected.json",
+        "configs/library.json"
+      ],
+      "discoveryReferenceIds": [
+        "moontv-list"
+      ],
+      "publisherEvidence": "self_identified_publication_page",
+      "originalAuthor": null,
+      "maintenanceUrls": [
+        "https://www.guangsuzy.com/help/"
+      ],
+      "alternativeEndpoints": [],
+      "metadataCheckedAt": "2026-10-18",
+      "observations": [
+        {
+          "scope": "api_host_root",
+          "url": "https://api.guangsuapi.com",
+          "error": "The operation was aborted"
+        },
+        {
+          "scope": "publisher_page",
+          "url": "https://www.guangsuzy.com/help/",
+          "httpStatus": 200,
+          "finalUrl": "https://www.guangsuzy.com/help/"
+        }
+      ],
+      "notes": "接口帮助页公布当前配置中的 API；本次 API 根路径超时不能推断点播失效。"
+    },
+    {
+      "key": "baofeng",
+      "name": "暴风资源",
+      "kind": "http_api",
+      "endpoint": "https://bfzyapi.com/api.php/provide/vod",
+      "localFiles": [
+        "configs/selected.json",
+        "configs/library.json"
+      ],
+      "discoveryReferenceIds": [
+        "moontv-list"
+      ],
+      "publisherEvidence": "self_identified_publication_page",
+      "originalAuthor": null,
+      "maintenanceUrls": [
+        "https://bfzy.tv/helps/"
+      ],
+      "alternativeEndpoints": [],
+      "metadataCheckedAt": "2026-10-18",
+      "observations": [
+        {
+          "scope": "api_host_root",
+          "url": "https://bfzyapi.com",
+          "httpStatus": 500,
+          "finalUrl": "https://bfzyapi.com/"
+        },
+        {
+          "scope": "publisher_page",
+          "url": "https://bfzy.tv/helps/",
+          "httpStatus": 200,
+          "finalUrl": "https://bfzy.tv/helps/"
+        }
+      ],
+      "notes": "帮助页可访问；API 根路径本次 HTTP 500，须另外抽查实际 API。"
+    },
+    {
+      "key": "modu",
+      "name": "魔都资源",
+      "kind": "http_api",
+      "endpoint": "https://caiji.moduapi.cc/api.php/provide/vod",
+      "localFiles": [
+        "configs/selected.json",
+        "configs/library.json"
+      ],
+      "discoveryReferenceIds": [
+        "moontv-list"
+      ],
+      "publisherEvidence": "self_identified_publication_page",
+      "originalAuthor": null,
+      "maintenanceUrls": [
+        "https://caiji.moduapi.cc/",
+        "https://caiji.moduapi.cc/caiji/",
+        "https://caiji.moduapi.cc/gonggao/"
+      ],
+      "alternativeEndpoints": [
+        {
+          "url": "https://www.mdzyapi.com/api.php/provide/vod/",
+          "status": "publisher_declared_not_adopted_or_playback_validated"
+        }
+      ],
+      "metadataCheckedAt": "2026-10-18",
+      "observations": [
+        {
+          "scope": "api_host_root",
+          "url": "https://caiji.moduapi.cc",
+          "httpStatus": 200,
+          "finalUrl": "https://caiji.moduapi.cc/"
+        }
+      ],
+      "notes": "API 首页另列 mdzyapi.com 接口；尚未作为域名更新采用。"
+    },
+    {
+      "key": "1080",
+      "name": "1080资源",
+      "kind": "http_api",
+      "endpoint": "https://api.1080zyku.com/inc/api_mac10.php",
+      "localFiles": [
+        "configs/selected.json",
+        "configs/library.json"
+      ],
+      "discoveryReferenceIds": [
+        "moontv-list"
+      ],
+      "publisherEvidence": "unconfirmed",
+      "originalAuthor": null,
+      "maintenanceUrls": [
+        "https://api.1080zyku.com/"
+      ],
+      "alternativeEndpoints": [],
+      "metadataCheckedAt": "2026-10-18",
+      "observations": [
+        {
+          "scope": "api_host_root",
+          "url": "https://api.1080zyku.com",
+          "httpStatus": 200,
+          "finalUrl": "https://api.1080zyku.com/"
+        }
+      ],
+      "notes": "只确认接口及公开列表引用，未找到可独立确认的原发布者或公告入口。"
+    },
+    {
+      "key": "360",
+      "name": "360资源",
+      "kind": "http_api",
+      "endpoint": "https://360zy.com/api.php/provide/vod",
+      "localFiles": [
+        "configs/selected.json",
+        "configs/library.json"
+      ],
+      "discoveryReferenceIds": [
+        "moontv-list"
+      ],
+      "publisherEvidence": "self_identified_publication_page",
+      "originalAuthor": null,
+      "maintenanceUrls": [
+        "https://360zy.com/",
+        "https://360zy.com/360zy/gonggao.html",
+        "https://360zy.com/360zy/help.html"
+      ],
+      "alternativeEndpoints": [
+        {
+          "url": "https://360zyzz.com/api.php/provide/vod",
+          "status": "publisher_declared_not_adopted_or_playback_validated"
+        }
+      ],
+      "metadataCheckedAt": "2026-10-18",
+      "observations": [
+        {
+          "scope": "api_host_root",
+          "url": "https://360zy.com",
+          "httpStatus": 200,
+          "finalUrl": "https://360zy.com/"
+        },
+        {
+          "scope": "publisher_page",
+          "url": "https://360zy.com/360zy/gonggao.html",
+          "httpStatus": 200,
+          "finalUrl": "https://360zy.com/360zy/gonggao.html"
+        }
+      ],
+      "notes": "首页另列 360zyzz.com 接口；公告仍有原接口，替代地址尚未验证媒体播放。"
+    },
+    {
+      "key": "uku",
+      "name": "U酷资源",
+      "kind": "http_api",
+      "endpoint": "https://api.ukuapi.com/api.php/provide/vod",
+      "localFiles": [
+        "configs/selected.json",
+        "configs/library.json"
+      ],
+      "discoveryReferenceIds": [
+        "moontv-list"
+      ],
+      "publisherEvidence": "self_identified_publication_page",
+      "originalAuthor": null,
+      "maintenanceUrls": [
+        "https://www.ukuzy.com/",
+        "https://www.ukuzy.com/help/"
+      ],
+      "alternativeEndpoints": [
+        {
+          "url": "https://api.ukuapi88.com/api.php/provide/vod/",
+          "status": "publisher_declared_not_adopted_or_playback_validated"
+        }
+      ],
+      "metadataCheckedAt": "2026-10-18",
+      "observations": [
+        {
+          "scope": "api_host_root",
+          "url": "https://api.ukuapi.com",
+          "httpStatus": 200,
+          "finalUrl": "https://api.ukuapi88.com/"
+        },
+        {
+          "scope": "publisher_page",
+          "url": "https://www.ukuzy.com/",
+          "httpStatus": 200,
+          "finalUrl": "https://www.ukuzy.com/"
+        }
+      ],
+      "notes": "原 API 根路径重定向至 api.ukuapi88.com；当前帮助页公布新域名。旧公告 /thff.txt 返回 404，先复查帮助页。"
+    },
+    {
+      "key": "wujin",
+      "name": "无尽资源",
+      "kind": "http_api",
+      "endpoint": "https://api.wujinapi.com/api.php/provide/vod",
+      "localFiles": [
+        "configs/selected.json",
+        "configs/library.json"
+      ],
+      "discoveryReferenceIds": [
+        "moontv-list"
+      ],
+      "publisherEvidence": "self_identified_publication_page",
+      "originalAuthor": null,
+      "maintenanceUrls": [
+        "https://www.wujinzy.com/",
+        "http://help.wujinapi.me"
+      ],
+      "alternativeEndpoints": [],
+      "metadataCheckedAt": "2026-10-18",
+      "observations": [
+        {
+          "scope": "api_host_root",
+          "url": "https://api.wujinapi.com",
+          "httpStatus": 403,
+          "finalUrl": "https://api.wujinapi.com/"
+        },
+        {
+          "scope": "publisher_page",
+          "url": "https://www.wujinzy.com/",
+          "httpStatus": 200,
+          "finalUrl": "https://www.wujinzy.com/"
+        }
+      ],
+      "notes": "API 根路径 HTTP 403，发布站可访问；公告涉及媒体与封面域名变更。帮助站链接为发布站提供，未完整验证。"
+    },
+    {
+      "key": "xinlang",
+      "name": "新浪资源",
+      "kind": "http_api",
+      "endpoint": "https://api.xinlangapi.com/xinlangapi.php/provide/vod",
+      "localFiles": [
+        "configs/selected.json",
+        "configs/library.json"
+      ],
+      "discoveryReferenceIds": [
+        "moontv-list"
+      ],
+      "publisherEvidence": "self_identified_publication_page",
+      "originalAuthor": null,
+      "maintenanceUrls": [
+        "https://www.xinlangzy.com/index.php/help/index.html"
+      ],
+      "alternativeEndpoints": [],
+      "metadataCheckedAt": "2026-10-18",
+      "observations": [
+        {
+          "scope": "api_host_root",
+          "url": "https://api.xinlangapi.com",
+          "error": "The operation was aborted"
+        },
+        {
+          "scope": "publisher_page",
+          "url": "https://www.xinlangzy.com/index.php/help/index.html",
+          "httpStatus": 200,
+          "finalUrl": "https://www.xinlangzy.com/index.php/help/index.html"
+        }
+      ],
+      "notes": "发布站帮助页列出当前 API。品牌名称不代表与新浪公司有已验证关联。"
+    },
+    {
+      "key": "ruyi",
+      "name": "如意资源",
+      "kind": "http_api",
+      "endpoint": "https://cj.rycjapi.com/api.php/provide/vod",
+      "localFiles": [
+        "configs/selected.json",
+        "configs/library.json"
+      ],
+      "discoveryReferenceIds": [
+        "moontv-list"
+      ],
+      "publisherEvidence": "self_identified_publication_page",
+      "originalAuthor": null,
+      "maintenanceUrls": [
+        "https://www.ryzyw.com/help/"
+      ],
+      "alternativeEndpoints": [
+        {
+          "url": "https://cj.rytvapi.com/api.php/provide/vod",
+          "status": "publisher_declared_not_adopted_or_playback_validated"
+        },
+        {
+          "url": "https://bycj.rytvapi.com/api.php/provide/vod",
+          "status": "publisher_declared_not_adopted_or_playback_validated"
+        }
+      ],
+      "metadataCheckedAt": "2026-10-18",
+      "observations": [
+        {
+          "scope": "api_host_root",
+          "url": "https://cj.rycjapi.com",
+          "error": "源地址不能指向本机或局域网。"
+        },
+        {
+          "scope": "publisher_page",
+          "url": "https://www.ryzyw.com/help/",
+          "error": "源地址不能指向本机或局域网。"
+        }
+      ],
+      "notes": "帮助页经网页工具可读取并列出当前 API；本机公网地址校验阻止了请求，不能据此判定站点失效。"
+    },
+    {
+      "key": "zuida",
+      "name": "最大资源",
+      "kind": "http_api",
+      "endpoint": "https://api.zuidapi.com/api.php/provide/vod",
+      "localFiles": [
+        "configs/selected.json",
+        "configs/library.json"
+      ],
+      "discoveryReferenceIds": [
+        "moontv-list"
+      ],
+      "publisherEvidence": "self_identified_publication_page",
+      "originalAuthor": null,
+      "maintenanceUrls": [
+        "https://api.zuidapi.com/",
+        "https://zuidafile.com/help"
+      ],
+      "alternativeEndpoints": [],
+      "metadataCheckedAt": "2026-10-18",
+      "observations": [
+        {
+          "scope": "api_host_root",
+          "url": "https://api.zuidapi.com",
+          "httpStatus": 200,
+          "finalUrl": "https://api.zuidapi.com/"
+        },
+        {
+          "scope": "publisher_page",
+          "url": "https://zuidafile.com/help",
+          "error": "无法连接这个源，请更换源或检查网络。"
+        }
+      ],
+      "notes": "API 首页可访问并链接 zuidafile.com/help，但该帮助页本次连接失败；另一帮助链接不能证明与无尽属于同一维护者。"
+    },
+    {
+      "key": "dytt",
+      "name": "电影天堂",
+      "kind": "http_api",
+      "endpoint": "https://caiji.dyttzyapi.com/api.php/provide/vod",
+      "localFiles": [
+        "configs/selected.json",
+        "configs/library.json"
+      ],
+      "discoveryReferenceIds": [
+        "moontv-list"
+      ],
+      "publisherEvidence": "self_identified_publication_page",
+      "originalAuthor": null,
+      "maintenanceUrls": [
+        "https://dyttzyw.tv/"
+      ],
+      "alternativeEndpoints": [],
+      "metadataCheckedAt": "2026-10-18",
+      "observations": [
+        {
+          "scope": "api_host_root",
+          "url": "https://caiji.dyttzyapi.com",
+          "httpStatus": 200,
+          "finalUrl": "https://caiji.dyttzyapi.com/"
+        },
+        {
+          "scope": "publisher_page",
+          "url": "https://dyttzyw.tv/",
+          "httpStatus": 200,
+          "finalUrl": "https://dyttzyw.tv/"
+        }
+      ],
+      "notes": "发布站公告记录封面和媒体 CDN 迁移；应重新读取详情而非批量替换临时播放 URL。"
+    },
+    {
+      "key": "baidu",
+      "name": "百度云资源",
+      "kind": "http_api",
+      "endpoint": "https://api.apibdzy.com/api.php/provide/vod",
+      "localFiles": [
+        "configs/selected.json",
+        "configs/library.json"
+      ],
+      "discoveryReferenceIds": [
+        "moontv-list"
+      ],
+      "publisherEvidence": "self_identified_publication_page",
+      "originalAuthor": null,
+      "maintenanceUrls": [
+        "https://api.apibdzy.com/",
+        "https://bdzy.tv/"
+      ],
+      "alternativeEndpoints": [],
+      "metadataCheckedAt": "2026-10-18",
+      "observations": [
+        {
+          "scope": "api_host_root",
+          "url": "https://api.apibdzy.com",
+          "httpStatus": 200,
+          "finalUrl": "https://api.apibdzy.com/"
+        },
+        {
+          "scope": "publisher_page",
+          "url": "https://bdzy.tv/",
+          "httpStatus": 200,
+          "finalUrl": "https://bdzy.tv/"
+        }
+      ],
+      "notes": "发布站列出当前 API，并提醒封面链接可能变化；未验证与百度公司的关系。"
+    },
+    {
+      "key": "hongniu",
+      "name": "红牛资源",
+      "kind": "http_api",
+      "endpoint": "https://www.hongniuzy2.com/api.php/provide/vod",
+      "localFiles": [
+        "configs/selected.json",
+        "configs/library.json"
+      ],
+      "discoveryReferenceIds": [
+        "moontv-list"
+      ],
+      "publisherEvidence": "self_identified_publication_page",
+      "originalAuthor": null,
+      "maintenanceUrls": [
+        "https://www.hongniuzy2.com/help/",
+        "https://www.hongniuzy.com/thff.html"
+      ],
+      "alternativeEndpoints": [],
+      "metadataCheckedAt": "2026-10-18",
+      "observations": [
+        {
+          "scope": "api_host_root",
+          "url": "https://www.hongniuzy2.com",
+          "httpStatus": 200,
+          "finalUrl": "https://www.hongniuzy2.com/"
+        },
+        {
+          "scope": "publisher_page",
+          "url": "https://www.hongniuzy.com/thff.html",
+          "httpStatus": 200,
+          "finalUrl": "https://www.hongniuzy.com/thff.html"
+        }
+      ],
+      "notes": "API 首页链接帮助及域名公告；公告为 GBK 页面，需正确解码。"
+    },
+    {
+      "key": "huya",
+      "name": "虎牙资源",
+      "kind": "http_api",
+      "endpoint": "https://www.huyaapi.com/api.php/provide/vod",
+      "localFiles": [
+        "configs/selected.json",
+        "configs/library.json"
+      ],
+      "discoveryReferenceIds": [
+        "moontv-list"
+      ],
+      "publisherEvidence": "unconfirmed",
+      "originalAuthor": null,
+      "maintenanceUrls": [
+        "https://www.huyaapi.com/"
+      ],
+      "alternativeEndpoints": [],
+      "metadataCheckedAt": "2026-10-18",
+      "observations": [
+        {
+          "scope": "api_host_root",
+          "url": "https://www.huyaapi.com",
+          "httpStatus": 403,
+          "finalUrl": "https://www.huyaapi.com/"
+        }
+      ],
+      "notes": "API 根路径本次 HTTP 403；尚未确认独立的发布站、帮助页或原作者。品牌名称不代表虎牙公司。"
+    },
+    {
+      "key": "haohua",
+      "name": "豪华资源",
+      "kind": "http_api",
+      "endpoint": "https://hhzyapi.com/api.php/provide/vod",
+      "localFiles": [
+        "configs/selected.json",
+        "configs/library.json"
+      ],
+      "discoveryReferenceIds": [
+        "moontv-list"
+      ],
+      "publisherEvidence": "self_identified_publication_page",
+      "originalAuthor": null,
+      "maintenanceUrls": [
+        "https://haohuazy.com/index.php/help/index.html"
+      ],
+      "alternativeEndpoints": [],
+      "metadataCheckedAt": "2026-10-18",
+      "observations": [
+        {
+          "scope": "api_host_root",
+          "url": "https://hhzyapi.com",
+          "httpStatus": 403,
+          "finalUrl": "https://hhzyapi.com/"
+        },
+        {
+          "scope": "publisher_page",
+          "url": "https://haohuazy.com/index.php/help/index.html",
+          "httpStatus": 200,
+          "finalUrl": "https://haohuazy.com/index.php/help/index.html"
+        }
+      ],
+      "notes": "发布站帮助页列出 hhzyapi.com。"
+    },
+    {
+      "key": "subo",
+      "name": "速博资源",
+      "kind": "http_api",
+      "endpoint": "https://subocaiji.com/api.php/provide/vod",
+      "localFiles": [
+        "configs/selected.json",
+        "configs/library.json"
+      ],
+      "discoveryReferenceIds": [
+        "moontv-list"
+      ],
+      "publisherEvidence": "self_identified_publication_page",
+      "originalAuthor": null,
+      "maintenanceUrls": [
+        "https://www.subozy.com/"
+      ],
+      "alternativeEndpoints": [],
+      "metadataCheckedAt": "2026-10-18",
+      "observations": [
+        {
+          "scope": "api_host_root",
+          "url": "https://subocaiji.com",
+          "error": "The operation was aborted"
+        },
+        {
+          "scope": "publisher_page",
+          "url": "https://www.subozy.com/",
+          "httpStatus": 200,
+          "finalUrl": "https://www.subozy.com/"
+        }
+      ],
+      "notes": "发布站自称“速播”，当前 My TV 名称为“速博”；保留现有 key 和名称，不按同音推断其它镜像关系。"
+    },
+    {
+      "key": "liangzi",
+      "name": "量子资源",
+      "kind": "http_api",
+      "endpoint": "https://cj.lziapi.com/api.php/provide/vod",
+      "localFiles": [
+        "configs/selected.json",
+        "configs/library.json"
+      ],
+      "discoveryReferenceIds": [
+        "moontv-list"
+      ],
+      "publisherEvidence": "self_identified_publication_page",
+      "originalAuthor": null,
+      "maintenanceUrls": [
+        "https://lzizy.net/help/"
+      ],
+      "alternativeEndpoints": [],
+      "metadataCheckedAt": "2026-10-18",
+      "observations": [
+        {
+          "scope": "api_host_root",
+          "url": "https://cj.lziapi.com",
+          "httpStatus": 403,
+          "finalUrl": "https://cj.lziapi.com/"
+        },
+        {
+          "scope": "publisher_page",
+          "url": "https://lzizy.net/help/",
+          "httpStatus": 200,
+          "finalUrl": "https://lzizy.net/help/"
+        }
+      ],
+      "notes": "帮助页本机读取成功；另一网页工具曾返回 520，体现不同网络结果差异。"
+    },
+    {
+      "key": "jinying",
+      "name": "金鹰资源",
+      "kind": "http_api",
+      "endpoint": "https://jinyingzy.com/api.php/provide/vod",
+      "localFiles": [
+        "configs/selected.json",
+        "configs/library.json"
+      ],
+      "discoveryReferenceIds": [
+        "moontv-list"
+      ],
+      "publisherEvidence": "self_identified_publication_page",
+      "originalAuthor": null,
+      "maintenanceUrls": [
+        "https://jinyingzy.com/index.php/help",
+        "https://jinyingzy.com/thff"
+      ],
+      "alternativeEndpoints": [],
+      "metadataCheckedAt": "2026-10-18",
+      "observations": [
+        {
+          "scope": "api_host_root",
+          "url": "https://jinyingzy.com",
+          "httpStatus": 200,
+          "finalUrl": "https://jinyingzy.com/"
+        },
+        {
+          "scope": "publisher_page",
+          "url": "https://jinyingzy.com/index.php/help",
+          "httpStatus": 200,
+          "finalUrl": "https://jinyingzy.com/index.php/help"
+        }
+      ],
+      "notes": "发布站提供接口帮助与域名历史页。"
+    },
+    {
+      "key": "feifan",
+      "name": "非凡资源",
+      "kind": "http_api",
+      "endpoint": "https://cj.ffzyapi.com/api.php/provide/vod",
+      "localFiles": [
+        "configs/selected.json",
+        "configs/library.json"
+      ],
+      "discoveryReferenceIds": [
+        "moontv-list"
+      ],
+      "publisherEvidence": "self_identified_publication_page",
+      "originalAuthor": null,
+      "maintenanceUrls": [
+        "https://cj.ffzyapi.com/help/"
+      ],
+      "alternativeEndpoints": [],
+      "metadataCheckedAt": "2026-10-18",
+      "observations": [
+        {
+          "scope": "api_host_root",
+          "url": "https://cj.ffzyapi.com",
+          "httpStatus": 200,
+          "finalUrl": "https://cj.ffzyapi.com/"
+        },
+        {
+          "scope": "publisher_page",
+          "url": "https://cj.ffzyapi.com/help/",
+          "httpStatus": 200,
+          "finalUrl": "https://cj.ffzyapi.com/help/"
+        }
+      ],
+      "notes": "API 主机提供独立帮助页。"
+    },
+    {
+      "key": "jisu",
+      "name": "极速资源",
+      "kind": "http_api",
+      "endpoint": "https://jszyapi.com/api.php/provide/vod",
+      "localFiles": [
+        "configs/selected.json",
+        "configs/library.json"
+      ],
+      "discoveryReferenceIds": [
+        "moontv-list"
+      ],
+      "publisherEvidence": "self_identified_publication_page",
+      "originalAuthor": null,
+      "maintenanceUrls": [
+        "https://jisuzy.com/index.php/help/index.html"
+      ],
+      "alternativeEndpoints": [],
+      "metadataCheckedAt": "2026-10-18",
+      "observations": [
+        {
+          "scope": "api_host_root",
+          "url": "https://jszyapi.com",
+          "error": "The operation was aborted"
+        },
+        {
+          "scope": "publisher_page",
+          "url": "https://jisuzy.com/index.php/help/index.html",
+          "httpStatus": 200,
+          "finalUrl": "https://jisuzy.com/index.php/help/index.html"
+        }
+      ],
+      "notes": "发布站帮助页列出 jszyapi.com；API 根路径本次超时不能推断实际播放失效。"
+    },
+    {
+      "key": "hdmoli_web",
+      "name": "HDmoli",
+      "kind": "website_adapter",
+      "endpoint": "https://www.hdmoli.me",
+      "localFiles": [
+        "configs/websites.json",
+        "configs/library.json"
+      ],
+      "adapterFile": "lib/websites/hdmoli.mjs",
+      "discoveryReferenceIds": [
+        "omnibox"
+      ],
+      "publisherEvidence": "site_itself",
+      "originalAuthor": null,
+      "maintenanceUrls": [
+        "https://www.hdmoli.me/"
+      ],
+      "metadataCheckedAt": "2026-10-18",
+      "observations": [
+        {
+          "url": "https://www.hdmoli.me/",
+          "error": "The operation was aborted due to timeout"
+        }
+      ],
+      "notes": "本项目根据公开页面实现适配；未确认实际运营者。"
+    },
+    {
+      "key": "a123tv_web",
+      "name": "A123TV",
+      "kind": "website_adapter",
+      "endpoint": "https://a123tv.com",
+      "localFiles": [
+        "configs/websites.json",
+        "configs/library.json"
+      ],
+      "adapterFile": "lib/websites/a123tv.mjs",
+      "discoveryReferenceIds": [],
+      "publisherEvidence": "site_itself",
+      "originalAuthor": null,
+      "maintenanceUrls": [
+        "https://a123tv.com/"
+      ],
+      "metadataCheckedAt": "2026-10-18",
+      "observations": [
+        {
+          "url": "https://a123tv.com/",
+          "status": 200,
+          "finalUrl": "https://a123tv.com/"
+        }
+      ],
+      "notes": "本项目根据公开页面实现适配；未确认实际运营者。"
+    },
+    {
+      "key": "jinpai_web",
+      "name": "金牌影视",
+      "kind": "website_adapter",
+      "endpoint": "https://m.jiabaide.cn",
+      "localFiles": [
+        "configs/websites.json",
+        "configs/library.json"
+      ],
+      "adapterFile": "lib/websites/jinpai.mjs",
+      "discoveryReferenceIds": [
+        "omnibox"
+      ],
+      "publisherEvidence": "site_itself",
+      "originalAuthor": null,
+      "maintenanceUrls": [
+        "https://m.jiabaide.cn/"
+      ],
+      "metadataCheckedAt": "2026-10-18",
+      "observations": [
+        {
+          "url": "https://m.jiabaide.cn/",
+          "status": 200,
+          "finalUrl": "https://www.jiabaide.cn/"
+        }
+      ],
+      "notes": "本项目根据公开页面实现适配；未确认实际运营者。公开访客线路；付费高清不在兼容范围。"
+    },
+    {
+      "key": "wooyun_web",
+      "name": "乌云影视",
+      "kind": "website_adapter",
+      "endpoint": "https://wooyun.tv",
+      "localFiles": [
+        "configs/websites.json",
+        "configs/library.json"
+      ],
+      "adapterFile": "lib/websites/wooyun.mjs",
+      "discoveryReferenceIds": [
+        "omnibox"
+      ],
+      "publisherEvidence": "site_itself",
+      "originalAuthor": null,
+      "maintenanceUrls": [
+        "https://wooyun.tv/"
+      ],
+      "metadataCheckedAt": "2026-10-18",
+      "observations": [
+        {
+          "url": "https://wooyun.tv/",
+          "status": 200,
+          "finalUrl": "https://wooyun.tv/"
+        }
+      ],
+      "notes": "本项目根据公开页面实现适配；未确认实际运营者。"
+    }
+  ]
+}

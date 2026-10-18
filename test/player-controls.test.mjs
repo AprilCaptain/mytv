@@ -50,12 +50,13 @@ test('鼠标拖动或点击进度后释放焦点，方向键仍控制播放器�
  e.document.activeElement=seek;e.emit(seek,'pointerdown');e.emit(globalThis.window,'pointerup');assert.equal(e.document.activeElement,e.document.body);
  // A browser may focus the range again as its final click default action runs.
  e.document.activeElement=seek;e.emit(seek,'click',{detail:1});assert.equal(e.document.activeElement,e.document.body);
- e.emit(e.document,'keydown',{key:'ArrowRight',target:e.document.body});assert.equal(e.video.currentTime,20);assert.equal(e.document.activeElement,e.document.body);
+ e.emit(e.document,'keydown',{key:'ArrowRight',target:e.document.body});assert.equal(e.video.currentTime,15);assert.equal(e.document.activeElement,e.document.body);
+ e.emit(e.document,'keydown',{key:'ArrowLeft',target:e.document.body});assert.equal(e.video.currentTime,10);
  t.mock.timers.tick(2600);assert.equal(e.idle(),true);
 });
 test('保留有意的键盘焦点；指针取消也释放滑块，松开时不抢其他控件的焦点',t=>{
  const e=environment(t),seek=e.element('player-seek'),controls=e.element('player-controls');controls.child=seek;seek.keyboard=true;e.document.activeElement=seek;
- e.emit(seek,'click',{detail:0});e.emit(e.document,'keydown',{key:'ArrowRight',target:seek});assert.equal(e.video.currentTime,20);assert.equal(e.document.activeElement,seek);t.mock.timers.tick(3000);assert.equal(e.idle(),false);
+ e.emit(seek,'click',{detail:0});e.emit(e.document,'keydown',{key:'ArrowRight',target:seek});assert.equal(e.video.currentTime,15);assert.equal(e.document.activeElement,seek);t.mock.timers.tick(3000);assert.equal(e.idle(),false);
  e.emit(seek,'pointerdown');e.emit(globalThis.window,'pointercancel');assert.equal(e.document.activeElement,e.document.body);
  e.emit(seek,'pointerdown');const other=e.element('player-toggle');e.document.activeElement=other;e.emit(globalThis.window,'pointerup');assert.equal(e.document.activeElement,other);
 });

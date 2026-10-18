@@ -108,7 +108,7 @@ export function createPlayer(video, stage, actions={}) {
     const target = event.target;
     if (target.isContentEditable || target.closest('textarea,select') || target.closest('input') && target !== seek) return;
     const key = event.key.toLowerCase();
-    if (key === 'arrowleft' || key === 'arrowright') { event.preventDefault();jump(key === 'arrowleft' ? -10 : 10); }
+    if (key === 'arrowleft' || key === 'arrowright') { event.preventDefault();jump(key === 'arrowleft' ? -5 : 5); }
     else if ((key === ' ' || key === 'k') && !target.closest('button,a')) { event.preventDefault();void playPause(); }
     else if (key === 'f') { event.preventDefault();void toggleFullscreen(); }
     else if (key === 'm') { event.preventDefault();toggleMute(); }

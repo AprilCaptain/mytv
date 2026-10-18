@@ -79,9 +79,13 @@ export function createPlayer(video, stage, actions={}) {
   quality.addEventListener('change',()=>{speedOpen=false;actions.onQualityChange?.(quality.value);showControls();});
   speed.addEventListener('change', () => { speedOpen = false;video.defaultPlaybackRate=Number(speed.value);video.playbackRate = Number(speed.value);showControls(); });
   seek.addEventListener('pointerdown', () => { scrubbing = true;showControls(); });
-  const endScrubbing = () => { if (scrubbing) { scrubbing = false;refresh();showControls(); } };
+  const releasePointerFocus = () => { if (document.activeElement === seek) seek.blur(); };
+  const endScrubbing = () => { if (scrubbing) { scrubbing = false;releasePointerFocus();refresh();showControls(); } };
   window.addEventListener('pointerup', endScrubbing);
   window.addEventListener('pointercancel', endScrubbing);
+  // Some browsers focus a range on the final click rather than pointerdown.
+  // Keep deliberate Tab focus, but never retain focus from a mouse/touch seek.
+  seek.addEventListener('click', event => { if (event.detail > 0) { releasePointerFocus();showControls(); } });
   seek.addEventListener('input', () => { if (bounds()) { actions.onSeek?.();video.currentTime = Number(seek.value);refresh();showControls(); } });
   seek.addEventListener('pointermove', event => {
     const rect = seek.getBoundingClientRect(), range = bounds(), time = hoverTime(event.clientX, rect.left, rect.width, range);

@@ -9,14 +9,15 @@ function environment(t,actions={}) {
     setAttribute(){} matches(selector){return selector===':hover'?this.hover:this.keyboard;}
     contains(element){return element===this.child;}
     closest(){return null;}
+    blur(){if(document.activeElement===this)document.activeElement=document.body;this.keyboard=false;this.dispatchEvent(new Event('blur'));}
   }
   const elements=new Map(),document=new EventTarget();
   document.getElementById=id=>{if(!elements.has(id))elements.set(id,new Element());return elements.get(id);};
-  document.querySelector=()=>null;document.activeElement=new Element();globalThis.document=document;globalThis.window=new EventTarget();
+  document.querySelector=()=>null;document.body=new Element();document.activeElement=document.body;globalThis.document=document;globalThis.window=new EventTarget();
   const video=new Element(),stage=new Element();Object.assign(video,{paused:false,ended:false,volume:1,currentTime:10,duration:120,seekable:{length:0},buffered:{length:0},playbackRate:1});
   t.mock.timers.enable({apis:['setTimeout']});const player=createPlayer(video,stage,actions);
   t.after(()=>{player.reset();globalThis.document=previous.document;globalThis.window=previous.window;});
-  const emit=(element,name)=>element.dispatchEvent(new Event(name));
+  const emit=(element,name,props={})=>{const event=new Event(name,{cancelable:true});for(const [key,value] of Object.entries(props))Object.defineProperty(event,key,{value});element.dispatchEvent(event);return event;};
   return {video,stage,document,element:id=>document.getElementById(id),emit,idle:()=>stage.classes.has('controls-idle')};
 }
 
@@ -43,4 +44,18 @@ test('键盘焦点与倍速菜单保持显示，全屏切换后仍可自动隐�
 test('画质菜单展开时保持控制栏，选中后恢复自动隐藏并通知播放器',t=>{
  let selected;const e=environment(t,{onQualityChange:value=>{selected=value;}}),quality=e.element('player-quality');e.emit(quality,'pointerdown');t.mock.timers.tick(5000);assert.equal(e.idle(),false);
  quality.value='auto';e.emit(quality,'change');assert.equal(selected,'auto');t.mock.timers.tick(2600);assert.equal(e.idle(),true);
+});
+test('鼠标拖动或点击进度后释放焦点，方向键仍控制播放器且控制栏可自动收起',t=>{
+ const e=environment(t),seek=e.element('player-seek'),controls=e.element('player-controls');controls.child=seek;
+ e.document.activeElement=seek;e.emit(seek,'pointerdown');e.emit(globalThis.window,'pointerup');assert.equal(e.document.activeElement,e.document.body);
+ // A browser may focus the range again as its final click default action runs.
+ e.document.activeElement=seek;e.emit(seek,'click',{detail:1});assert.equal(e.document.activeElement,e.document.body);
+ e.emit(e.document,'keydown',{key:'ArrowRight',target:e.document.body});assert.equal(e.video.currentTime,20);assert.equal(e.document.activeElement,e.document.body);
+ t.mock.timers.tick(2600);assert.equal(e.idle(),true);
+});
+test('保留有意的键盘焦点；指针取消也释放滑块，松开时不抢其他控件的焦点',t=>{
+ const e=environment(t),seek=e.element('player-seek'),controls=e.element('player-controls');controls.child=seek;seek.keyboard=true;e.document.activeElement=seek;
+ e.emit(seek,'click',{detail:0});e.emit(e.document,'keydown',{key:'ArrowRight',target:seek});assert.equal(e.video.currentTime,20);assert.equal(e.document.activeElement,seek);t.mock.timers.tick(3000);assert.equal(e.idle(),false);
+ e.emit(seek,'pointerdown');e.emit(globalThis.window,'pointercancel');assert.equal(e.document.activeElement,e.document.body);
+ e.emit(seek,'pointerdown');const other=e.element('player-toggle');e.document.activeElement=other;e.emit(globalThis.window,'pointerup');assert.equal(e.document.activeElement,other);
 });

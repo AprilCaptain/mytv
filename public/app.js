@@ -1,4 +1,5 @@
 import {loadPoster} from './poster.js';
+import {episodeVisibleCount,revealEpisode} from './episode-list.js';
 import { createPlayer } from './player.js';
 import { createHistory } from './history-ui.js';
 import { historyEpisode,filmFamily,nextHistoryEpisode } from './history-utils.js';
@@ -6,6 +7,7 @@ import {qualityOptions,alternateLine,streamFailure,watchPlayback} from './playba
 const $ = id => document.getElementById(id);
 const video = $('video');
 let history;
+let episodeScrollFrame=0;
 const player = createPlayer(video, $('video-stage'),{onPlay:()=>history?.requestClaim(),onSeek:()=>history?.requestClaim(),onQualityChange:setPlaybackQuality});
 const state = {
   configs: [], config: null, configUrl: '', configName: '全部', generation: 0,
@@ -355,12 +357,11 @@ async function loadCandidate(candidate,preserveName,automatic=false,restore=null
     const nextIndex=nextHistoryEpisode(activeEpisodes,state.episode,detail.type);
     const nextMissing=completed&&restore.record.episode.locator.hasNext&&nextIndex<0;
     if(completed&&nextIndex>=0)state.episode=nextIndex;
-    state.shown=Math.max(180,Math.ceil((state.episode+1)/180)*180);
     $('watch-title').textContent=detail.title;
     $('watch-meta').textContent=[detail.year,detail.area,detail.type,detail.remarks].filter(Boolean).join(' · ');
     $('watch-actors').textContent=[detail.director?'导演：'+detail.director:'',detail.actors?'演员：'+detail.actors:''].filter(Boolean).join('　');
     $('watch-description').textContent=detail.description||'';$('watch-description').closest('.description-panel').hidden=!detail.description;
-    renderLines();renderEpisodes();
+    renderLines();renderEpisodes({revealCurrent:true});
     if(missingEpisode){errorPlayback('未找到上次观看的集数，请重新选集。');return;}
     if(nextMissing){errorPlayback('这一集已看完，暂无下一集。可以重新选集或更换片源。');return;}
     await playEpisode(state.episode,automatic);
@@ -383,8 +384,11 @@ function renderLines() {
     $('line-list').append(button);
   });
 }
-function renderEpisodes() {
+function renderEpisodes({revealCurrent=false}={}) {
+  cancelAnimationFrame(episodeScrollFrame);episodeScrollFrame=0;
   const episodes=state.current?.lines[state.line]?.episodes||[];
+  if(revealCurrent)state.shown=episodeVisibleCount(episodes.length,state.episode,state.reverse,state.shown);
+  const previousScroll=$('episode-list').scrollTop;
   $('episode-list').replaceChildren();
   const indices=episodes.map((_ep,i)=>i);if(state.reverse)indices.reverse();
   indices.slice(0,state.shown).forEach(index=>{
@@ -400,12 +404,20 @@ function renderEpisodes() {
   $('next-episode').disabled=nextHistoryEpisode(episodes,state.episode,state.current?.type)<0;
   $('episode-order').textContent=state.reverse?'正序':'倒序';
   $('more-episodes').hidden=state.shown>=episodes.length;
+  $('episode-list').scrollTop=previousScroll;
+  if(revealCurrent){
+    const current=state.current,line=state.line,episode=state.episode;
+    episodeScrollFrame=requestAnimationFrame(()=>{
+      episodeScrollFrame=0;
+      if(!$('watch-view').hidden&&state.current===current&&state.line===line&&state.episode===episode)revealEpisode($('episode-list'));
+    });
+  }
 }
 async function playEpisode(index,automatic=false) {
   const current=state.current;if(!current||!current.lines[state.line]?.episodes[index])return;
   if(history.filmId)state.historyDistinct=false;if(history.record)state.historyRecord=history.record;
   const saved=stopPlayer();state.episode=index;state.autoMode=automatic;
-  const serial=state.playSerial,ctrl=controller('play');renderEpisodes();
+  const serial=state.playSerial,ctrl=controller('play');renderEpisodes({revealCurrent:true});
   playerStatus('正在连接 · '+currentEpisode().name);
   try {
     await saved;if(ctrl.signal.aborted||serial!==state.playSerial)return;
@@ -563,7 +575,7 @@ $('clear-search').addEventListener('click',()=>{abort('search');state.q='';state
 $('refresh-library').addEventListener('click',()=>{const previous=state.catalogSource;state.catalogSource='';state.page=1;state.category='';loadCatalog(previous);});
 $('previous-page').addEventListener('click',()=>{state.page--;loadCatalog();window.scrollTo({top:0});});
 $('next-page').addEventListener('click',()=>{state.page++;loadCatalog();window.scrollTo({top:0});});
-$('episode-order').addEventListener('click',()=>{state.reverse=!state.reverse;renderEpisodes();});
+$('episode-order').addEventListener('click',()=>{state.reverse=!state.reverse;renderEpisodes({revealCurrent:true});});
 $('more-episodes').addEventListener('click',()=>{state.shown+=180;renderEpisodes();});
 $('next-episode').addEventListener('click',()=>{state.autoAttempt=0;playEpisode(nextHistoryEpisode(state.current.lines[state.line].episodes,state.episode,state.current.type),false);});
 $('play-retry').addEventListener('click',()=>{state.autoAttempt=0;state.current?playEpisode(state.episode,false):loadCandidate(state.pendingCandidate);});

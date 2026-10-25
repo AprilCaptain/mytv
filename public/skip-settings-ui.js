@@ -1,3 +1,4 @@
+import { skipTimeError } from './skip-rules.js';
 import { filmTitle } from './history-utils.js';
 const $ = id => document.getElementById(id);
 export function parseSkipTime(value) {
@@ -25,9 +26,11 @@ export function createSkipSettingsUI({ api, current, onChange, choose, onNavigat
     $('skip-previous').disabled = value || page <= 1;
     $('skip-next').disabled = value || !data || page >= skipRulePage(data.rules, page).pages;
   }
-  function updateOutroLabel() {
-    const position = $('skip-outro-mode').value === 'position';
-    $('skip-outro-label').textContent = position ? '片尾开始时间' : '片尾时长';
+  function updateTimeLabels() {
+    const position = $('skip-mode').value === 'position';
+    $('skip-intro-label').textContent = position ? '片头结束位置' : '片头跳过时长';
+    $('skip-intro-help').textContent = position ? '例如 02:55：跳到第 2 分 55 秒' : '例如 02:55：跳过开头的 2 分 55 秒';
+    $('skip-outro-label').textContent = position ? '片尾开始位置' : '片尾跳过时长';
     $('skip-outro-help').textContent = position ? '例如 10:20：播到第 10 分 20 秒时跳过片尾' : '例如 02:00：跳过最后 2 分钟';
   }
   function editor(rule = null, film = null) {
@@ -35,11 +38,11 @@ export function createSkipSettingsUI({ api, current, onChange, choose, onNavigat
     $('skip-title').value = rule?.title || (film && !film.direct ? film.title : '');
     $('skip-year').value = rule?.year || (/^(19|20)\d{2}$/.test(String(film?.year || '')) ? film.year : '');
     $('skip-intro').value = formatSkipTime(rule?.intro || 0); $('skip-outro').value = formatSkipTime(rule?.outro || 0);
-    $('skip-outro-mode').value = rule?.outroMode || 'position';
+    $('skip-mode').value = rule?.mode || 'position';
     $('skip-rule-enabled').checked = rule ? rule.enabled : true;
     $('skip-editor-title').textContent = rule ? '编辑跳过规则' : '新增跳过规则';
     $('skip-save-rule').textContent = rule ? '保存修改' : '添加规则';
-    message('', false, true); updateOutroLabel(); $('skip-dialog').showModal();
+    message('', false, true); updateTimeLabels(); $('skip-dialog').showModal();
   }
   function render() {
     $('skip-enabled').checked = data.enabled; $('skip-intro-enabled').checked = data.skipIntro; $('skip-outro-enabled').checked = data.skipOutro;
@@ -54,8 +57,9 @@ export function createSkipSettingsUI({ api, current, onChange, choose, onNavigat
       const info = document.createElement('div'), title = document.createElement('h3'), detail = document.createElement('p');
       title.textContent = rule.title + (rule.year ? ' · ' + rule.year : '');
       const badge = document.createElement('span'); badge.className = 'skip-rule-state' + (rule.enabled ? '' : ' inactive'); badge.textContent = rule.enabled ? '已启用' : '已停用'; title.append(badge);
-      const outro = !rule.outro ? '不跳过片尾' : rule.outroMode === 'position' ? '片尾从 ' + formatSkipTime(rule.outro) + ' 开始' : '跳过最后 ' + formatSkipTime(rule.outro);
-      detail.textContent = [rule.intro ? '片头跳至 ' + formatSkipTime(rule.intro) : '不跳过片头', outro].join(' · ');
+      const outro = !rule.outro ? '不跳过片尾' : rule.mode === 'position' ? '片尾从 ' + formatSkipTime(rule.outro) + ' 开始' : '跳过最后 ' + formatSkipTime(rule.outro);
+      const intro = !rule.intro ? '不跳过片头' : rule.mode === 'position' ? '片头跳至 ' + formatSkipTime(rule.intro) : '跳过开头 ' + formatSkipTime(rule.intro);
+      detail.textContent = [rule.mode === 'position' ? '按位置' : '按时长', intro, outro].join(' · ');
       info.append(title, detail); const actions = document.createElement('div'); actions.className = 'skip-rule-actions';
       const action = (label, handler) => { const button = document.createElement('button'); button.type = 'button'; button.className = 'history-delete'; button.textContent = label; button.setAttribute('aria-label', label + '：' + rule.title); button.addEventListener('click', handler); actions.append(button); };
       action('编辑', () => editor(rule));
@@ -101,16 +105,15 @@ export function createSkipSettingsUI({ api, current, onChange, choose, onNavigat
     event.preventDefault(); if (busy || !data) return;
     try {
       const rule = { id: editing || Array.from(crypto.getRandomValues(new Uint8Array(16)), byte => byte.toString(16).padStart(2, '0')).join(''), title: $('skip-title').value.trim(), year: $('skip-year').value.trim(),
-        intro: parseSkipTime($('skip-intro').value), outro: parseSkipTime($('skip-outro').value), outroMode: $('skip-outro-mode').value, enabled: $('skip-rule-enabled').checked };
+        intro: parseSkipTime($('skip-intro').value), outro: parseSkipTime($('skip-outro').value), mode: $('skip-mode').value, enabled: $('skip-rule-enabled').checked };
       if (!filmTitle(rule.title)) throw new Error('请填写影片名。');
-      if (!rule.intro && !rule.outro) throw new Error('请至少设置片头或片尾时间。');
-      if (rule.outroMode === 'position' && rule.outro && rule.intro >= rule.outro) throw new Error('片尾开始时间应晚于片头结束时间。');
+      const timeError = skipTimeError(rule); if (timeError) throw new Error(timeError);
       if (data.rules.some(r => r.id !== editing && filmTitle(r.title) === filmTitle(rule.title) && r.year === rule.year)) throw new Error('这部影片已有规则，请直接编辑。');
       const rules = editing ? data.rules.map(r => r.id === editing ? rule : r) : [rule, ...data.rules];
       await persist({ ...data, rules }, true);
     } catch (error) { message(error.message, true, true); }
   });
-  $('skip-outro-mode').addEventListener('change', updateOutroLabel);
+  $('skip-mode').addEventListener('change', updateTimeLabels);
   $('skip-add-rule').addEventListener('click', () => editor());
   $('skip-reload').addEventListener('click', load);
   $('skip-previous').addEventListener('click', () => { page--; render(); });

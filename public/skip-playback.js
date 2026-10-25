@@ -1,3 +1,4 @@
+import { skipWindows } from './skip-rules.js';
 import { filmTitle } from './history-utils.js';
 
 export function matchingSkipRule(settings, film) {
@@ -11,15 +12,10 @@ export function matchingSkipRule(settings, film) {
 }
 export function skipDecision(settings, rule, { position, duration, introDone, outroDone }) {
   if (!settings?.enabled || !rule?.enabled || !Number.isFinite(duration) || duration <= 0 || !Number.isFinite(position)) return null;
-  const intro = settings.skipIntro ? rule.intro : 0;
-  const outro = settings.skipOutro && rule.outro > 0 ? (rule.outroMode === 'position' ? rule.outro : duration - rule.outro) : null;
-  const validIntro = intro > 0 && intro < duration;
-  const validOutro = outro !== null && outro > 0 && outro < duration && (!validIntro || outro > intro);
-  const warning = (intro >= duration ? '片头时间超出本集时长' : '') ||
-    (outro !== null && !validOutro ? '片尾时间与本集不匹配' : '');
+  const { introEnd, outroStart, warning } = skipWindows(settings, rule, duration);
   // Validate each part independently: a bad outro must not suppress a valid intro.
-  if (validIntro && !introDone && position < intro) return { kind: 'intro', target: intro, ...(warning ? { warning } : {}) };
-  if (validOutro && !outroDone && position >= outro) return { kind: 'outro', target: Math.max(0, duration - 0.05), ...(warning ? { warning } : {}) };
+  if (introEnd !== null && !introDone && position < introEnd) return { kind: 'intro', target: introEnd, ...(warning ? { warning } : {}) };
+  if (outroStart !== null && !outroDone && position >= outroStart) return { kind: 'outro', target: Math.max(0, duration - 0.05), ...(warning ? { warning } : {}) };
   return warning ? { kind: 'invalid', warning } : null;
 }
 

@@ -7,7 +7,7 @@ import { openSkipSettings, defaultSkipSettings } from '../lib/skip-settings.mjs'
 import { createApi } from '../lib/api.mjs';
 import { matchingSkipRule, skipDecision, createSkipPlayback } from '../public/skip-playback.js';
 import { parseSkipTime, skipRulePage } from '../public/skip-settings-ui.js';
-const rule = (extra = {}) => ({ id: 'film-1', title: '测试剧 第一季', year: '2026', enabled: true, intro: 90, outro: 120, ...extra });
+const rule = (extra = {}) => ({ id: 'film-1', title: '测试剧 第一季', year: '2026', enabled: true, intro: 90, outro: 120, mode: 'duration', ...extra });
 const settings = (extra = {}) => ({ ...defaultSkipSettings(), enabled: true, rules: [rule()], ...extra });
 async function fixture(t) {
   const root = await mkdtemp(join(tmpdir(), 'mytv-skip-')); t.after(() => rm(root, { recursive: true, force: true }));
@@ -93,12 +93,12 @@ test('实际播放器先等待续播与可跳转范围，换集重置；手动�
 
 
 test('炼气十万年：片头 02:55 / 片尾从 10:20 开始，续播正文不回退，片尾无效也不连带禁用片头', () => {
-  const r = rule({ title: '炼气十万年', year: '', intro: 175, outro: 620, outroMode: 'position' });
+  const r = rule({ title: '炼气十万年', year: '', intro: 175, outro: 620, mode: 'position' });
   const data = settings({ rules: [r] });
   assert.deepEqual(skipDecision(data, r, { position: 0, duration: 752 }), { kind: 'intro', target: 175 });
   assert.equal(skipDecision(data, r, { position: 541, duration: 752 }), null);
   assert.deepEqual(skipDecision(data, r, { position: 620, duration: 752 }), { kind: 'outro', target: 751.95 });
-  const old = { ...r, outroMode: 'remaining' };
+  const old = { ...r, mode: 'duration' };
   assert.equal(skipDecision(data, old, { position: 0, duration: 752 }).kind, 'intro');
   assert.match(skipDecision(data, old, { position: 0, duration: 752 }).warning, /片尾/);
   assert.equal(skipDecision(data, { ...r, intro: 900 }, { position: 620, duration: 752 }).kind, 'outro');
@@ -110,10 +110,10 @@ test('旧设置升级保留倒数含义，不猜测历史规则；未知版本�
   const old = { ...settings(), version: 1 };
   await writeFile(file, JSON.stringify(old));
   const store = await openSkipSettings(root);
-  assert.equal(store.get().version, 2); assert.equal(store.get().rules[0].outroMode, 'remaining');
+  assert.equal(store.get().version, 3); assert.equal(store.get().rules[0].mode, 'duration');
   assert.equal(JSON.parse(await readFile(file, 'utf8')).version, 1);
   await assert.rejects(async () => store.update(old), { status: 400 });
-  await store.update(store.get()); assert.equal(JSON.parse(await readFile(file, 'utf8')).version, 2);
+  await store.update(store.get()); assert.equal(JSON.parse(await readFile(file, 'utf8')).version, 3);
   await writeFile(file, JSON.stringify({ ...old, version: 99 })); await assert.rejects(openSkipSettings(root), /原文件已保留/);
 });
 
@@ -124,4 +124,57 @@ test('规则分页只显示当前十条，删除最后一页最后一条会回�
   assert.equal(skipRulePage(rules, 3).items[0].id, 'r-20');
   assert.equal(skipRulePage(rules.slice(0, 20), 3).page, 2);
   assert.deepEqual(skipRulePage([], 5), { items: [], page: 1, pages: 1, total: 0 });
+});
+
+test('统一跳过方式：按位置与按时长使用同一对片头片尾字段，按实际视频时长换算', () => {
+  const position = rule({ mode: 'position', intro: 175, outro: 620 });
+  const duration = rule({ mode: 'duration', intro: 175, outro: 120 });
+  for (const r of [position, duration]) assert.equal(skipDecision(settings(), r, { position: 0, duration: 752 }).target, 175);
+  assert.equal(skipDecision(settings(), position, { position: 619, duration: 752 }), null);
+  assert.equal(skipDecision(settings(), position, { position: 620, duration: 752 }).kind, 'outro');
+  assert.equal(skipDecision(settings(), duration, { position: 631, duration: 752 }), null);
+  assert.equal(skipDecision(settings(), duration, { position: 632, duration: 752 }).kind, 'outro');
+  // The duration rule follows each episode's length, rather than fixing the old boundary.
+  assert.equal(skipDecision(settings(), duration, { position: 632, duration: 900 }), null);
+  assert.equal(skipDecision(settings(), duration, { position: 780, duration: 900 }).kind, 'outro');
+});
+
+test('保存规则拒绝相同/交叉位置、未知模式、缺少模式；服务端不依赖前端校验', async t => {
+  const { store } = await fixture(t);
+  for (const invalid of [rule({ mode: 'position', intro: 120, outro: 120 }), rule({ mode: 'position', intro: 200, outro: 120 }), rule({ mode: 'random' }), rule({ mode: undefined })]) {
+    await assert.rejects(async () => store.update(settings({ rules: [invalid] })), { status: 400 });
+  }
+  assert.equal(store.get().revision, 0);
+  await store.update(settings({ rules: [rule({ mode: 'position', intro: 0, outro: 120 })] }));
+});
+
+test('运行时校验两种方式的越界、交叉、等长和独立开关，避免跳过全部正片', () => {
+  const r = rule({ mode: 'duration', intro: 90, outro: 120 });
+  for (const length of [209, 210]) {
+    const intro = skipDecision(settings(), r, { position: 0, duration: length });
+    assert.equal(intro.kind, 'intro'); assert.match(intro.warning, /交叉/);
+    assert.equal(skipDecision(settings(), r, { position: 100, duration: length }).kind, 'invalid');
+  }
+  assert.equal(skipDecision(settings(), r, { position: 91, duration: 211 }).kind, 'outro');
+  const invalidTail = rule({ mode: 'position', intro: 90, outro: 900 });
+  assert.equal(skipDecision(settings(), invalidTail, { position: 0, duration: 752 }).kind, 'intro');
+  assert.match(skipDecision(settings(), invalidTail, { position: 100, duration: 752 }).warning, /片尾时间超出/);
+  assert.equal(skipDecision(settings({ skipOutro: false }), invalidTail, { position: 100, duration: 752 }), null);
+  assert.equal(skipDecision(settings({ skipIntro: false }), r, { position: 90, duration: 210 }).kind, 'outro');
+  for (const length of [0, NaN, Infinity]) assert.equal(skipDecision(settings(), r, { position: 0, duration: length }), null);
+});
+
+test('旧片尾位置/倒数设置无损映射为整条规则的按位置/按时长方式', async t => {
+  const { root } = await fixture(t); await mkdir(join(root, 'data'));
+  const file = join(root, 'data/playback-settings.json');
+  for (const [outroMode, expected] of [['position', 'position'], ['remaining', 'duration']]) {
+    const legacy = { ...settings(), version: 2, rules: [{ ...rule(), mode: undefined, outroMode }] };
+    await writeFile(file, JSON.stringify(legacy));
+    const loaded = await openSkipSettings(root), migrated = loaded.get();
+    assert.equal(migrated.version, 3); assert.equal(migrated.rules[0].mode, expected);
+    assert.equal(migrated.rules[0].intro, 90); assert.equal(migrated.rules[0].outro, 120);
+    assert.equal(migrated.rules[0].id, 'film-1'); assert.equal(migrated.rules[0].enabled, true);
+    assert.equal(Object.hasOwn(migrated.rules[0], 'outroMode'), false);
+    await loaded.update(migrated); assert.equal(JSON.parse(await readFile(file, 'utf8')).rules[0].mode, expected);
+  }
 });

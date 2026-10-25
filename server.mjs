@@ -79,7 +79,7 @@ const server = http.createServer(async (incoming, outgoing) => {
       ['/app.js', new URL('app.js', publicRoot)], ['/poster.js', new URL('poster.js', publicRoot)], ['/episode-list.js', new URL('episode-list.js', publicRoot)], ['/style.css', new URL('style.css', publicRoot)],
       ['/player.js', new URL('player.js', publicRoot)], ['/player-utils.js', new URL('player-utils.js', publicRoot)],
       ['/playback-utils.js', new URL('playback-utils.js', publicRoot)],
-      ['/skip-playback.js', new URL('skip-playback.js', publicRoot)], ['/skip-settings-ui.js', new URL('skip-settings-ui.js', publicRoot)],
+      ['/skip-rules.js', new URL('skip-rules.js', publicRoot)], ['/skip-playback.js', new URL('skip-playback.js', publicRoot)], ['/skip-settings-ui.js', new URL('skip-settings-ui.js', publicRoot)],
       ['/history-ui.js', new URL('history-ui.js', publicRoot)], ['/history-utils.js', new URL('history-utils.js', publicRoot)],
       ['/favicon.svg', new URL('favicon.svg', publicRoot)],
       ['/placeholder.svg', new URL('placeholder.svg', publicRoot)],

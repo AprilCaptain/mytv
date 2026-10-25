@@ -59,7 +59,7 @@ test('重新点击当前集从头播放，不再强制恢复该集旧进度；�
   if(path.endsWith('prepare'))return {candidates:[],filmId:'f',bookmark:{position:541,duration:752}};
   if(path.endsWith('sessions')){writes.push(options.body);return {session:'s',filmId:'f'};}return {accepted:true};
  });
- const data={enabled:true,skipIntro:true,skipOutro:true,rules:[{title:'炼气十万年',year:'',enabled:true,intro:175,outro:620,outroMode:'position'}]};
+ const data={enabled:true,skipIntro:true,skipOutro:true,rules:[{title:'炼气十万年',year:'',enabled:true,intro:175,outro:620,mode:'position'}]};
  const skip=createSkipPlayback({video,api:async()=>data,current:()=>({title:'炼气十万年',year:'2023'}),ready:()=>h.canSkip,notice(){}});t.after(()=>skip.dispose());
  video.duration=752;video.seekable={length:1,start:()=>0,end:()=>752};
  await skip.refresh();await h.prepare({url:'https://media.example/episode.mp4'});video.emit('loadedmetadata');assert.equal(video.currentTime,541);

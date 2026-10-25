@@ -153,9 +153,9 @@
     <form id="skip-rule-form"><fieldset id="skip-editor" class="skip-editor">
       <div class="skip-fields"><label>影片名称<input id="skip-title" maxlength="120" required placeholder="与片库中的片名一致"></label>
       <label>年份（选填）<input id="skip-year" inputmode="numeric" maxlength="4" pattern="(?:19|20)[0-9]{2}" placeholder="区分同名影片"></label>
-      <label>片头结束时间<input id="skip-intro" value="00:00" required maxlength="6" placeholder="01:30"><small>例如 01:30：跳到第 1 分 30 秒</small></label>
-      <label>片尾跳过方式<select id="skip-outro-mode" aria-label="片尾跳过方式"><option value="position">从指定时间开始</option><option value="remaining">跳过最后一段时长</option></select></label>
-      <label class="skip-wide-field"><span id="skip-outro-label">片尾开始时间</span><input id="skip-outro" value="00:00" required maxlength="6" aria-labelledby="skip-outro-label" aria-describedby="skip-outro-help"><small id="skip-outro-help">例如 10:20：播到第 10 分 20 秒时跳过片尾</small></label></div>
+      <label class="skip-wide-field">跳过方式<select id="skip-mode" aria-label="跳过方式"><option value="position">按位置跳过</option><option value="duration">按时长跳过</option></select></label>
+      <label><span id="skip-intro-label">片头结束位置</span><input id="skip-intro" value="00:00" required maxlength="6" placeholder="02:55" aria-labelledby="skip-intro-label" aria-describedby="skip-intro-help"><small id="skip-intro-help">例如 02:55：跳到第 2 分 55 秒</small></label>
+      <label><span id="skip-outro-label">片尾开始位置</span><input id="skip-outro" value="00:00" required maxlength="6" aria-labelledby="skip-outro-label" aria-describedby="skip-outro-help"><small id="skip-outro-help">例如 10:20：播到第 10 分 20 秒时跳过片尾</small></label></div>
       <div class="skip-editor-actions"><label><input id="skip-rule-enabled" type="checkbox" checked>启用此规则</label><button type="button" class="dialog-close text-button">取消</button><button id="skip-save-rule" type="submit" class="button primary small">添加规则</button></div>
     </fieldset></form><p id="skip-editor-message" class="dialog-caption" role="status"></p>
   </dialog>

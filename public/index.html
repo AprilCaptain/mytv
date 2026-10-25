@@ -80,6 +80,17 @@
         <p id="history-message" class="intro-caption" role="status"></p><details id="history-error-details" class="error-details" hidden><summary>查看详情</summary><p id="history-error-detail"></p></details><div id="history-list" class="history-list"></div>
         <nav id="history-pagination" class="pagination" aria-label="观看历史分页" hidden><button id="history-previous" class="button secondary">上一页</button><span id="history-page-label"></span><button id="history-next" class="button secondary">下一页</button></nav>
       </div></section>
+      <section id="skip-view" hidden>
+        <header class="topbar"><span class="page-label">片头片尾</span><button id="skip-back" class="text-button">返回发现</button></header>
+        <div class="browse-body skip-page"><div class="skip-page-heading"><div><h1>片头片尾</h1><p class="intro-caption">为常看的影片设置跳过时间，把时间留给正片。</p></div><button id="skip-add-rule" class="button primary">新增规则</button></div>
+          <fieldset id="skip-global" class="skip-global"><legend class="sr-only">自动跳过设置</legend>
+            <label><input id="skip-enabled" type="checkbox">自动跳过</label><label><input id="skip-intro-enabled" type="checkbox">跳过片头</label><label><input id="skip-outro-enabled" type="checkbox">跳过片尾</label><span id="skip-master-status"></span>
+          </fieldset>
+          <div class="skip-list-heading"><h2>已配置影片</h2><button id="skip-reload" class="text-button">刷新</button></div>
+          <p id="skip-message" class="intro-caption" role="status"></p><p id="skip-empty" class="intro-caption" hidden>还没有规则，添加一部常看的影片吧。</p><div id="skip-rule-list"></div>
+          <nav id="skip-pagination" class="pagination" aria-label="跳过规则分页" hidden><button id="skip-previous" class="button secondary">上一页</button><span id="skip-page-label"></span><button id="skip-next" class="button secondary">下一页</button></nav>
+        </div>
+      </section>
       <section id="watch-view" hidden>
         <header class="watch-topbar"><button id="watch-back" class="back-button"><svg><use href="#i-arrow"/></svg>返回发现</button><span id="watch-source" class="watch-source"></span></header>
         <div class="watch-layout">
@@ -136,24 +147,17 @@
     <p class="dialog-caption">粘贴视频链接，直接开始观看。</p>
     <form id="direct-form"><label for="direct-url">视频地址</label><input id="direct-url" type="url" required placeholder="https://…/video.m3u8" autocomplete="off"><p id="direct-message" class="form-message" role="status"></p><button class="button primary full-width" type="submit"><svg><use href="#i-play"/></svg>开始播放</button></form>
   </dialog>
-  <dialog id="skip-dialog" class="dialog skip-dialog" aria-labelledby="skip-dialog-title">
-    <div class="dialog-header"><h2 id="skip-dialog-title">片头片尾</h2><button class="dialog-close icon-button" aria-label="关闭片头片尾设置">×</button></div>
-    <p class="dialog-caption">为常看的影片设置跳过时间，同一影片的各集共用规则。</p>
-    <fieldset id="skip-global" class="skip-global"><legend class="sr-only">自动跳过开关</legend>
-      <label><input id="skip-enabled" type="checkbox">自动跳过</label>
-      <label><input id="skip-intro-enabled" type="checkbox">跳过片头</label>
-      <label><input id="skip-outro-enabled" type="checkbox">跳过片尾</label>
-    </fieldset>
-    <form id="skip-rule-form"><fieldset id="skip-editor" class="skip-editor"><legend id="skip-editor-title">新增影片</legend>
-      <div class="skip-fields"><label class="skip-title-field">影片名称<input id="skip-title" maxlength="120" required placeholder="与片库中的片名一致"></label>
+  <dialog id="skip-dialog" class="dialog skip-dialog" aria-labelledby="skip-editor-title">
+    <div class="dialog-header"><h2 id="skip-editor-title">新增跳过规则</h2><button class="dialog-close icon-button" aria-label="关闭跳过规则编辑">×</button></div>
+    <p class="dialog-caption">时间使用“分:秒”，填 00:00 表示不跳过。</p>
+    <form id="skip-rule-form"><fieldset id="skip-editor" class="skip-editor">
+      <div class="skip-fields"><label>影片名称<input id="skip-title" maxlength="120" required placeholder="与片库中的片名一致"></label>
       <label>年份（选填）<input id="skip-year" inputmode="numeric" maxlength="4" pattern="(?:19|20)[0-9]{2}" placeholder="区分同名影片"></label>
-      <label>片头：跳到<input id="skip-intro" inputmode="text" value="00:00" required maxlength="6" placeholder="01:30"><small>分:秒，例如 01:30</small></label>
-      <label>片尾：结束前<input id="skip-outro" inputmode="text" value="00:00" required maxlength="6" placeholder="02:00"><small>分:秒，00:00 表示不跳过</small></label></div>
-      <div class="skip-editor-actions"><label><input id="skip-rule-enabled" type="checkbox" checked>启用此规则</label><button id="skip-new-rule" type="button" class="text-button">重置</button><button id="skip-save-rule" type="submit" class="button primary small">添加规则</button></div>
-    </fieldset></form>
-    <p id="skip-message" class="dialog-caption" role="status"></p>
-    <p class="skip-hint">按片名匹配，可填写年份区分版本。跨片源时请留意片头片尾是否一致；手动拖回后不会反复跳过。</p>
-    <h3 class="skip-list-title">影片规则</h3><p id="skip-empty" class="dialog-caption">还没有规则，添加一部常看的影片吧。</p><div id="skip-rule-list"></div>
+      <label>片头结束时间<input id="skip-intro" value="00:00" required maxlength="6" placeholder="01:30"><small>例如 01:30：跳到第 1 分 30 秒</small></label>
+      <label>片尾跳过方式<select id="skip-outro-mode" aria-label="片尾跳过方式"><option value="position">从指定时间开始</option><option value="remaining">跳过最后一段时长</option></select></label>
+      <label class="skip-wide-field"><span id="skip-outro-label">片尾开始时间</span><input id="skip-outro" value="00:00" required maxlength="6" aria-labelledby="skip-outro-label" aria-describedby="skip-outro-help"><small id="skip-outro-help">例如 10:20：播到第 10 分 20 秒时跳过片尾</small></label></div>
+      <div class="skip-editor-actions"><label><input id="skip-rule-enabled" type="checkbox" checked>启用此规则</label><button type="button" class="dialog-close text-button">取消</button><button id="skip-save-rule" type="submit" class="button primary small">添加规则</button></div>
+    </fieldset></form><p id="skip-editor-message" class="dialog-caption" role="status"></p>
   </dialog>
   <dialog id="history-choice" class="dialog"><div class="dialog-header"><h2 id="history-choice-title"></h2></div><p id="history-choice-message" class="dialog-caption"></p><div id="history-choice-actions" class="history-choice-actions"></div></dialog>
 </body>

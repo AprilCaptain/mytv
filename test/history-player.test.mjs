@@ -50,3 +50,23 @@ test('媒体重新初始化恢复已有位置，不因自动 playing 抢回共�
  video.readyState=4;video.emit('playing');await tick();assert.equal(sessions,1);
  h.requestClaim();video.emit('playing');await tick();assert.equal(sessions,2);
 });
+
+
+test('重新点击当前集从头播放，不再强制恢复该集旧进度；与自动跳过联动', async t => {
+ const { createSkipPlayback } = await import('../public/skip-playback.js');
+ const writes=[];
+ const {h,video}=environment(t,async(path,options)=>{
+  if(path.endsWith('prepare'))return {candidates:[],filmId:'f',bookmark:{position:541,duration:752}};
+  if(path.endsWith('sessions')){writes.push(options.body);return {session:'s',filmId:'f'};}return {accepted:true};
+ });
+ const data={enabled:true,skipIntro:true,skipOutro:true,rules:[{title:'炼气十万年',year:'',enabled:true,intro:175,outro:620,outroMode:'position'}]};
+ const skip=createSkipPlayback({video,api:async()=>data,current:()=>({title:'炼气十万年',year:'2023'}),ready:()=>h.canSkip,notice(){}});t.after(()=>skip.dispose());
+ video.duration=752;video.seekable={length:1,start:()=>0,end:()=>752};
+ await skip.refresh();await h.prepare({url:'https://media.example/episode.mp4'});video.emit('loadedmetadata');assert.equal(video.currentTime,541);
+ video.readyState=4;video.emit('playing');await tick();assert.equal(video.currentTime,541);
+ h.reset();skip.reset();video.currentTime=0;video.readyState=1;video.paused=true;
+ await h.prepare({url:'https://media.example/episode.mp4'},'f',false,{fromStart:true});
+ video.emit('loadedmetadata');assert.equal(video.currentTime,0);video.readyState=4;video.emit('playing');await tick();assert.equal(video.currentTime,175);
+ video.currentTime=620;video.emit('timeupdate');assert.equal(video.currentTime,751.95);
+ assert.ok(writes.length>=2);
+});

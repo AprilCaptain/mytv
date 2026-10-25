@@ -21,7 +21,7 @@ const state = {
 };
 history=createHistory({api,video,resume:resumeHistory,onFailure:errorPlayback});
 const skipPlayback=createSkipPlayback({video,api,current:()=>state.current,ready:()=>history.canSkip,notice:text=>{$('skip-notice').textContent=text;}});
-createSkipSettingsUI({api,current:()=>state.current,onChange:()=>void skipPlayback.refresh(),choose:history.choose});
+createSkipSettingsUI({api,current:()=>state.current,onChange:()=>void skipPlayback.refresh(),choose:history.choose,onNavigate:showSkipSettings});
 state.historyRecord=null;state.recovering=false;
 state.resumeFailedSources=new Set();
 
@@ -303,6 +303,7 @@ function stopPlayer() {
 }
 function goHome() {
   abort('detail');abort('history-resume');stopPlayer();state.current=null;state.detailSerial++;
+  $('skip-view').hidden=true;$('skip-nav').classList.remove('active');
   $('watch-view').hidden=true;$('browse-view').hidden=false;
   $('history-view').hidden=true;$('home-nav').classList.add('active');$('history-nav').classList.remove('active');void history.refresh();
   if(state.historyCatalogDirty){state.historyCatalogDirty=false;void loadCatalog();}
@@ -400,7 +401,7 @@ function renderEpisodes({revealCurrent=false}={}) {
     const ep=episodes[index],selected=state.episode===index;
     const button=element('button','episode-button'+(selected?' selected':''),ep.name);
     button.title=ep.name;button.setAttribute('aria-pressed',String(selected));
-    button.addEventListener('click',()=>{state.autoAttempt=0;state.failed.clear();playEpisode(index,false);});
+    button.addEventListener('click',()=>{state.autoAttempt=0;state.failed.clear();playEpisode(index,false,{fromStart:selected});});
     $('episode-list').append(button);
   });
   const movie=filmFamily(state.current?.type)==='movie';
@@ -418,7 +419,7 @@ function renderEpisodes({revealCurrent=false}={}) {
     });
   }
 }
-async function playEpisode(index,automatic=false) {
+async function playEpisode(index,automatic=false,{fromStart=false}={}) {
   const current=state.current;if(!current||!current.lines[state.line]?.episodes[index])return;
   if(history.filmId)state.historyDistinct=false;if(history.record)state.historyRecord=history.record;
   const saved=stopPlayer();state.episode=index;state.autoMode=automatic;
@@ -427,7 +428,7 @@ async function playEpisode(index,automatic=false) {
   try {
     await saved;if(ctrl.signal.aborted||serial!==state.playSerial)return;
     const body=current.direct?{url:currentEpisode().url}:{config:state.config.id,source:current.source,id:current.id,line:state.line,episode:index};
-    const prepared=await history.prepare({...body,configName:state.configName},state.historyRecord?.id,state.historyDistinct);
+    const prepared=await history.prepare({...body,configName:state.configName},state.historyRecord?.id,state.historyDistinct,{fromStart});
     if(ctrl.signal.aborted||serial!==state.playSerial)return;
     if(!prepared){errorPlayback('已取消播放，观看进度已保留。');return;}
     const result=await api('/api/play',{method:'POST',body,signal:AbortSignal.any([ctrl.signal,AbortSignal.timeout(15000)])});
@@ -483,6 +484,7 @@ async function resumeHistory(id){
     const candidate=await historyCandidates(result);if(candidate)await openMovie(candidate,{...result,record:result.record});
   }catch(e){if(!ctrl.signal.aborted){showHistory();$('history-message').textContent='暂时无法继续播放，请稍后重试。';errorDetails('history-error',e.message);}}
 }
+function showSkipSettings(){goHome();$('browse-view').hidden=true;$('skip-view').hidden=false;$('home-nav').classList.remove('active');$('skip-nav').classList.add('active');document.title='片头片尾 · My TV';}
 function showHistory(){goHome();$('browse-view').hidden=true;$('history-view').hidden=false;$('home-nav').classList.remove('active');$('history-nav').classList.add('active');document.title='观看历史 · My TV';void history.refresh();}
 function attachMedia(result,serial) {
   state.mediaUrl=result.url;$('video-placeholder').hidden=true;
@@ -559,7 +561,7 @@ for(const dialog of document.querySelectorAll('dialog'))dialog.addEventListener(
   if(event.clientX<box.left||event.clientX>box.right||event.clientY<box.top||event.clientY>box.bottom)dialog.close();
 });
 $('home-nav').addEventListener('click',goHome);$('watch-back').addEventListener('click',goHome);
-$('history-nav').addEventListener('click',showHistory);$('all-history').addEventListener('click',showHistory);$('history-back').addEventListener('click',goHome);
+$('history-nav').addEventListener('click',showHistory);$('all-history').addEventListener('click',showHistory);$('history-back').addEventListener('click',goHome);$('skip-back').addEventListener('click',goHome);
 function afterHistoryConfig(){if(state.pendingHistory&&state.config){state.historyRecord=state.pendingHistory;state.pendingHistory=null;void recoverSource();}}
 $('config-select').addEventListener('change',event=>{const config=state.configs.find(c=>c.url===event.target.value);if(config)selectConfig(config).then(afterHistoryConfig);});
 $('add-config').addEventListener('click',()=>$('configs-dialog').showModal());

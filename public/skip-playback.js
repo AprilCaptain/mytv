@@ -11,11 +11,16 @@ export function matchingSkipRule(settings, film) {
 }
 export function skipDecision(settings, rule, { position, duration, introDone, outroDone }) {
   if (!settings?.enabled || !rule?.enabled || !Number.isFinite(duration) || duration <= 0 || !Number.isFinite(position)) return null;
-  const intro = settings.skipIntro ? rule.intro : 0, outro = settings.skipOutro ? rule.outro : 0;
-  if (intro + outro >= duration) return { kind: 'invalid' };
-  if (outro > 0 && !outroDone && position >= duration - outro) return { kind: 'outro', target: Math.max(0, duration - 0.05) };
-  if (intro > 0 && !introDone && position < intro) return { kind: 'intro', target: intro };
-  return null;
+  const intro = settings.skipIntro ? rule.intro : 0;
+  const outro = settings.skipOutro && rule.outro > 0 ? (rule.outroMode === 'position' ? rule.outro : duration - rule.outro) : null;
+  const validIntro = intro > 0 && intro < duration;
+  const validOutro = outro !== null && outro > 0 && outro < duration && (!validIntro || outro > intro);
+  const warning = (intro >= duration ? '片头时间超出本集时长' : '') ||
+    (outro !== null && !validOutro ? '片尾时间与本集不匹配' : '');
+  // Validate each part independently: a bad outro must not suppress a valid intro.
+  if (validIntro && !introDone && position < intro) return { kind: 'intro', target: intro, ...(warning ? { warning } : {}) };
+  if (validOutro && !outroDone && position >= outro) return { kind: 'outro', target: Math.max(0, duration - 0.05), ...(warning ? { warning } : {}) };
+  return warning ? { kind: 'invalid', warning } : null;
 }
 
 export function createSkipPlayback({ video, api, current, ready, notice }) {
@@ -23,7 +28,7 @@ export function createSkipPlayback({ video, api, current, ready, notice }) {
   let refreshSerial = 0;
   async function refresh() {
     const serial = ++refreshSerial;
-    try { const data = await api('/api/skip-settings'); if (!disposed && serial === refreshSerial) settings = data; }
+    try { const data = await api('/api/skip-settings'); if (!disposed && serial === refreshSerial) { settings = data; check(); } }
     catch { if (!disposed && serial === refreshSerial) settings = null; }
   }
   function check() {
@@ -33,7 +38,7 @@ export function createSkipPlayback({ video, api, current, ready, notice }) {
     if (rule && settings.skipIntro && video.currentTime >= rule.intro) introDone = true;
     if (!action) return;
     if (action.kind === 'invalid') {
-      if (!invalidNotified) notice('跳过时间超出本集时长，本集未自动跳过。');
+      if (!invalidNotified) notice(action.warning + '，该部分未自动跳过。');
       invalidNotified = true; return;
     }
     let seekable = false;
@@ -43,7 +48,7 @@ export function createSkipPlayback({ video, api, current, ready, notice }) {
     try { video.currentTime = action.target; }
     catch { return; }
     if (action.kind === 'intro') introDone = true; else outroDone = true;
-    notice(action.kind === 'intro' ? '已跳过片头' : '已跳过片尾');
+    notice((action.kind === 'intro' ? '已跳过片头' : '已跳过片尾') + (action.warning ? '；' + action.warning : ''));
   }
   for (const event of ['timeupdate', 'playing', 'seeked', 'progress']) video.addEventListener(event, check);
   const timer = setInterval(() => { if (!video.paused) void refresh(); }, 10000);

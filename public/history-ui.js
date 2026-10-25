@@ -85,7 +85,7 @@ export function createHistory({api,video,resume,onFailure,onEnd}) {
   }
   function reset(){save(video.ended);epoch++;ready=false;route=null;prepared=null;session=null;seq=0;decisionBusy=false;needsClaim=false;claiming=false;deleted=false;seeking=false;hasPlayed=false;failed=false;lastStable=null;
     $('resume-notice').hidden=true;$('history-save-status').textContent='';$('history-save-status').title='';choiceResolve?.(null);return pendingSave;}
-  async function prepare(body,filmId,distinct=false){
+  async function prepare(body,filmId,distinct=false,{fromStart=false}={}){
     const token=epoch;route=body;
     try{
       const loaded=await api('/api/history/prepare',{method:'POST',body:{...body,filmId,distinct}});loaded.distinct=distinct;
@@ -98,6 +98,7 @@ export function createHistory({api,video,resume,onFailure,onEnd}) {
         if(token!==epoch)return false;prepared=selected;
         prepared.distinct=chosen==='distinct';
       }
+      if(fromStart)prepared.bookmark=null;
       return token===epoch;
     }catch(e){$('history-save-status').textContent='暂时无法读取观看进度。';$('history-save-status').title=e.message;prepared=null;return token===epoch;}
   }

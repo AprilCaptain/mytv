@@ -1,3 +1,5 @@
+import { createSkipPlayback } from './skip-playback.js';
+import { createSkipSettingsUI } from './skip-settings-ui.js';
 import {loadPoster} from './poster.js';
 import {episodeVisibleCount,revealEpisode} from './episode-list.js';
 import { createPlayer } from './player.js';
@@ -18,6 +20,8 @@ const state = {
   controllers: {}, searching: false
 };
 history=createHistory({api,video,resume:resumeHistory,onFailure:errorPlayback});
+const skipPlayback=createSkipPlayback({video,api,current:()=>state.current,ready:()=>history.canSkip,notice:text=>{$('skip-notice').textContent=text;}});
+createSkipSettingsUI({api,current:()=>state.current,onChange:()=>void skipPlayback.refresh(),choose:history.choose});
 state.historyRecord=null;state.recovering=false;
 state.resumeFailedSources=new Set();
 
@@ -286,6 +290,7 @@ async function searchConfig() {
   finally{if(generation===state.generation&&state.controllers.search===ctrl){state.searching=false;$('stop-search').hidden=true;}}
 }
 function stopPlayer() {
+  skipPlayback.reset();$('skip-notice').textContent='';
   state.playWatchdog?.dispose();state.playWatchdog=null;
   const saved=history.reset();
   state.playSerial++;abort('play');state.hls?.destroy();state.hls=null;state.mediaUrl='';
@@ -597,7 +602,7 @@ $('direct-form').addEventListener('submit',event=>{
 });
 window.addEventListener('pagehide',()=>{for(const key of Object.keys(state.controllers))abort(key);stopPlayer();});
 async function initialize() {
-  void history.refresh();
+  void history.refresh();void skipPlayback.refresh();
   try {
     const data=await api('/api/configs');state.configs=data.configs;
     if(!state.config)await selectConfig(state.configs.find(c=>c.default)||state.configs[0],true);else renderConfigs();

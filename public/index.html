@@ -31,6 +31,7 @@
         <button class="nav-item active" id="home-nav" aria-label="发现"><svg><use href="#i-grid"/></svg><span>发现</span></button>
         <button class="nav-item" id="history-nav" aria-label="观看历史"><svg><use href="#i-history"/></svg><span>观看历史</span></button>
         <button class="nav-item" id="direct-nav" aria-label="链接播放"><svg><use href="#i-link"/></svg><span>链接播放</span></button>
+        <button class="nav-item" id="skip-nav"><svg aria-hidden="true"><use href="#i-settings"/></svg><span>片头片尾</span></button>
       </nav>
       <div class="config-sidebar">
         <div class="config-sidebar-heading"><span>TVBox 配置</span><button id="add-config" class="icon-button" aria-label="导入自定义配置">＋</button></div>
@@ -103,6 +104,7 @@
             </div>
             <div class="player-status-row"><span id="player-status" role="status" aria-live="polite">正在加载影片…</span><span id="video-quality" class="video-quality"></span><button id="next-episode" class="text-button" disabled><svg><use href="#i-next"/></svg>下一集</button></div>
             <p id="history-save-status" class="history-save-status" role="status"></p><p id="resume-notice" class="resume-notice" hidden></p>
+            <div class="watch-skip-row"><button id="watch-skip" class="text-button">片头片尾设置</button><span id="skip-notice" role="status"></span></div>
             <details id="playback-info" class="error-details playback-info" hidden><summary>播放信息</summary><p id="playback-info-text"></p></details>
             <div class="error-banner" id="play-error" role="alert" hidden><span id="play-error-text"></span><button id="play-alternate" class="button secondary small" hidden>尝试备用线路</button><button id="play-retry" class="button secondary small">重试播放</button></div>
             <details id="play-error-details" class="error-details" hidden><summary>查看详情</summary><p id="play-error-detail"></p></details><div class="watch-info"><h1 id="watch-title"></h1><p class="watch-meta" id="watch-meta"></p><p id="watch-actors" class="watch-actors"></p></div>
@@ -133,6 +135,25 @@
     <div class="dialog-header"><div><h2>打开播放链接</h2></div><button class="icon-button dialog-close" aria-label="关闭链接播放"><svg><use href="#i-close"/></svg></button></div>
     <p class="dialog-caption">粘贴视频链接，直接开始观看。</p>
     <form id="direct-form"><label for="direct-url">视频地址</label><input id="direct-url" type="url" required placeholder="https://…/video.m3u8" autocomplete="off"><p id="direct-message" class="form-message" role="status"></p><button class="button primary full-width" type="submit"><svg><use href="#i-play"/></svg>开始播放</button></form>
+  </dialog>
+  <dialog id="skip-dialog" class="dialog skip-dialog" aria-labelledby="skip-dialog-title">
+    <div class="dialog-header"><h2 id="skip-dialog-title">片头片尾</h2><button class="dialog-close icon-button" aria-label="关闭片头片尾设置">×</button></div>
+    <p class="dialog-caption">为常看的影片设置跳过时间，同一影片的各集共用规则。</p>
+    <fieldset id="skip-global" class="skip-global"><legend class="sr-only">自动跳过开关</legend>
+      <label><input id="skip-enabled" type="checkbox">自动跳过</label>
+      <label><input id="skip-intro-enabled" type="checkbox">跳过片头</label>
+      <label><input id="skip-outro-enabled" type="checkbox">跳过片尾</label>
+    </fieldset>
+    <form id="skip-rule-form"><fieldset id="skip-editor" class="skip-editor"><legend id="skip-editor-title">新增影片</legend>
+      <div class="skip-fields"><label class="skip-title-field">影片名称<input id="skip-title" maxlength="120" required placeholder="与片库中的片名一致"></label>
+      <label>年份（选填）<input id="skip-year" inputmode="numeric" maxlength="4" pattern="(?:19|20)[0-9]{2}" placeholder="区分同名影片"></label>
+      <label>片头：跳到<input id="skip-intro" inputmode="text" value="00:00" required maxlength="6" placeholder="01:30"><small>分:秒，例如 01:30</small></label>
+      <label>片尾：结束前<input id="skip-outro" inputmode="text" value="00:00" required maxlength="6" placeholder="02:00"><small>分:秒，00:00 表示不跳过</small></label></div>
+      <div class="skip-editor-actions"><label><input id="skip-rule-enabled" type="checkbox" checked>启用此规则</label><button id="skip-new-rule" type="button" class="text-button">重置</button><button id="skip-save-rule" type="submit" class="button primary small">添加规则</button></div>
+    </fieldset></form>
+    <p id="skip-message" class="dialog-caption" role="status"></p>
+    <p class="skip-hint">按片名匹配，可填写年份区分版本。跨片源时请留意片头片尾是否一致；手动拖回后不会反复跳过。</p>
+    <h3 class="skip-list-title">影片规则</h3><p id="skip-empty" class="dialog-caption">还没有规则，添加一部常看的影片吧。</p><div id="skip-rule-list"></div>
   </dialog>
   <dialog id="history-choice" class="dialog"><div class="dialog-header"><h2 id="history-choice-title"></h2></div><p id="history-choice-message" class="dialog-caption"></p><div id="history-choice-actions" class="history-choice-actions"></div></dialog>
 </body>

@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url';
 import { createApi } from './lib/api.mjs';
 import { timingSafeEqual } from 'node:crypto';
 import { registerServer, removeControl } from './lib/lifecycle.mjs';
+import { openSkipSettings } from './lib/skip-settings.mjs';
 import { openHistory } from './lib/history.mjs';
 import { serverAddresses } from './lib/network-mode.mjs';
 import { localRequestUrl } from './lib/request-security.mjs';
@@ -17,9 +18,9 @@ const network=serverAddresses(port,process.env.MYTV_LAN==='1'||process.env.HOST=
 const host = network.host;
 let control;
 const rootPath = fileURLToPath(root);
-let history;
-try{history=await openHistory(rootPath);}catch(e){console.error(e.message);process.exit(1);}
-const api = createApi(undefined, { origin: 'http://127.0.0.1:' + port,history,
+let history, skipSettings;
+try{history=await openHistory(rootPath);skipSettings=await openSkipSettings(rootPath);}catch(e){console.error(e.message);process.exit(1);}
+const api = createApi(undefined, { origin: 'http://127.0.0.1:' + port,history,skipSettings,
   health: () => control ? { rootId: control.rootId, instance: control.instance,mode:network.mode } : {} });
 const types = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8',
   '.css': 'text/css; charset=utf-8', '.svg': 'image/svg+xml' };
@@ -78,6 +79,7 @@ const server = http.createServer(async (incoming, outgoing) => {
       ['/app.js', new URL('app.js', publicRoot)], ['/poster.js', new URL('poster.js', publicRoot)], ['/episode-list.js', new URL('episode-list.js', publicRoot)], ['/style.css', new URL('style.css', publicRoot)],
       ['/player.js', new URL('player.js', publicRoot)], ['/player-utils.js', new URL('player-utils.js', publicRoot)],
       ['/playback-utils.js', new URL('playback-utils.js', publicRoot)],
+      ['/skip-playback.js', new URL('skip-playback.js', publicRoot)], ['/skip-settings-ui.js', new URL('skip-settings-ui.js', publicRoot)],
       ['/history-ui.js', new URL('history-ui.js', publicRoot)], ['/history-utils.js', new URL('history-utils.js', publicRoot)],
       ['/favicon.svg', new URL('favicon.svg', publicRoot)],
       ['/placeholder.svg', new URL('placeholder.svg', publicRoot)],

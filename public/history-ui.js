@@ -143,5 +143,5 @@ export function createHistory({api,video,resume,onFailure,onEnd}) {
   const pollTimer=setInterval(()=>{if(!document.hidden&&($('watch-view').hidden||!$('history-view').hidden))void refresh();},10000);
   window.addEventListener('pagehide',()=>save(video.ended,true));
   document.addEventListener('visibilitychange',()=>{if(document.hidden)save();else if($('watch-view').hidden)void refresh();});
-  return {prepare,reset,save,refresh,choose,requestClaim(){if(ready)needsClaim=true;},markFailed(){ready=false;failed=true;},dispose(){refreshToken++;clearTimeout(searchTimer);clearInterval(timer);clearInterval(pollTimer);},get bookmark(){return prepared?.bookmark;},get record(){return prepared?.record;},get filmId(){return prepared?.filmId;},get distinct(){return prepared?.distinct;}};
+  return {prepare,reset,save,refresh,choose,requestClaim(){if(ready)needsClaim=true;},markFailed(){ready=false;failed=true;},dispose(){refreshToken++;clearTimeout(searchTimer);clearInterval(timer);clearInterval(pollTimer);},get canSkip(){return ready&&!decisionBusy&&!failed&&hasPlayed;},get bookmark(){return prepared?.bookmark;},get record(){return prepared?.record;},get filmId(){return prepared?.filmId;},get distinct(){return prepared?.distinct;}};
 }
